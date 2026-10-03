@@ -1,0 +1,21 @@
+# Pickup core implementation boundary
+
+Implemented on 2026-10-03. This is an internal prototype, not a working kiosk interface.
+
+`internal/pickup` accepts independent 32-byte encryption and lookup keys supplied by the installation. Codes use cryptographic randomness, four digits including leading zeros, HMAC-SHA256 lookup and AES-GCM encrypted recovery bound to the order ID. Migration 035 enforces one active use of each code and one release per order. Duplicate verified callbacks return the existing code. Claims require paid status, unexpired code and ready preparation; they atomically consume the code, insert a durable release and request dispatch. Expiry does not change payment or delete an order.
+
+`IssueVerified` is a privileged internal method. The caller must verify gateway signature, identity, amount and currency; an arbitrary reference string or a paid order status is **not** payment proof. It is deliberately not wired to HTTP, manual payment or generic order-state updates. Likewise `MarkPrepared` must only be called by a worker that has validated immutable artifacts/settings. Its digest is persisted but the existing dispatcher does not yet consume those artifacts or recompute their digest: this integration is a release blocker.
+
+The production dispatcher default requires the durable claim regardless of inherited auto-print settings. Unclaimed orders are removed before invoice group planning. Direct document dispatch, invoice dispatch and merchant RequestPrint also check the claim. Existing submission journals continue to hold ambiguous submissions for explicit review. A claimed order can dispatch when the inherited auto-print setting is off. No physical exactly-once guarantee is claimed.
+
+## Before wiring customer entry
+
+1. Linux devicekeys, provisioning and startup pickup-key derivation are implemented; see LINUX-SECURITY.md. Validate on a real Pi. Non-Linux Pi startup fails explicitly; tests inject synthetic keys. No unprotected fallback is implemented. Root access remains outside the protection boundary.
+2. Verified merchant webhook/API capture now writes migration 036's durable issuance queue in the same transaction as capture. A worker recovers codes after payment-state promotion/restart. It never infers verification from a paid/captured status alone. Missing/incorrect gateway link, provider, amount or currency cannot authorize issuance. Duplicate webhook delivery can complete a previously interrupted capture transaction. Cash checkout is disabled in kiosk mode pending approved semantics; saved merchant settings are retained.
+3. Implement immutable preparation, checksum verification and CUPS submission/progress. Freeze edits after payment/preparation and define operator retry boundaries.
+4. Portal code recovery is implemented at GET `/api/v1/portal/orders/{id}/pickup`, requiring the matching `X-Order-Token` header. Codes are not accepted in URLs or added to generic order/history responses. Responses are no-store. The portal displays Preparing/Ready/Claimed/Expired/Assistance, preserves leading zeros and clears the code on claim/reset. Merchant-authorized reissue and its audit trail remain pending.
+5. The separate 127.0.0.1:8081 release listener now requires a separately provisioned credential, strict origin/host/forwarded-header checks and durable global/per-kiosk throttling. See KIOSK-ENDPOINT.md. A trusted launcher/session bridge and touchscreen UI are still pending; do not embed the client credential in public assets or URLs.
+6. Age-based deletion now preserves paid/dispatched orders and nonterminal kiosk pickup records, including expired codes. Confirmed completed files still purge. Prepared artifact retention and partial-job cleanup must be integrated with the future preparation worker.
+7. Implement keypad UI, startup/service packaging and hardware qualification.
+
+The 24-hour code expiry is a prototype default from the proposed requirements, not a newly approved customer policy. Exhaustion returns a recoverable capacity error; issuance failures persist a generic assistance state and retry in the worker. Reissue, namespace-exhaustion tests and multi-process contention/recovery tests remain outstanding. Historical captured intents without the new verification record are intentionally not trusted to issue codes automatically.

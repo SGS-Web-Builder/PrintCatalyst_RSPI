@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "productId": "print-catalyst-rspi-kiosk",
+  "displayName": "Print Catalyst Raspberry Pi Kiosk",
+  "releaseTagPrefix": "rspi-v",
+  "target": {
+    "os": "linux",
+    "architecture": "arm64"
+  },
+  "status": "development-not-deployable",
+  "dataPlane": {
+    "database": "local",
+    "documents": "local",
+    "printing": "local"
+  },
+  "releasePolicy": "verified-payment-and-physical-pickup-code"
+}

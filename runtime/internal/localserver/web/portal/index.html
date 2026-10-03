@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Print Catalyst · Upload &amp; Print</title>
+    <link rel="stylesheet" href="/portal/portal.css?v=rspi-pickup-1"><link rel="stylesheet" href="/portal/portal-refresh.css?v=0.1.44">
+    <script type="module" src="/portal/portal.mjs?v=rspi-pickup-1"></script>
+  </head>
+  <body>
+    <header>
+      <div class="brand"><span class="brand-icon" aria-hidden="true">▤</span><div><strong>Print<span>Catalyst</span></strong><small>Your local print shop · Secure document upload</small></div></div>
+      <span id="shop-name"></span>
+      <nav class="portal-steps" aria-label="Order progress"><span data-step="upload" aria-current="step"><b>1</b>Upload</span><i aria-hidden="true"></i><span data-step="config"><b>2</b>Print options</span><i aria-hidden="true"></i><span data-step="confirm"><b>3</b>Done</span></nav>
+    </header>
+    <main class="upload-view">
+      <!-- Upload section -->
+      <section id="upload-section">
+        <p class="step-label">STEP 1 · ADD DOCUMENTS</p>
+        <div class="upload-formats"><span>PDF documents</span><span>JPG &amp; PNG photos</span><span>Up to 50 MB each · 10 files</span></div>
+        <div id="drop-zone" tabindex="0" role="button" aria-label="Upload files">
+          <svg class="upload-symbol" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M12 16V4m-5 5 5-5 5 5M4 16v4h16v-4"/></svg><strong>Add files to print</strong><span>Tap to browse files or use your camera</span><span class="drop-desktop-hint">You can also drag and drop files here</span>
+          <input type="file" id="file-input" multiple accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png" hidden>
+        </div>
+        <div id="upload-progress" hidden role="status" aria-live="polite"><strong>Uploading securely…</strong><p id="upload-filename"></p><progress id="upload-meter" max="100" value="0" aria-label="File upload progress"></progress><p id="upload-percent">0% uploaded</p><p class="upload-warning">Please do not close or refresh this window until the upload finishes.</p></div><p id="upload-error" class="error" hidden></p>
+        <p class="upload-reassurance">You can review your documents and the total price before placing your order.</p><div id="file-list" aria-live="polite"></div>
+        <div id="upload-actions" hidden>
+          <button id="continue-btn" type="button">Continue to print options</button>
+        </div>
+      </section>
+
+      <!-- Configure section -->
+      <section id="config-section" hidden>
+        <div class="workspace-heading"><div><p class="step-label">STEP 2 · PRINT SETTINGS</p><h1>Your documents <span id="document-count"></span></h1></div>
+        <div class="file-actions"><button id="add-files-btn" type="button">+ Add files</button><button id="discard-draft-btn" type="button">Start over</button></div></div>
+        <label class="service-field" id="printer-choice-label" hidden>Printer<select id="printer-choice"><option value="">Automatic printer</option></select></label>
+        <select id="service-choice" hidden aria-hidden="true"><option value="">Standard document printing</option></select>
+        <div id="image-composer"></div>
+        <nav id="document-tabs" aria-label="Your documents"></nav><div id="config-list"></div>
+        <div class="checkout-dock"><div class="checkout-top">        <div id="quote-area">
+          <div id="quote-loading" hidden>
+            <span>Calculating your quote…</span>
+          </div>
+          <div id="quote-result" hidden>
+            <div class="quote-box">
+              <span id="quote-label">Estimated total</span>
+              <strong id="quote-total"></strong>
+            </div>
+          </div>
+          <p id="quote-error" class="error" hidden></p>
+        </div>
+
+<div class="copies-control"><span>Copies <small>selected document</small></span><div><button id="copies-less" type="button" aria-label="Decrease copies">−</button><output id="copies-value">1</output><button id="copies-more" type="button" aria-label="Increase copies">+</button></div></div></div>          <div class="payment-actions"><button id="place-order-btn" type="button" name="paymentMethod" value="cash_on_counter" disabled>Cash On Counter</button>
+          <button id="pay-online-btn" type="button" name="paymentMethod" value="razorpay" hidden disabled>Confirm &amp; Pay</button></div></div>
+      </section>
+
+<section id="details-section" hidden>        <p class="step-label">FINAL STEP · CONFIRM ORDER</p><h1>Your details</h1><p id="details-summary"></p>
+        <form id="order-form">
+          <label>Your name <span class="required">*</span>
+            <input name="customerName" maxlength="200" required placeholder="Ravi Sharma">
+          </label>
+          <label>Phone number <span class="required">*</span>
+            <input name="customerPhone" autocomplete="tel" type="tel" maxlength="40" required placeholder="+91 98765 43210">
+          </label>
+          <label>Email <small>(optional)</small>
+            <input name="customerEmail" type="email" maxlength="80" placeholder="ravi@example.com">
+          </label>
+          <label>Notes <small>(optional)</small>
+            <textarea name="customerNotes" maxlength="500" rows="2" placeholder="Any special instructions?"></textarea>
+          </label>
+
+          <label id="remember-phone-label"><input id="remember-phone" type="checkbox"> Remember my number on this device for 30 days</label>
+          <p id="order-error" class="error" hidden></p>
+
+<button id="confirm-order-btn" type="submit">Confirm order</button><button id="back-options-btn" type="button" class="secondary">Back to print options</button>
+        </form>
+</section>
+
+      <!-- Confirmation section -->
+      <section id="confirm-section" hidden>
+        <div class="receipt-header">
+          <div class="receipt-check" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="3"><path d="m7 17 6 6L26 8"/></svg></div>
+          <h1 id="receipt-title">Order received</h1><p id="order-summary"></p>
+          <p class="receipt-id">Order ID: <strong id="conf-order-id"></strong></p>
+          <span id="conf-status-badge" class="status-badge">pending_payment</span>
+        </div>
+        <div class="receipt-body"><div id="order-detail" class="receipt-invoice">
+          <h2>ORDER RECEIPT</h2><div id="receipt-documents"></div>
+          <dl class="receipt-meta"><dt>Status</dt><dd id="conf-status">Awaiting confirmation</dd><dt>Files</dt><dd id="conf-files"></dd></dl>
+          <div class="receipt-total"><strong>Total</strong><strong id="conf-total"></strong></div>
+        </div>
+        <section id="pickup-panel" class="pickup-panel" hidden role="status" aria-live="polite">
+          <h2>Your pickup code</h2><strong id="pickup-code" class="pickup-code"></strong><p id="pickup-message"></p>
+        </section>
+        <p id="payment-error" class="error" hidden></p><button id="retry-payment-btn" type="button" hidden>Retry online payment</button>
+        <button id="new-order-btn" type="button">Print another document</button></div>
+      </section>
+    </main>
+    <dialog id="upload-source-dialog" aria-labelledby="upload-source-title">
+      <div class="source-heading"><h2 id="upload-source-title">Add files to print</h2><button id="close-upload-source" type="button" aria-label="Close upload options">×</button></div>
+      <p>Upload documents up to <strong>50 MB per file</strong>.</p><p id="source-file-types">PDF, JPG and PNG supported. Up to 10 files per order.</p>
+      <div class="source-options">
+        <button id="choose-source-files" type="button"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M8 3h11l6 6v20H8zM19 3v7h6M12 15h9M12 20h9M12 25h6"/></svg><strong>Choose files</strong><span>Browse your device</span></button>
+        <button id="choose-source-camera" type="button"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 9h6l3-4h6l3 4h6v18H4z"/><circle cx="16" cy="18" r="5"/></svg><strong>Take a photo</strong><span>Use your camera</span></button>
+      </div><p class="source-hint">Camera capture is available on supported devices.</p>
+    </dialog><input id="camera-input" type="file" accept="image/jpeg,image/png" capture="environment" hidden>
+  </body>
+</html>

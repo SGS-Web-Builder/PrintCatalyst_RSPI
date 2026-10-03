@@ -1,0 +1,1783 @@
+{
+  "sourceRepository": "https://github.com/SGS-Web-Builder/PrintCatalyst-OnPremise",
+  "sourceHEAD": "c9a13330f8d46f9e21a178efb25df9f19b862f78",
+  "sourceIsWorkingTree": true,
+  "note": "Allowlisted working-tree source, not just HEAD. Module paths rewritten. No publisher website, packaging, credentials, data or binaries copied. Windows tagged implementation retained for parity reference; no Windows release jobs imported.",
+  "files": [
+    {
+      "path": "runtime/cmd/print-catalyst-on-premise/bootstrap_unix_test.go",
+      "sourceSHA256": "f54b3e64e8f8c69442bbe3bd86eab93e70cfd78704871c51ef99126ce147debb",
+      "importedSHA256": "dec17ee092f93e39e5317c3df9ab2ccda4ce09974bb1c345140e3ca1c75fa80a"
+    },
+    {
+      "path": "runtime/cmd/print-catalyst-on-premise/bootstrap_windows_test.go",
+      "sourceSHA256": "7ac8e81b332dce6d9d336b4b5321713fc8b113406d17f308c0c93ec454fd82df",
+      "importedSHA256": "7ac8e81b332dce6d9d336b4b5321713fc8b113406d17f308c0c93ec454fd82df"
+    },
+    {
+      "path": "runtime/cmd/print-catalyst-on-premise/dev.go",
+      "sourceSHA256": "40095abefe3a6738ecb97b372ad5522f8c4d4fb367ec71e5b7131593ed523344",
+      "importedSHA256": "71fbcd59173e2ad57c8f3d4b8274cc092bd5135583aa56bbf40871c42b1ecbf6"
+    },
+    {
+      "path": "runtime/cmd/print-catalyst-on-premise/dev_stub.go",
+      "sourceSHA256": "99d62d74d8d4e26d01614d0b00dca8bd9b90473b8785137ecde23d660ee6aef7",
+      "importedSHA256": "bc7db848bfa78eb3caf0bd71eb17afb8ad0ebb28b4607276b8758f88c4ed6912"
+    },
+    {
+      "path": "runtime/cmd/print-catalyst-on-premise/main.go",
+      "sourceSHA256": "a6a58cb0ee65271c30e4fa02377d697b3019228bd82bbc519477fb4aa5fae09e",
+      "importedSHA256": "d1124d36e4c8f40fcfa060c9b3de5a9b3adb78b9fcb84ddfb89f72cc55fedb73"
+    },
+    {
+      "path": "runtime/cmd/print-catalyst-on-premise/platform_unix.go",
+      "sourceSHA256": "75486ed2f3eaad7cb2ad743a3e6fd2df4aa75140c2c6fc7aba1eab94c1a2103f",
+      "importedSHA256": "8102bc420a9f3bb7c1bccda8a2b3c78462b64d18d1afeeb75d2c1080e667fb5e"
+    },
+    {
+      "path": "runtime/cmd/print-catalyst-on-premise/platform_windows.go",
+      "sourceSHA256": "9e128b1cd052d41c30092f200e312b15a991f0893d8fe7479f54e54d06a5d0ee",
+      "importedSHA256": "fec3660d81851f1ab1c491710c38ce70c98e9b87a086f9cf16d2f703601caae0"
+    },
+    {
+      "path": "runtime/go.mod",
+      "sourceSHA256": "e9feb305b5004b3d48316618e11f46c7cfc9f49edc35885abfb9e8bbbcd0c499",
+      "importedSHA256": "dd800fa24ff1c4bee7fdf7df6548de36ba830e76041f076dc34af9f958f62f9f"
+    },
+    {
+      "path": "runtime/go.sum",
+      "sourceSHA256": "335680df9f9d9b8e46f8b84d197ca40a16141df880422ad4c57eb262f0d51d8d",
+      "importedSHA256": "335680df9f9d9b8e46f8b84d197ca40a16141df880422ad4c57eb262f0d51d8d"
+    },
+    {
+      "path": "runtime/internal/autodelete/autodelete.go",
+      "sourceSHA256": "fcd97d3a28865b968a9bc33ca719a5e99b654c2f6382c37329520fd606321b09",
+      "importedSHA256": "e69a4a9b223f4c486dda5bc721ad10215a8321f0136fa952defdc726ce0d61e0"
+    },
+    {
+      "path": "runtime/internal/autodelete/autodelete_test.go",
+      "sourceSHA256": "6e8c1126b3bebb9fd20443c61865e2f36a6e956a5572080f659bf369b3cc5fc6",
+      "importedSHA256": "836cae35efd7a64b0f8048cbb65dd9c5045d577699b4463ab33acd876a14c49e"
+    },
+    {
+      "path": "runtime/internal/autodelete/shop_test.go",
+      "sourceSHA256": "74727f993f8b870c14177302a4bc113a75868001a200f262c5bd0663b6ca71ea",
+      "importedSHA256": "74727f993f8b870c14177302a4bc113a75868001a200f262c5bd0663b6ca71ea"
+    },
+    {
+      "path": "runtime/internal/business/business.go",
+      "sourceSHA256": "35c18a31c6a3dfafbf36b5ab12d21b7fda7c7fd71e3efc25e0ce26cf85374990",
+      "importedSHA256": "8b7c08206dff5b7d7aede884c1cf9a4c27a0138d9447b1e088d4201444a75c3f"
+    },
+    {
+      "path": "runtime/internal/config/config.go",
+      "sourceSHA256": "0b5f85ef6735de385725b0531495e6c52d3afc77a666e2c53a6c606d808f875e",
+      "importedSHA256": "fa16c060925b496abf3c97a126a9d94d6ea6369234364c6e593e0f754c812735"
+    },
+    {
+      "path": "runtime/internal/config/config_test.go",
+      "sourceSHA256": "fc991cc007ee84196ca34f1a3845c5661a75949326c99cd56e3bf26ca9cf616f",
+      "importedSHA256": "fc991cc007ee84196ca34f1a3845c5661a75949326c99cd56e3bf26ca9cf616f"
+    },
+    {
+      "path": "runtime/internal/config/lan_test.go",
+      "sourceSHA256": "b41135a33754ae25844762100a37233e5213965953a290039536c6b33670c2e8",
+      "importedSHA256": "b41135a33754ae25844762100a37233e5213965953a290039536c6b33670c2e8"
+    },
+    {
+      "path": "runtime/internal/configparser/configparser.go",
+      "sourceSHA256": "33e5a3880bddd80718c4919a3adcc9027e807161ae759b5951b8318a0ca98677",
+      "importedSHA256": "33e5a3880bddd80718c4919a3adcc9027e807161ae759b5951b8318a0ca98677"
+    },
+    {
+      "path": "runtime/internal/configparser/configparser_extra_test.go",
+      "sourceSHA256": "e81f871e4237e4c088c052737074ea4496aded92d92d75c0acebb96419e223b6",
+      "importedSHA256": "e81f871e4237e4c088c052737074ea4496aded92d92d75c0acebb96419e223b6"
+    },
+    {
+      "path": "runtime/internal/configparser/configparser_test.go",
+      "sourceSHA256": "3b73f5cc129943a68c233ce7434955fc966328c497c42f50e20a0e9b8d7eada3",
+      "importedSHA256": "3b73f5cc129943a68c233ce7434955fc966328c497c42f50e20a0e9b8d7eada3"
+    },
+    {
+      "path": "runtime/internal/configparser/configparser_unix.go",
+      "sourceSHA256": "b905b71d27630f0e9c454c51febb8a7b8fe56e49fa3d23e5a1473ffe01042157",
+      "importedSHA256": "b905b71d27630f0e9c454c51febb8a7b8fe56e49fa3d23e5a1473ffe01042157"
+    },
+    {
+      "path": "runtime/internal/configparser/configparser_windows.go",
+      "sourceSHA256": "703892db220493fe20d64f2e8cec6128acca8106506482b369a95c5d0dc50310",
+      "importedSHA256": "703892db220493fe20d64f2e8cec6128acca8106506482b369a95c5d0dc50310"
+    },
+    {
+      "path": "runtime/internal/currency/currency.go",
+      "sourceSHA256": "c36bdc6006cf26b021c9c3f97a4d4148b6743bfd7bd39b488a64189041435bdd",
+      "importedSHA256": "c36bdc6006cf26b021c9c3f97a4d4148b6743bfd7bd39b488a64189041435bdd"
+    },
+    {
+      "path": "runtime/internal/documents/compose_images.go",
+      "sourceSHA256": "650e8b34a544e2fa3fd2a500ff1cbef321acf24cac710484f08da712eda5aad4",
+      "importedSHA256": "56f7e4a4988d125d2d1d332907c39f751f7699851dce659061000a5f59081956"
+    },
+    {
+      "path": "runtime/internal/documents/compose_images_test.go",
+      "sourceSHA256": "9dc38a0c5e89e822437d3fb1c249e8f7cc2cf25362c8498ab52ddab2cb69fb97",
+      "importedSHA256": "9dc38a0c5e89e822437d3fb1c249e8f7cc2cf25362c8498ab52ddab2cb69fb97"
+    },
+    {
+      "path": "runtime/internal/documents/convert.go",
+      "sourceSHA256": "00cf72963784e3fd57a6534d1f342cdea7018ca46f02c2cd99fa4c76888ee469",
+      "importedSHA256": "00cf72963784e3fd57a6534d1f342cdea7018ca46f02c2cd99fa4c76888ee469"
+    },
+    {
+      "path": "runtime/internal/documents/convert_other.go",
+      "sourceSHA256": "1a55945c895eb7561c8d9751283437bcb5b1c2f1471920c603ad4bbe15870b29",
+      "importedSHA256": "1a55945c895eb7561c8d9751283437bcb5b1c2f1471920c603ad4bbe15870b29"
+    },
+    {
+      "path": "runtime/internal/documents/convert_windows.go",
+      "sourceSHA256": "276c546d18c9758ab0583ab21c1380d2bdb38332a9e195ad28f0e77584f5da0f",
+      "importedSHA256": "276c546d18c9758ab0583ab21c1380d2bdb38332a9e195ad28f0e77584f5da0f"
+    },
+    {
+      "path": "runtime/internal/documents/documents.go",
+      "sourceSHA256": "9c34226a01a979e5564ed38d1a801fec8dc63613882674d30b48b151e7699d8a",
+      "importedSHA256": "77c600a5ea7c80d50df309bb7a78c3a82809442f070c465cc389e871d140558f"
+    },
+    {
+      "path": "runtime/internal/documents/documents_test.go",
+      "sourceSHA256": "d05f6fa0f08c67be378d7e653c583b65b32a937f4064c277bceb31600a506c5b",
+      "importedSHA256": "8e8d5ca543dd55cff03b0d6a2ab43454fdc4e67432a12626dfe05aff17537fe6"
+    },
+    {
+      "path": "runtime/internal/documents/reflow_images.go",
+      "sourceSHA256": "ef504511964cd62b16971c5c0407a8d7cf02b8c5a0ef39fdb47bc94de0a28e87",
+      "importedSHA256": "ef504511964cd62b16971c5c0407a8d7cf02b8c5a0ef39fdb47bc94de0a28e87"
+    },
+    {
+      "path": "runtime/internal/eventlog/eventlog.go",
+      "sourceSHA256": "90313b72e45d71ab88546037ca011a2a5fcff17da222a250b5b94cdfe62bf69a",
+      "importedSHA256": "90313b72e45d71ab88546037ca011a2a5fcff17da222a250b5b94cdfe62bf69a"
+    },
+    {
+      "path": "runtime/internal/eventlog/eventlog_test.go",
+      "sourceSHA256": "4faa36f9bd250056090bf2ed2a161f44489acb430d457fde7c7f8293449ca89d",
+      "importedSHA256": "4faa36f9bd250056090bf2ed2a161f44489acb430d457fde7c7f8293449ca89d"
+    },
+    {
+      "path": "runtime/internal/eventlog/eventlog_unix.go",
+      "sourceSHA256": "8e68b7ba468654256f718e92f6668b2072457f3b868b5cd55bc91e0030338084",
+      "importedSHA256": "8e68b7ba468654256f718e92f6668b2072457f3b868b5cd55bc91e0030338084"
+    },
+    {
+      "path": "runtime/internal/eventlog/eventlog_windows.go",
+      "sourceSHA256": "f9c3e114a99e1666639755730cc8364665c06a2c2d877f1bea30a30ddadb0800",
+      "importedSHA256": "f9c3e114a99e1666639755730cc8364665c06a2c2d877f1bea30a30ddadb0800"
+    },
+    {
+      "path": "runtime/internal/idcards/compose.go",
+      "sourceSHA256": "5c14e3c353276cca46d7502a1a390cb4c5d3c4befa8b96317aa74e7f601bf69b",
+      "importedSHA256": "5c14e3c353276cca46d7502a1a390cb4c5d3c4befa8b96317aa74e7f601bf69b"
+    },
+    {
+      "path": "runtime/internal/idcards/compose_test.go",
+      "sourceSHA256": "86a23160e07c65c2235209145e5fa33e43b5e82cd1d5e92a4b802af9bd369657",
+      "importedSHA256": "86a23160e07c65c2235209145e5fa33e43b5e82cd1d5e92a4b802af9bd369657"
+    },
+    {
+      "path": "runtime/internal/idcards/decode.go",
+      "sourceSHA256": "f793cb62686034eeb8ae46a185fb065b65242bec620e55162b8374a2d043a435",
+      "importedSHA256": "f793cb62686034eeb8ae46a185fb065b65242bec620e55162b8374a2d043a435"
+    },
+    {
+      "path": "runtime/internal/idcards/detect.go",
+      "sourceSHA256": "030c49aae3d09f2d45bf3e569707174c1b8ca7b5d4b3d9949745bf0cc0cb5e40",
+      "importedSHA256": "030c49aae3d09f2d45bf3e569707174c1b8ca7b5d4b3d9949745bf0cc0cb5e40"
+    },
+    {
+      "path": "runtime/internal/idcards/detect_test.go",
+      "sourceSHA256": "fbd07807757a738be4e9848f10565bf2e43f095d1481227d474b45d22a65f383",
+      "importedSHA256": "fbd07807757a738be4e9848f10565bf2e43f095d1481227d474b45d22a65f383"
+    },
+    {
+      "path": "runtime/internal/idcards/exif.go",
+      "sourceSHA256": "7ee80335019af2f3b6f8ed038509b338c6f83c81324cb1f13a1a2d3e3c909bbd",
+      "importedSHA256": "7ee80335019af2f3b6f8ed038509b338c6f83c81324cb1f13a1a2d3e3c909bbd"
+    },
+    {
+      "path": "runtime/internal/idcards/exif_test.go",
+      "sourceSHA256": "342ae654c29d579da385f1e19c08b7fd041ac81f25aa3d98e23c370aca0dcd16",
+      "importedSHA256": "342ae654c29d579da385f1e19c08b7fd041ac81f25aa3d98e23c370aca0dcd16"
+    },
+    {
+      "path": "runtime/internal/idcards/geometry.go",
+      "sourceSHA256": "e0399e8ec996b8bcdcd2e4d873f2adea3d91c2bf2b9e66903509523feaf70d44",
+      "importedSHA256": "e0399e8ec996b8bcdcd2e4d873f2adea3d91c2bf2b9e66903509523feaf70d44"
+    },
+    {
+      "path": "runtime/internal/idcards/geometry_test.go",
+      "sourceSHA256": "1e54d332bbbd83f8e10d51f54f60a8f8ac8d11d5e5a767ecbc82b10a1918f7f2",
+      "importedSHA256": "1e54d332bbbd83f8e10d51f54f60a8f8ac8d11d5e5a767ecbc82b10a1918f7f2"
+    },
+    {
+      "path": "runtime/internal/idcards/layout.go",
+      "sourceSHA256": "f1a616794602eb86a49e6687306a16c17ec8e25a51b250e525429febaac752d4",
+      "importedSHA256": "f1a616794602eb86a49e6687306a16c17ec8e25a51b250e525429febaac752d4"
+    },
+    {
+      "path": "runtime/internal/idcards/layout_test.go",
+      "sourceSHA256": "f8b3946f2a89671638f3e3d9ee1862f9260988620a62c06328f8517f917ce614",
+      "importedSHA256": "f8b3946f2a89671638f3e3d9ee1862f9260988620a62c06328f8517f917ce614"
+    },
+    {
+      "path": "runtime/internal/idcards/service.go",
+      "sourceSHA256": "595566cd96ff999751c008f0b550ab6bc7f383d7be0a15ac384d2a65e28afed9",
+      "importedSHA256": "b28cf74a4e953c633da84e437e26dbcfee791d3ef8cbf26a6187e0aff45f5102"
+    },
+    {
+      "path": "runtime/internal/idcards/service_test.go",
+      "sourceSHA256": "50e7fd33a382ad078466b7c5eca68885ba33cfce58df55564b191bbe8c810eac",
+      "importedSHA256": "999868c84be9e77786e77f89ef995ab268dba8d393c7a74eac8f91d4933c061d"
+    },
+    {
+      "path": "runtime/internal/jobs/repository.go",
+      "sourceSHA256": "a07a1049091cc64dd124f03058f65e77f8f4f32a9308dc5665b9901301fe79e2",
+      "importedSHA256": "a07a1049091cc64dd124f03058f65e77f8f4f32a9308dc5665b9901301fe79e2"
+    },
+    {
+      "path": "runtime/internal/jobs/repository_test.go",
+      "sourceSHA256": "cbb862e9222615d68c6a071d9201df90676fd05118771fcb7f2c3a631e4a19c1",
+      "importedSHA256": "2be073e8bc2c503b71e0358e516d31fd0082d42b5ea219ff0a26019a2418247e"
+    },
+    {
+      "path": "runtime/internal/licensegate/client.go",
+      "sourceSHA256": "07281a2f17d1899d790348744099bb999946c41f07d9208b905075aa88d6188e",
+      "importedSHA256": "07281a2f17d1899d790348744099bb999946c41f07d9208b905075aa88d6188e"
+    },
+    {
+      "path": "runtime/internal/licensegate/client_test.go",
+      "sourceSHA256": "1e74c71c363926c4e0c5d6ec48642f57d368afc36a3d57fc5b442dbccd256bb7",
+      "importedSHA256": "15dd2d6498d2eac31f8e54150072334a28c3a309de36c484deb8bd12bb1adf29"
+    },
+    {
+      "path": "runtime/internal/licensegate/enforcement.go",
+      "sourceSHA256": "3b6bda3d0efb96e337a02ba9fed42892afe1660e038943e87bf969bee3ce5c78",
+      "importedSHA256": "3b6bda3d0efb96e337a02ba9fed42892afe1660e038943e87bf969bee3ce5c78"
+    },
+    {
+      "path": "runtime/internal/licensegate/enforcement_test.go",
+      "sourceSHA256": "cce589604aaceae603a900c08297e5481ccf7c091d9aef71dc594f38d4151f96",
+      "importedSHA256": "cce589604aaceae603a900c08297e5481ccf7c091d9aef71dc594f38d4151f96"
+    },
+    {
+      "path": "runtime/internal/licensegate/latency_windows_test.go",
+      "sourceSHA256": "df793e4d225f8e134a6487c92ab7498023833ae42f02b44b86352922268a6f60",
+      "importedSHA256": "88d4f15ded271bf60559b488237cffc0323c3d47345a6386d38aa096eb6a7e48"
+    },
+    {
+      "path": "runtime/internal/licensegate/protect_other.go",
+      "sourceSHA256": "5f1fcec76c28365a9edc7050cdb08a74045eb1cc06b7d21cbd87b51adc287870",
+      "importedSHA256": "5f1fcec76c28365a9edc7050cdb08a74045eb1cc06b7d21cbd87b51adc287870"
+    },
+    {
+      "path": "runtime/internal/licensegate/protect_windows.go",
+      "sourceSHA256": "14ff1c49bcd04698afb562f504de85ebf605c8dcbd22a80b7155ccada59a8565",
+      "importedSHA256": "14ff1c49bcd04698afb562f504de85ebf605c8dcbd22a80b7155ccada59a8565"
+    },
+    {
+      "path": "runtime/internal/licensegate/required_development.go",
+      "sourceSHA256": "f725d95d2241c45a11a1e38741cebb87068c1ed53977823c0c12519a4e9a9b04",
+      "importedSHA256": "f725d95d2241c45a11a1e38741cebb87068c1ed53977823c0c12519a4e9a9b04"
+    },
+    {
+      "path": "runtime/internal/licensegate/required_production.go",
+      "sourceSHA256": "1e4c4d0b0ec63b47d66abb888255bd770372d1e6d98b195155427a19fbc368de",
+      "importedSHA256": "1e4c4d0b0ec63b47d66abb888255bd770372d1e6d98b195155427a19fbc368de"
+    },
+    {
+      "path": "runtime/internal/licensing/controlplane.go",
+      "sourceSHA256": "f1fecaf890838f1e1dad1bd6bec13448a4da97a8051b6a115a935496584d5c8a",
+      "importedSHA256": "f1fecaf890838f1e1dad1bd6bec13448a4da97a8051b6a115a935496584d5c8a"
+    },
+    {
+      "path": "runtime/internal/licensing/disabled.go",
+      "sourceSHA256": "ac9e004435c3ad664a603b66cf426ec2c6566882344f61d9110449dcd4cb7cf8",
+      "importedSHA256": "ac9e004435c3ad664a603b66cf426ec2c6566882344f61d9110449dcd4cb7cf8"
+    },
+    {
+      "path": "runtime/internal/licensing/fixture_key.go",
+      "sourceSHA256": "e3249a9726747bef695a0595ea38beedee8b97e94506c4a4158567d0c444531b",
+      "importedSHA256": "e3249a9726747bef695a0595ea38beedee8b97e94506c4a4158567d0c444531b"
+    },
+    {
+      "path": "runtime/internal/licensing/keypair.go",
+      "sourceSHA256": "e850d858d1ae18439e51fe3033c5457265cc788c7061c8c0e7a0a7832b35c845",
+      "importedSHA256": "e850d858d1ae18439e51fe3033c5457265cc788c7061c8c0e7a0a7832b35c845"
+    },
+    {
+      "path": "runtime/internal/licensing/keypair_test.go",
+      "sourceSHA256": "cac0e9eee6e12d5cebd5f6af659c0afe38b737a3397587b9571c873d97876f76",
+      "importedSHA256": "cac0e9eee6e12d5cebd5f6af659c0afe38b737a3397587b9571c873d97876f76"
+    },
+    {
+      "path": "runtime/internal/licensing/production_key.go",
+      "sourceSHA256": "46c4bbfe50637d356b169bf795e9abfcf61a33196cb96a1e30a9a6464592a7c9",
+      "importedSHA256": "46c4bbfe50637d356b169bf795e9abfcf61a33196cb96a1e30a9a6464592a7c9"
+    },
+    {
+      "path": "runtime/internal/licensing/service.go",
+      "sourceSHA256": "be684738986419b721a4080a8da6038e083909608b9fda844e7aad82e6e86f38",
+      "importedSHA256": "be684738986419b721a4080a8da6038e083909608b9fda844e7aad82e6e86f38"
+    },
+    {
+      "path": "runtime/internal/licensing/service_test.go",
+      "sourceSHA256": "83fc9105d8d659ddc3a4a4c243607531b5ff85541c3ef01e99cf1463f90001bd",
+      "importedSHA256": "b4289c8688fbe90d23062fb1bfb413bcee136bf239ba957b7c5284c25e184c7f"
+    },
+    {
+      "path": "runtime/internal/licensing/types.go",
+      "sourceSHA256": "c2f0b40bf45f916539cdd629ce9e97fa38e237097890d67e6803f316f044b930",
+      "importedSHA256": "c2f0b40bf45f916539cdd629ce9e97fa38e237097890d67e6803f316f044b930"
+    },
+    {
+      "path": "runtime/internal/licensing/verify.go",
+      "sourceSHA256": "284c263d30fad3cb455494fb8c8e60c7907774d313f06bd3b567ec9a24bd1271",
+      "importedSHA256": "284c263d30fad3cb455494fb8c8e60c7907774d313f06bd3b567ec9a24bd1271"
+    },
+    {
+      "path": "runtime/internal/licensing/verify_test.go",
+      "sourceSHA256": "93807257ab394709869bb6487bc9a1a4b53b5f85dea9ec2fa9e2f8b6697205e1",
+      "importedSHA256": "93807257ab394709869bb6487bc9a1a4b53b5f85dea9ec2fa9e2f8b6697205e1"
+    },
+    {
+      "path": "runtime/internal/localfiles/database.go",
+      "sourceSHA256": "bec1b5cde250e590d29caece67dc34f4d121071639494403430d4e6c4d5b4237",
+      "importedSHA256": "bec1b5cde250e590d29caece67dc34f4d121071639494403430d4e6c4d5b4237"
+    },
+    {
+      "path": "runtime/internal/localfiles/database_test.go",
+      "sourceSHA256": "aae672e744f68f7eab37187d3351b410c57a9c03ad46f830d0b0082f3574c5e8",
+      "importedSHA256": "aae672e744f68f7eab37187d3351b410c57a9c03ad46f830d0b0082f3574c5e8"
+    },
+    {
+      "path": "runtime/internal/localfiles/files.go",
+      "sourceSHA256": "a8ad7b59791c97a9a61e38b4642305efb5706f864da7d215d796151bb6969df6",
+      "importedSHA256": "a8ad7b59791c97a9a61e38b4642305efb5706f864da7d215d796151bb6969df6"
+    },
+    {
+      "path": "runtime/internal/localfiles/files_test.go",
+      "sourceSHA256": "c45aa57d638c1311c2d9611252d16d18af3f960e5d2fa0ac6cb5396732861b08",
+      "importedSHA256": "c45aa57d638c1311c2d9611252d16d18af3f960e5d2fa0ac6cb5396732861b08"
+    },
+    {
+      "path": "runtime/internal/localfiles/permissions_unix_test.go",
+      "sourceSHA256": "231af804253984a766b848c5418213a78fc7cb22f415f7d20c5fc90e7fd488f3",
+      "importedSHA256": "231af804253984a766b848c5418213a78fc7cb22f415f7d20c5fc90e7fd488f3"
+    },
+    {
+      "path": "runtime/internal/localfiles/permissions_windows_test.go",
+      "sourceSHA256": "204645093461327cf415a9a7ffb15a2aad63c6e93c8c33e1ce790fbb912e594d",
+      "importedSHA256": "204645093461327cf415a9a7ffb15a2aad63c6e93c8c33e1ce790fbb912e594d"
+    },
+    {
+      "path": "runtime/internal/localfiles/platform_unix.go",
+      "sourceSHA256": "eca0136588b3b5f00744a13d9580c4ea31f325444479ea64c2928da5cc781586",
+      "importedSHA256": "eca0136588b3b5f00744a13d9580c4ea31f325444479ea64c2928da5cc781586"
+    },
+    {
+      "path": "runtime/internal/localfiles/platform_windows.go",
+      "sourceSHA256": "ca0e2f9fbed76efcf0af756bcb66bcd17aecb49bd9277fc465d1b536daf148da",
+      "importedSHA256": "ca0e2f9fbed76efcf0af756bcb66bcd17aecb49bd9277fc465d1b536daf148da"
+    },
+    {
+      "path": "runtime/internal/localserver/bootstrap_test.go",
+      "sourceSHA256": "4722d56b03037dca707d98190909a7fba9dcfe5df5a138dab9c339ac294c7725",
+      "importedSHA256": "f85076840bc0dff407a687892ddc91345d81c58a9d8c2129c446ca6a229b3e2f"
+    },
+    {
+      "path": "runtime/internal/localserver/business_owner.go",
+      "sourceSHA256": "2f37fbfa189158e82bd5d7465e8cc74f8cc5627138c46f69f9d7e1319ae302d4",
+      "importedSHA256": "8aa00bb566117d12786d63fd061dfb69bc4946bbe6fcce8666edf42b9353c47b"
+    },
+    {
+      "path": "runtime/internal/localserver/checkout_test.go",
+      "sourceSHA256": "9cde5dff0305275fd9b37c94169a311a8eed552d0125c5eff8b309ccec06e4da",
+      "importedSHA256": "09a10555a0446287a4e9273ce52b1f434c5fe1cbe3226854fa02164e87d4f52a"
+    },
+    {
+      "path": "runtime/internal/localserver/config_owner.go",
+      "sourceSHA256": "bd35783437e0e330ce703bc719c9cafccb68997c4343f4f3b66ec5c84d6637ed",
+      "importedSHA256": "01a08914cb2f6f618a95de7023502025b4d284816fdc598361067773c0461abb"
+    },
+    {
+      "path": "runtime/internal/localserver/config_owner_test.go",
+      "sourceSHA256": "a7d524543bd11c7c9c9a6f7cd8966d0941819bb037aac40fd4b53a09336b6db3",
+      "importedSHA256": "ddd63872ad6cd1baca05b7312819fee7cfc97d34c9e1b1a0ba2c3efea7736284"
+    },
+    {
+      "path": "runtime/internal/localserver/customer_details_policy_test.go",
+      "sourceSHA256": "ba9abb44cf8ed594679c80332cce6e522970fc28fae39a3cd299cf68d163e121",
+      "importedSHA256": "ba9abb44cf8ed594679c80332cce6e522970fc28fae39a3cd299cf68d163e121"
+    },
+    {
+      "path": "runtime/internal/localserver/idcards_owner.go",
+      "sourceSHA256": "904eb253e37ffd085352b58838e93fb40c5313ac90c510ff0b682ce1e23af495",
+      "importedSHA256": "b1a47e2784cd41f869bae60d86a5e2c36802de45629f45a7c1567d1a696523b7"
+    },
+    {
+      "path": "runtime/internal/localserver/licensing_owner.go",
+      "sourceSHA256": "0bd8c4e07672c055fe97070c9ac181cc9fb497b319973b02007c76baa25be619",
+      "importedSHA256": "f6fe88a2baa3aca296c89ffb47cbf9799b186afd3e13a310d0b5c7e64ab8d4af"
+    },
+    {
+      "path": "runtime/internal/localserver/local_tray.go",
+      "sourceSHA256": "152e42f712747feb6ce7d14c193826c45566b56ab0f56cc00c3184d4b962ecf7",
+      "importedSHA256": "8c55a9cf88d9747190b707478bc51634d60b712b9372ec6e8ab51668a97d0604"
+    },
+    {
+      "path": "runtime/internal/localserver/local_tray_test.go",
+      "sourceSHA256": "81a41719373adb560992e787292898d3acb2aa9b28d83698b4f6cc351beab02b",
+      "importedSHA256": "c2cb160825815d42553ae82b056cbcd1298e4fc4612c6a3b6f87e7a63161c96a"
+    },
+    {
+      "path": "runtime/internal/localserver/main_test.go",
+      "sourceSHA256": "9059fb689d0beebe243d48652d982968cae77bce57c31a82eb4d4c0ba01278bc",
+      "importedSHA256": "9059fb689d0beebe243d48652d982968cae77bce57c31a82eb4d4c0ba01278bc"
+    },
+    {
+      "path": "runtime/internal/localserver/monitor.go",
+      "sourceSHA256": "3914a93a6bc35dc58b31608198c50e8b56659b569aa64cf937fcd0f1cc6d11a8",
+      "importedSHA256": "91dc07a572b1a3ef33bfd1f4348bce2d40225f7dcf615c8f5b3d13496ee044d9"
+    },
+    {
+      "path": "runtime/internal/localserver/monitor_test.go",
+      "sourceSHA256": "93ec8098e68b8a2fed242a7252b22c84b389c21aafb2df07f42f9bfd5c764f7c",
+      "importedSHA256": "66e991a268b86046ffa183db320f7490bccf96e47280e21d90eec457ab66b767"
+    },
+    {
+      "path": "runtime/internal/localserver/notifications_owner.go",
+      "sourceSHA256": "cadc59062d72ff82bbac8e71567376363f849e7cf60548974b56d7f9e0b79e49",
+      "importedSHA256": "76e0d3dd1afa8950d3ad6fa7c8291b64b2b21a9b4c30c1b8e4597cd6d96f4541"
+    },
+    {
+      "path": "runtime/internal/localserver/operators.go",
+      "sourceSHA256": "d8998316caa70ab849695120fc5bacaa298247de60afb100f68e0ccc76267aff",
+      "importedSHA256": "c979715390feed5364f6bc71cf9e42ae2a1779fa93067b4606b2df4495bfbc86"
+    },
+    {
+      "path": "runtime/internal/localserver/operators_test.go",
+      "sourceSHA256": "fc03d0dad64065a5cd0c141b317f82b256e2ed6986442d725b7588be7345f6b6",
+      "importedSHA256": "bad7e76abe9da97c77bff4e320304bfd78065a7c2227e55f8598a0ce8ebc0b44"
+    },
+    {
+      "path": "runtime/internal/localserver/order_separators.go",
+      "sourceSHA256": "8b07ca3d985d7527e3c977e6c421a9a1d5f5f3a81f0047026a4a40144347f677",
+      "importedSHA256": "8b07ca3d985d7527e3c977e6c421a9a1d5f5f3a81f0047026a4a40144347f677"
+    },
+    {
+      "path": "runtime/internal/localserver/orders_owner.go",
+      "sourceSHA256": "e5de640a84af5ac26f92a55a45d0636fc796e7520563338976775318187ce618",
+      "importedSHA256": "434ad0a02f47e0bcb9ffc0ebe9ecd479c0f8760b9dd69b286f599163030756e0"
+    },
+    {
+      "path": "runtime/internal/localserver/orders_owner_test.go",
+      "sourceSHA256": "58de51274796be028bed8f84bd446578f8796e94bca474b793dabafd603489a7",
+      "importedSHA256": "b4eb265ad1e777f1de5a1ccf6cc934d01ce71d6b01a37f0962e8fd22c598b817"
+    },
+    {
+      "path": "runtime/internal/localserver/owner.go",
+      "sourceSHA256": "9148f8f2042bf5de2aed21fc00aa52a791d745040c1d5465251a1af5830d543e",
+      "importedSHA256": "521acd10f2eb93cede820c2d10af5476c740aafbff531999935d4d91d02e61db"
+    },
+    {
+      "path": "runtime/internal/localserver/owner_test.go",
+      "sourceSHA256": "04b0ea1909815589688ca8522cd4f138e0030801fd735669765fcc98ce63d592",
+      "importedSHA256": "70940a0d2890c1f4fa59829bdea430640789abb204804030651e59b88527b39f"
+    },
+    {
+      "path": "runtime/internal/localserver/pairing_owner.go",
+      "sourceSHA256": "893733144f9e990b8e767027ad76283c00c11892017db7d186ef33c41bf7bd33",
+      "importedSHA256": "a0ab42df429da2607a3ba70966b37a4d5f1b9c1443a82cb629ae00582807c975"
+    },
+    {
+      "path": "runtime/internal/localserver/paper_stock.go",
+      "sourceSHA256": "ff1854b8bbce1f7322d38de1047b73761f48f7db3d2eb4a00ffd0bd6bb0a2537",
+      "importedSHA256": "ff1854b8bbce1f7322d38de1047b73761f48f7db3d2eb4a00ffd0bd6bb0a2537"
+    },
+    {
+      "path": "runtime/internal/localserver/paper_stock_test.go",
+      "sourceSHA256": "d9c608429e0d46ba95ad1b1826b3e7d8adbfccc13f24a0c25e579a78af59eabb",
+      "importedSHA256": "d9c608429e0d46ba95ad1b1826b3e7d8adbfccc13f24a0c25e579a78af59eabb"
+    },
+    {
+      "path": "runtime/internal/localserver/passports_owner.go",
+      "sourceSHA256": "b004a309b7611cf87d2fd724e63a7c0b010e73733c01f07996c625479706911b",
+      "importedSHA256": "7108b377cf932f2dc57067b932a691fce80edc129e62f28a0b25217d72617517"
+    },
+    {
+      "path": "runtime/internal/localserver/payment_connection.go",
+      "sourceSHA256": "2ae81d1951d49da2c0a83021bfaf67ccdd98bd411230495bf1fd987fedd1e287",
+      "importedSHA256": "6aadbd1e3254593189b3ea15945d42a177f456ef21365cc829617ab2f8753475"
+    },
+    {
+      "path": "runtime/internal/localserver/payment_connection_test.go",
+      "sourceSHA256": "c2ca0d787fd37331676f7e9b09c6bc66871b7c45a6884f01d94765e0abd1704a",
+      "importedSHA256": "c9479bbafba62cc0611b788077dc538a350b9e8f940fce39941325ee31f6f6ce"
+    },
+    {
+      "path": "runtime/internal/localserver/payments_owner.go",
+      "sourceSHA256": "30d325f0d698e79a6e3a5462d508e099158fbce7e5eb448a5db2fac0bb54f9ad",
+      "importedSHA256": "ea83c2dcf3b681c8a5a548d780fed7cc549d778b04dc6eb5e2c1200b92b37342"
+    },
+    {
+      "path": "runtime/internal/localserver/phase10_test.go",
+      "sourceSHA256": "4418d1bca9dbb4debb6421e727276f159c38249844607acf01869d3e310bc70f",
+      "importedSHA256": "c4f0fb213af1ebfb037416b41627a42cb19b0f93e4a6c7e943270bbdb0797ab6"
+    },
+    {
+      "path": "runtime/internal/localserver/phase3f_test.go",
+      "sourceSHA256": "cc902a2a9e202e97ccab909490efd3e63ba6a2617362ac43a1cfadb7a70c8588",
+      "importedSHA256": "565e80ec58f2e692be00bb65f54cae13a12a479c0aa00348ab375cdeeab43f0c"
+    },
+    {
+      "path": "runtime/internal/localserver/phase3g_test.go",
+      "sourceSHA256": "c0625f9fa9b894b2177f7c0d75e317a8b8fcdf93a108b1fbc6ad0ef60cda2d71",
+      "importedSHA256": "6b15aad94e1505aa96275905035b3b52517e372a150e393a0ff157a1e6ce9210"
+    },
+    {
+      "path": "runtime/internal/localserver/phase4_test.go",
+      "sourceSHA256": "a11b7f9ae775a6923f56416a5f9de08fdd889896e8706c633ae0d8630588fbd4",
+      "importedSHA256": "a11b7f9ae775a6923f56416a5f9de08fdd889896e8706c633ae0d8630588fbd4"
+    },
+    {
+      "path": "runtime/internal/localserver/phase5_test.go",
+      "sourceSHA256": "ed3710eee2499f69d1fa19f2cdd59f196db689d28e15bf014156f6805ad9f391",
+      "importedSHA256": "879787e7a2ceb6af5aceeceb3d3c0e803dc62fae8258ccf84931e9db549417b9"
+    },
+    {
+      "path": "runtime/internal/localserver/phase6_test.go",
+      "sourceSHA256": "928a35592b1e7db5cc8c8837ed7f8cdfaadee2afa207263a476d4d5027f0ba7d",
+      "importedSHA256": "53f877794479ea620a7ba2c3b852dc3ecc5eab851a04417325da419bd738a97c"
+    },
+    {
+      "path": "runtime/internal/localserver/phase7_test.go",
+      "sourceSHA256": "ed63bff965ab706cf26b1f4ecba3abf1a7219cad9f962e6d172b995f53a9920f",
+      "importedSHA256": "598db83e037a75f6cfd7d10f6300b424ed35bd2f246ab6b5924c89c9df27040a"
+    },
+    {
+      "path": "runtime/internal/localserver/phase8a_test.go",
+      "sourceSHA256": "cca785639af06a4136859d798003bbac3a085a920389bc6380510edd61f2ff56",
+      "importedSHA256": "cca785639af06a4136859d798003bbac3a085a920389bc6380510edd61f2ff56"
+    },
+    {
+      "path": "runtime/internal/localserver/phase8b_test.go",
+      "sourceSHA256": "a8216da95ce19a6726d9f0e9c7fcba9f97ea5bcb0292d26d5b580218f0c95da3",
+      "importedSHA256": "f0d0230bdf0742b5519df50c1f8235c3e26893e9027f51b8897b689febe7571a"
+    },
+    {
+      "path": "runtime/internal/localserver/portal.go",
+      "sourceSHA256": "f4bbe869b3e3aa68ac0bdd978f4b659ee0d154df39e5b398df616aef8eb177c7",
+      "importedSHA256": "af09f55476b081ad7804daf87ff0c5fee964dbf8ca8086990e415606b195c13f"
+    },
+    {
+      "path": "runtime/internal/localserver/portal_branding.go",
+      "sourceSHA256": "1e14c9389a370835f5dc510aef77737a4b795cf23b18d73dab3e81d89f4b1a8a",
+      "importedSHA256": "1e14c9389a370835f5dc510aef77737a4b795cf23b18d73dab3e81d89f4b1a8a"
+    },
+    {
+      "path": "runtime/internal/localserver/portal_branding_test.go",
+      "sourceSHA256": "77e2794d267a368be80a8bf2839c2ce4843a7d355c113f8f7eec45f240032787",
+      "importedSHA256": "77e2794d267a368be80a8bf2839c2ce4843a7d355c113f8f7eec45f240032787"
+    },
+    {
+      "path": "runtime/internal/localserver/portal_catalogue.go",
+      "sourceSHA256": "0da6997aad252ad0615f43b8672b20f48233bea1c6cfc46d9f1a0ee5bf28a65e",
+      "importedSHA256": "70354135db511c0152eaaefb33c3e12ae186ca99a43ee7758be2b50fadf16e24"
+    },
+    {
+      "path": "runtime/internal/localserver/portal_compose.go",
+      "sourceSHA256": "667a502c7bb25d0c03ef98e6440bc30d35aac7cc1748b58bbd4c5e87994a493f",
+      "importedSHA256": "1d42ee59f7fb17ea56ffdb675d61171bbc05326245dd33928a65deb4afd186d2"
+    },
+    {
+      "path": "runtime/internal/localserver/portal_compose_test.go",
+      "sourceSHA256": "90c2b40c11cf158cacd39d27688737e86b43454674e8855a3317c67c08efcdd2",
+      "importedSHA256": "90c2b40c11cf158cacd39d27688737e86b43454674e8855a3317c67c08efcdd2"
+    },
+    {
+      "path": "runtime/internal/localserver/portal_customer_details.go",
+      "sourceSHA256": "c61439fb0882ada35419ea64d7d19e1c26b3b834f97ca338ac2e9f5a14bc3b43",
+      "importedSHA256": "c61439fb0882ada35419ea64d7d19e1c26b3b834f97ca338ac2e9f5a14bc3b43"
+    },
+    {
+      "path": "runtime/internal/localserver/portal_customer_details_test.go",
+      "sourceSHA256": "29f406943da985c7489a0934a71192b4055d8ec3edbd07de795430c09932d01c",
+      "importedSHA256": "29f406943da985c7489a0934a71192b4055d8ec3edbd07de795430c09932d01c"
+    },
+    {
+      "path": "runtime/internal/localserver/portal_delete_test.go",
+      "sourceSHA256": "5692dba4cc4549bb66680635840462fb78ff93faf4f93f44814c34ecfb5ee8f6",
+      "importedSHA256": "5692dba4cc4549bb66680635840462fb78ff93faf4f93f44814c34ecfb5ee8f6"
+    },
+    {
+      "path": "runtime/internal/localserver/portal_documents.go",
+      "sourceSHA256": "9d5002801871fee2660467e7900c690e8d3bfe3125988e1f0af8e64ea5cbf803",
+      "importedSHA256": "7e8efa270dddf5e76b0817be4ba93d0e890bb0de1470b0117118f4ee2994a11a"
+    },
+    {
+      "path": "runtime/internal/localserver/portal_payment_buttons.go",
+      "sourceSHA256": "2da772e3d9e59c166c8ad67b8e810a99fdbeb41de73d9e86cff0e4867a3c631c",
+      "importedSHA256": "2da772e3d9e59c166c8ad67b8e810a99fdbeb41de73d9e86cff0e4867a3c631c"
+    },
+    {
+      "path": "runtime/internal/localserver/portal_payment_buttons_test.go",
+      "sourceSHA256": "d82ff5a7fc96d0db5cd3660915914c551c4cd126b4c8fe65471b6c34158afd50",
+      "importedSHA256": "d82ff5a7fc96d0db5cd3660915914c551c4cd126b4c8fe65471b6c34158afd50"
+    },
+    {
+      "path": "runtime/internal/localserver/portal_proxy_test.go",
+      "sourceSHA256": "49691feee33304a7aadd14016d566daadef97482a0e4bb962c0f0f898e0cbd38",
+      "importedSHA256": "49691feee33304a7aadd14016d566daadef97482a0e4bb962c0f0f898e0cbd38"
+    },
+    {
+      "path": "runtime/internal/localserver/portal_test.go",
+      "sourceSHA256": "0a703f7cdb348d7f81a853ce8b6cf7b84df25fe1c9138d01f13cd5a41b1f2966",
+      "importedSHA256": "907c1ad96c78e5f17f130bb3e2c3cc751df3a9c6b7babb7eaae9fb59f2e92dff"
+    },
+    {
+      "path": "runtime/internal/localserver/pricing.go",
+      "sourceSHA256": "6cd6a87a0b6a1234b7c9f867df38c50e17ec93992803c57a0492b4d4dc3f6853",
+      "importedSHA256": "6b83bd19ab198389e40ff849eea092c71d41794da57b9330eaf933a657ab0bb0"
+    },
+    {
+      "path": "runtime/internal/localserver/pricing_grid.go",
+      "sourceSHA256": "65b7c78c3f299fdda75fae70f962c20d0bfb07c53577b6cc7f6d96597d270ae2",
+      "importedSHA256": "33f3e2449cc0e01c78382617ddb59cf9a357b55403cafad38ba54b813ce825b5"
+    },
+    {
+      "path": "runtime/internal/localserver/pricing_grid_test.go",
+      "sourceSHA256": "ababf98923314396311f434641d00617998e4fac1ebf35fdb3c6e475290e1146",
+      "importedSHA256": "4a37e65c6879a4bfe5ab56d0df626752cab3327303e2f50488443c9e871888bc"
+    },
+    {
+      "path": "runtime/internal/localserver/pricing_test.go",
+      "sourceSHA256": "3892587acc8e094b9e04399b95fa9f0974044bee59f6de496f409b35e6f7e0f3",
+      "importedSHA256": "fd03fd499af6f36c8f97f217587367604ee3b3005255db17fec63596cdf98ebb"
+    },
+    {
+      "path": "runtime/internal/localserver/printer_invoices.go",
+      "sourceSHA256": "c90ce3386cb7d160255657a3ce1c22af4079f552a59a1c8191e2d2dc09c86f17",
+      "importedSHA256": "d2d33534f935c72331422f0c4ac97eae9c1cf36676e5f247f4e01ec51210739c"
+    },
+    {
+      "path": "runtime/internal/localserver/printer_invoices_test.go",
+      "sourceSHA256": "5b97944b606d04e61640fc49be3b8568e5e563c59712900ade0ef6868d8fb7b7",
+      "importedSHA256": "5b97944b606d04e61640fc49be3b8568e5e563c59712900ade0ef6868d8fb7b7"
+    },
+    {
+      "path": "runtime/internal/localserver/printer_setup.go",
+      "sourceSHA256": "4a1b8acfcb8ffcc77b2b09f817437d240e8614e04d17a43222e45db3ad2ba2fc",
+      "importedSHA256": "4a1b8acfcb8ffcc77b2b09f817437d240e8614e04d17a43222e45db3ad2ba2fc"
+    },
+    {
+      "path": "runtime/internal/localserver/printers_owner.go",
+      "sourceSHA256": "146e06d8226ddc64f1892bdeabbdff4aa1fd9e850623f36726a1babe5e4faa81",
+      "importedSHA256": "0f55dd971b11631e7fd71e14c325d8885dcc941ce6ca2360066f9456ef059bec"
+    },
+    {
+      "path": "runtime/internal/localserver/razorpay_delivery_test.go",
+      "sourceSHA256": "f219c53506d4eb02b3d10a4043b0e165cc332de6e117f0ab8f110806dd435d99",
+      "importedSHA256": "0965925c5630ac7ce667b1f6ba311ef817ab80efab891c97fb66bec0243ab27c"
+    },
+    {
+      "path": "runtime/internal/localserver/regression_test.go",
+      "sourceSHA256": "f835c28b8fd72e45c1f1c213fe1f9c2ae1f10d63c87faf760b3b620db33f7ace",
+      "importedSHA256": "62f6ca1b9feb08ad897c8bae83fca9824f0cadea3577db90a95d5ac6a8aa5dfc"
+    },
+    {
+      "path": "runtime/internal/localserver/reports_owner.go",
+      "sourceSHA256": "3726b1b9f648087e1db6b770cae1065ae3f1f4ed0dc7197df60f1bb1fc7118f9",
+      "importedSHA256": "3726b1b9f648087e1db6b770cae1065ae3f1f4ed0dc7197df60f1bb1fc7118f9"
+    },
+    {
+      "path": "runtime/internal/localserver/server.go",
+      "sourceSHA256": "311222312df45a6ae672c342ae584db18b4629b0ab59b7a8f30842a109965b39",
+      "importedSHA256": "a9fede12332820f3decd36e0184a4d97b15c3a610a276148135a981af645180d"
+    },
+    {
+      "path": "runtime/internal/localserver/server_test.go",
+      "sourceSHA256": "4cd2fb00d82a5ef9f868c1fbade41ca27424d118637e2c0ada9e6235639f41c7",
+      "importedSHA256": "38b91b4acb35b4ff14589e68e76686feb9a6c072c42cf8b7ffd53baa03fe0f7b"
+    },
+    {
+      "path": "runtime/internal/localserver/shop_regression_test.go",
+      "sourceSHA256": "92fa6fb04e2b61b524090b3e13c67726f30d9412b5789d78e067864d97054a54",
+      "importedSHA256": "32e1db9c73548c1002f09f17803fc1d3ae847de6b90fdfa8dd7f401228c3352c"
+    },
+    {
+      "path": "runtime/internal/localserver/shop_settings.go",
+      "sourceSHA256": "64d14d6e582ce0f4d876077f21c2b9459869d13ccb943d886d8be69fd7909302",
+      "importedSHA256": "c9fa4cf2ef88705a6feddab944238700b08f4f4061513f633669fa54ee6fa696"
+    },
+    {
+      "path": "runtime/internal/localserver/software_license.go",
+      "sourceSHA256": "fa1b77f07931efe1c84a7fd343957b9f100fea867f124cf77f24b71b08f9d660",
+      "importedSHA256": "16944aa2aa3cdb7cb2bf8d0b1164187b0823ee3f65043b60c17a05306ce33b74"
+    },
+    {
+      "path": "runtime/internal/localserver/software_license_test.go",
+      "sourceSHA256": "a2b46b8bec6a0675b315b267cbdb90b0d4a511b3360415f7a3052b1bf273ce35",
+      "importedSHA256": "53d11c6a9b1e4d9bf2ba8f4aac24171eab1cd21700857c710cd350f9836fbf66"
+    },
+    {
+      "path": "runtime/internal/localserver/testfiles_test.go",
+      "sourceSHA256": "e499e3698ea8a937c0440219041b381511a6780e844fba93f5b0cefa4c96767e",
+      "importedSHA256": "56109dca1d7c8c4a2441197a6041300ca5a540f65a451cfc0a054cf4af4d96cb"
+    },
+    {
+      "path": "runtime/internal/localserver/tunnel_owner.go",
+      "sourceSHA256": "c75b50b601fec6c60c5b0057a7f7ab1a2e4734979d3331076d6bc6d879bb5d3e",
+      "importedSHA256": "75a1f2fe9546362444ffe0125fca66ac451e5d0285eef0285c46971c7fbfe275"
+    },
+    {
+      "path": "runtime/internal/localserver/web/client.mjs",
+      "sourceSHA256": "827d6bc9779a4209006164781cd5a02a43f5ae7db97c541c08561e144db838d1",
+      "importedSHA256": "827d6bc9779a4209006164781cd5a02a43f5ae7db97c541c08561e144db838d1"
+    },
+    {
+      "path": "runtime/internal/localserver/web/dashboard-shell.css",
+      "sourceSHA256": "207f8dedbed0a3d25e86d5bd273f8b26f271070914049277ff805681d51f77be",
+      "importedSHA256": "207f8dedbed0a3d25e86d5bd273f8b26f271070914049277ff805681d51f77be"
+    },
+    {
+      "path": "runtime/internal/localserver/web/dashboard-shell.mjs",
+      "sourceSHA256": "ad8869b8c0364a99818e7a5d1e87f7e48a317e98d598e321a66ae9b6f9fb505b",
+      "importedSHA256": "ad8869b8c0364a99818e7a5d1e87f7e48a317e98d598e321a66ae9b6f9fb505b"
+    },
+    {
+      "path": "runtime/internal/localserver/web/index.html",
+      "sourceSHA256": "3a39b80b9ee039361d7836fd471014d5c85bdf0a08d2c3d567d7cf845b628e2f",
+      "importedSHA256": "3a39b80b9ee039361d7836fd471014d5c85bdf0a08d2c3d567d7cf845b628e2f"
+    },
+    {
+      "path": "runtime/internal/localserver/web/money.mjs",
+      "sourceSHA256": "c3a039b2985070d1d8b9272dcd44e601f50dfb7c5889fc13a66e068c57bf7221",
+      "importedSHA256": "c3a039b2985070d1d8b9272dcd44e601f50dfb7c5889fc13a66e068c57bf7221"
+    },
+    {
+      "path": "runtime/internal/localserver/web/monitor-filters.mjs",
+      "sourceSHA256": "53616c7c8363b589424c30e36faa31ccce62d66035b7437bd6d3ee8e454fedf1",
+      "importedSHA256": "53616c7c8363b589424c30e36faa31ccce62d66035b7437bd6d3ee8e454fedf1"
+    },
+    {
+      "path": "runtime/internal/localserver/web/monitor.css",
+      "sourceSHA256": "46ee104877dab3d0f94db9ca31e525e2a33ef5060f40cb9cbeaf477ed2794c94",
+      "importedSHA256": "46ee104877dab3d0f94db9ca31e525e2a33ef5060f40cb9cbeaf477ed2794c94"
+    },
+    {
+      "path": "runtime/internal/localserver/web/monitor.html",
+      "sourceSHA256": "ae3e69ab27bc33c2211e3898b4236b7e9cbbd2d440041d913ceee85f9ff350f0",
+      "importedSHA256": "ae3e69ab27bc33c2211e3898b4236b7e9cbbd2d440041d913ceee85f9ff350f0"
+    },
+    {
+      "path": "runtime/internal/localserver/web/monitor.mjs",
+      "sourceSHA256": "62f7bbf9944b675b185fe2eb33c3958732cc069e28ba777dc8307e491e10e7bb",
+      "importedSHA256": "62f7bbf9944b675b185fe2eb33c3958732cc069e28ba777dc8307e491e10e7bb"
+    },
+    {
+      "path": "runtime/internal/localserver/web/order-queue.css",
+      "sourceSHA256": "d1d29ab777ab29f8e0608f769caa818bce336478ca812070ecab31499bc407ac",
+      "importedSHA256": "d1d29ab777ab29f8e0608f769caa818bce336478ca812070ecab31499bc407ac"
+    },
+    {
+      "path": "runtime/internal/localserver/web/order-queue.mjs",
+      "sourceSHA256": "331419238eadc8b8b23026d609b389d6aa0c9499638998ea26252ba04cd32d5f",
+      "importedSHA256": "331419238eadc8b8b23026d609b389d6aa0c9499638998ea26252ba04cd32d5f"
+    },
+    {
+      "path": "runtime/internal/localserver/web/paper-stock.css",
+      "sourceSHA256": "ad501c0c19977bdd42211730f1e18979a4dec9197c87af997a8a10fc6bf96a82",
+      "importedSHA256": "ad501c0c19977bdd42211730f1e18979a4dec9197c87af997a8a10fc6bf96a82"
+    },
+    {
+      "path": "runtime/internal/localserver/web/paper-stock.mjs",
+      "sourceSHA256": "c2d0f270801d33eaf33969dac3458191ef8468d9e005031cb4be0a631b080b11",
+      "importedSHA256": "c2d0f270801d33eaf33969dac3458191ef8468d9e005031cb4be0a631b080b11"
+    },
+    {
+      "path": "runtime/internal/localserver/web/portal/image-composer.mjs",
+      "sourceSHA256": "0056c38e67df175377ae85ddc2f86bb8284f6e50fcb6790d5a7a4ca969056c06",
+      "importedSHA256": "0056c38e67df175377ae85ddc2f86bb8284f6e50fcb6790d5a7a4ca969056c06"
+    },
+    {
+      "path": "runtime/internal/localserver/web/portal/index.html",
+      "sourceSHA256": "b59894b7d92830c8b7367a791fd0130024068e555225ddcb3d01617ab148bbc9",
+      "importedSHA256": "b59894b7d92830c8b7367a791fd0130024068e555225ddcb3d01617ab148bbc9"
+    },
+    {
+      "path": "runtime/internal/localserver/web/portal/portal-refresh.css",
+      "sourceSHA256": "72bd38f63e53d041d8cd32c5efab715166a36bd8142b10bde8e12faa2ad5d1d4",
+      "importedSHA256": "72bd38f63e53d041d8cd32c5efab715166a36bd8142b10bde8e12faa2ad5d1d4"
+    },
+    {
+      "path": "runtime/internal/localserver/web/portal/portal.css",
+      "sourceSHA256": "a5ba80bdfd6f5aee6fc49b97e4d7bfbb6c17344fec45f8e3792a5ad63a47934a",
+      "importedSHA256": "a5ba80bdfd6f5aee6fc49b97e4d7bfbb6c17344fec45f8e3792a5ad63a47934a"
+    },
+    {
+      "path": "runtime/internal/localserver/web/portal/portal.mjs",
+      "sourceSHA256": "7e744476fd21494d8c7b55bebf55f4283dac93e0b425f70933cbeabf72303c54",
+      "importedSHA256": "7e744476fd21494d8c7b55bebf55f4283dac93e0b425f70933cbeabf72303c54"
+    },
+    {
+      "path": "runtime/internal/localserver/web/portal-branding.mjs",
+      "sourceSHA256": "de8df4f543bf142e299a1add7e4c0b29ee0e0383f14533780238e04bd975aeeb",
+      "importedSHA256": "de8df4f543bf142e299a1add7e4c0b29ee0e0383f14533780238e04bd975aeeb"
+    },
+    {
+      "path": "runtime/internal/localserver/web/pricing-grid.css",
+      "sourceSHA256": "eaf4459e2017f2e3dc474c1931cbb47cff80cac989833e98f1c22b72285207a6",
+      "importedSHA256": "eaf4459e2017f2e3dc474c1931cbb47cff80cac989833e98f1c22b72285207a6"
+    },
+    {
+      "path": "runtime/internal/localserver/web/pricing-grid.mjs",
+      "sourceSHA256": "c647e91334d1b56e597d9efa7443f2d50845b0740e01795685f996b3d75be0b1",
+      "importedSHA256": "c647e91334d1b56e597d9efa7443f2d50845b0740e01795685f996b3d75be0b1"
+    },
+    {
+      "path": "runtime/internal/localserver/web/printer-invoices.mjs",
+      "sourceSHA256": "8afb92dbd54a29e79809180f12c559cd59c1a4fb38b5dfa9c5d0d2b7c2f6b25a",
+      "importedSHA256": "8afb92dbd54a29e79809180f12c559cd59c1a4fb38b5dfa9c5d0d2b7c2f6b25a"
+    },
+    {
+      "path": "runtime/internal/localserver/web/printer-setup.css",
+      "sourceSHA256": "e393b30594060b94520b832f958eb7e3f0c730d0dda39b4ff14528a40e11ce53",
+      "importedSHA256": "e393b30594060b94520b832f958eb7e3f0c730d0dda39b4ff14528a40e11ce53"
+    },
+    {
+      "path": "runtime/internal/localserver/web/printer-setup.mjs",
+      "sourceSHA256": "4262ee27702d35244a031e829ed2bfe66a726541158734570ff26ab229373574",
+      "importedSHA256": "4262ee27702d35244a031e829ed2bfe66a726541158734570ff26ab229373574"
+    },
+    {
+      "path": "runtime/internal/localserver/web/setup.css",
+      "sourceSHA256": "0f71e64e5e3ac4ff6d403b17f0bf6c733bc20439e474baef36770c4fd5dc7d52",
+      "importedSHA256": "0f71e64e5e3ac4ff6d403b17f0bf6c733bc20439e474baef36770c4fd5dc7d52"
+    },
+    {
+      "path": "runtime/internal/localserver/web/setup.js",
+      "sourceSHA256": "dc08c4b38df5c11915613cfe5ecb5d56e799ae501f6f3d39db36bafeb6c31623",
+      "importedSHA256": "dc08c4b38df5c11915613cfe5ecb5d56e799ae501f6f3d39db36bafeb6c31623"
+    },
+    {
+      "path": "runtime/internal/localserver/web/shop-settings.mjs",
+      "sourceSHA256": "50e0f92bb50e2f9d3c87029ac4c1c53034bec727a61c6b9cb14efeac3c51fc0a",
+      "importedSHA256": "50e0f92bb50e2f9d3c87029ac4c1c53034bec727a61c6b9cb14efeac3c51fc0a"
+    },
+    {
+      "path": "runtime/internal/notifications/notifications.go",
+      "sourceSHA256": "a9e1c72e41463a2d94c68fdaecd64ab6e3827d5b5bcfb1a875349b78aebf4cc2",
+      "importedSHA256": "a9e1c72e41463a2d94c68fdaecd64ab6e3827d5b5bcfb1a875349b78aebf4cc2"
+    },
+    {
+      "path": "runtime/internal/notifications/notifications_test.go",
+      "sourceSHA256": "599b4b93e7f79cac39ab932d1be7c15ccbd388882ebdcfa3d897a78a2466cd0b",
+      "importedSHA256": "a35a5f5d2e45a80d3ddb9415258e9971b27dc47387c346d74f3dcb4fdd468187"
+    },
+    {
+      "path": "runtime/internal/notifications/transports_test.go",
+      "sourceSHA256": "34f73950f0ea6f88618bcabe268f7e55d381340b8d9ef4d677b80cc365c62974",
+      "importedSHA256": "6ff503923c38c7e5cc9b4dbbc701d2b29bef4c83b2e008ca7e80f6be24ac6092"
+    },
+    {
+      "path": "runtime/internal/orders/orders.go",
+      "sourceSHA256": "266ca900f7d4170550171a0bec4ae96e4f03771196d95f5f9a09cdb54299f9b9",
+      "importedSHA256": "063f23e4591dacc5b4fefa241436decf3622a665fe9e61fee4f295fa204f220e"
+    },
+    {
+      "path": "runtime/internal/orders/orders_test.go",
+      "sourceSHA256": "2f45f1f867621f2ba50f2e7efab033c7962375f90d866472703a0348d3e5ff4c",
+      "importedSHA256": "bc268c395e7861cc28fdf8c8f4530e77c875b0749e85afb12952079f75ded015"
+    },
+    {
+      "path": "runtime/internal/orders/print_progress.go",
+      "sourceSHA256": "a66638ade0fdd4e3c5332f49148843ac3ca5cc593e58ae32dcd624721dee2d05",
+      "importedSHA256": "a66638ade0fdd4e3c5332f49148843ac3ca5cc593e58ae32dcd624721dee2d05"
+    },
+    {
+      "path": "runtime/internal/orders/printer_prices_test.go",
+      "sourceSHA256": "ceec6700bf0d15bd439bd35eadb408a6e7549b62e6dbd8533dd2dda528d16cc2",
+      "importedSHA256": "4fdd4be291c3b41a058bd6c1b54e063465ff2798d6d1149b75febd8a0695b354"
+    },
+    {
+      "path": "runtime/internal/owner/bootstrap.go",
+      "sourceSHA256": "4dc687d7d53833282c27885ea7fe7003d7b3b6d6f550b58ee0bcfb74e8809f18",
+      "importedSHA256": "0568f4d9e3c20dd7c8aa2b532225a526e5d762fbd4382688aeb7d30188d14d9f"
+    },
+    {
+      "path": "runtime/internal/owner/bootstrap_test.go",
+      "sourceSHA256": "f6d50bd0ba056f006913689160e6b8fda0ad77d70d0aa1693886c0433fc7dd38",
+      "importedSHA256": "8358b9e4ed4f8004cb702468e17927e95932496b4ba7655e2afee8e053973da0"
+    },
+    {
+      "path": "runtime/internal/owner/rbac.go",
+      "sourceSHA256": "684c16a8151a13e60806f7130e141ae9ac447dc51d542d4a3fae73dd12664309",
+      "importedSHA256": "684c16a8151a13e60806f7130e141ae9ac447dc51d542d4a3fae73dd12664309"
+    },
+    {
+      "path": "runtime/internal/owner/rbac_test.go",
+      "sourceSHA256": "73ffbd8b23ca6d8405cdb978219a33c3aec69aed4d194566d0b4bd6aba8dfbc6",
+      "importedSHA256": "73ffbd8b23ca6d8405cdb978219a33c3aec69aed4d194566d0b4bd6aba8dfbc6"
+    },
+    {
+      "path": "runtime/internal/owner/service.go",
+      "sourceSHA256": "df84ba4e385ac718c445a69922ef5cd1c522cf429054ba28360a71a113dfd20d",
+      "importedSHA256": "df84ba4e385ac718c445a69922ef5cd1c522cf429054ba28360a71a113dfd20d"
+    },
+    {
+      "path": "runtime/internal/owner/service_test.go",
+      "sourceSHA256": "501bd2d50dd627d3870abeb6fe9eb0f82c9eb1166a576f5b895aed24ff86135f",
+      "importedSHA256": "871f9ca811624f4b51bc40fa0be24ff777832f1d380c7ff05d482f15a64b3637"
+    },
+    {
+      "path": "runtime/internal/pageselection/pages.go",
+      "sourceSHA256": "e1be63da8c02b5a2faa49b007678ec7141f390617b7ac5bb07ac960b091c957d",
+      "importedSHA256": "e1be63da8c02b5a2faa49b007678ec7141f390617b7ac5bb07ac960b091c957d"
+    },
+    {
+      "path": "runtime/internal/pairing/service.go",
+      "sourceSHA256": "6cbe7aa28f8b0e6dc4cb6cc0d52f713956015fdc9e5fbfdffc7e2114b3ccadc3",
+      "importedSHA256": "6cbe7aa28f8b0e6dc4cb6cc0d52f713956015fdc9e5fbfdffc7e2114b3ccadc3"
+    },
+    {
+      "path": "runtime/internal/pairing/service_test.go",
+      "sourceSHA256": "9da07d0fb245b2b64ed7bcd20818d8e6c0c8fe0cf9afbe38fa34176e21fa6f42",
+      "importedSHA256": "2ed79c9f518cfd35c02d689120f6f44a69f1b2b072b098e02bed6c41d4fb1243"
+    },
+    {
+      "path": "runtime/internal/pairing/types.go",
+      "sourceSHA256": "6f02073571b34cdf7056f02386150cb0149f4270b6e7445b9a74851eb151df24",
+      "importedSHA256": "6f02073571b34cdf7056f02386150cb0149f4270b6e7445b9a74851eb151df24"
+    },
+    {
+      "path": "runtime/internal/passport/compose.go",
+      "sourceSHA256": "f6e65fd32516f9df4a24f66110f6d37f7ad605605975f3b24cbd2204b61578b6",
+      "importedSHA256": "9308682c4a88bc2c279897d00a13b8a330d9f9b791f2e073dc1689ee97660fc0"
+    },
+    {
+      "path": "runtime/internal/passport/decode.go",
+      "sourceSHA256": "ee0afa0d1ce7444031ddbc0ada13bc4e88c11a88093cfa9fb879a756963da446",
+      "importedSHA256": "ee0afa0d1ce7444031ddbc0ada13bc4e88c11a88093cfa9fb879a756963da446"
+    },
+    {
+      "path": "runtime/internal/passport/detect.go",
+      "sourceSHA256": "b0021a1a9aaaf48e7d10326b6335d9340e4e9a2ae9b47342b43d26846ee423a3",
+      "importedSHA256": "b0021a1a9aaaf48e7d10326b6335d9340e4e9a2ae9b47342b43d26846ee423a3"
+    },
+    {
+      "path": "runtime/internal/passport/errors.go",
+      "sourceSHA256": "09dd27e545e589b01a36528543f969366f21728c5ac3b77aa9fccfafb98bb7d7",
+      "importedSHA256": "09dd27e545e589b01a36528543f969366f21728c5ac3b77aa9fccfafb98bb7d7"
+    },
+    {
+      "path": "runtime/internal/passport/helpers_test.go",
+      "sourceSHA256": "b3d95d314ae5e15b1aa8423bd669406f030a7549b3a87cbe0cb73fc374288072",
+      "importedSHA256": "b3d95d314ae5e15b1aa8423bd669406f030a7549b3a87cbe0cb73fc374288072"
+    },
+    {
+      "path": "runtime/internal/passport/layout.go",
+      "sourceSHA256": "9ca8d80a2603ddf688c368560631e4e2c79602f639f3bc07a0a0e6b3d542960d",
+      "importedSHA256": "9ca8d80a2603ddf688c368560631e4e2c79602f639f3bc07a0a0e6b3d542960d"
+    },
+    {
+      "path": "runtime/internal/passport/luminance.go",
+      "sourceSHA256": "6f7f6190cc170a1d07e01b7a0dbcb087a1097502ba347fe93b45f15142fab28d",
+      "importedSHA256": "6f7f6190cc170a1d07e01b7a0dbcb087a1097502ba347fe93b45f15142fab28d"
+    },
+    {
+      "path": "runtime/internal/passport/luminance_test.go",
+      "sourceSHA256": "b5f923ac232acc36388b7e6e9d6432a850cecb9741d3ef08ddb97943ff20663a",
+      "importedSHA256": "b5f923ac232acc36388b7e6e9d6432a850cecb9741d3ef08ddb97943ff20663a"
+    },
+    {
+      "path": "runtime/internal/passport/service.go",
+      "sourceSHA256": "05eaa890fd1224f5d54d884057017f408275dc414e65b674a4de492a1e96280f",
+      "importedSHA256": "7ad91e5ad347374e7eb72733cdfcac953ff306d7d6f346c687f0ad3dd48e17b8"
+    },
+    {
+      "path": "runtime/internal/passport/service_test.go",
+      "sourceSHA256": "476ead75a57b9f0dee0b53dbeceb679a05dad4f326bb26aad33f4ba508158fef",
+      "importedSHA256": "53937b63b855ef554348d64504aa219b22107961c0a6f50eea9b47485b828241"
+    },
+    {
+      "path": "runtime/internal/passport/types.go",
+      "sourceSHA256": "159925d524260ef219a2351775f94c6aced6fca350da42f27d1d9f97680e4358",
+      "importedSHA256": "159925d524260ef219a2351775f94c6aced6fca350da42f27d1d9f97680e4358"
+    },
+    {
+      "path": "runtime/internal/passport/types_test.go",
+      "sourceSHA256": "d418fe5aba37ac924fb9a40673f60c9614338f5785a59f3ebf3276677597646d",
+      "importedSHA256": "d418fe5aba37ac924fb9a40673f60c9614338f5785a59f3ebf3276677597646d"
+    },
+    {
+      "path": "runtime/internal/payments/auto_advance_test.go",
+      "sourceSHA256": "c2b0e4735ed37ea229db4f31cb0218525820c4975bdb5318465c69e89a98074e",
+      "importedSHA256": "19a8c55e927caa57698c5c15fd139331b895adb9482bcd8b4ab071cc9595b9ec"
+    },
+    {
+      "path": "runtime/internal/payments/disabled_broker.go",
+      "sourceSHA256": "d32fd65236cffa4c678cec4bdc806700fac711a2146ff155c7fbed23a0e9144d",
+      "importedSHA256": "d32fd65236cffa4c678cec4bdc806700fac711a2146ff155c7fbed23a0e9144d"
+    },
+    {
+      "path": "runtime/internal/payments/integration_test.go",
+      "sourceSHA256": "d9bd9e5f87427227d2eccd6045c5bd104b141ebf5404fb6b4cf14347e2585a8f",
+      "importedSHA256": "dc08e90b66dbe4196510eaf1ec7097ea1073b58ce1179fcb8712f71daa5a75d7"
+    },
+    {
+      "path": "runtime/internal/payments/link_recovery_test.go",
+      "sourceSHA256": "16ece50126c7b1589ac9cd734b433ccab0338ca6fa34d45f078a71f52c44d467",
+      "importedSHA256": "16ece50126c7b1589ac9cd734b433ccab0338ca6fa34d45f078a71f52c44d467"
+    },
+    {
+      "path": "runtime/internal/payments/merchant_e2e_test.go",
+      "sourceSHA256": "f60e0978b3b130b3e4be2188b3bb42b713993b4662cdd4efd3f0f494edceb039",
+      "importedSHA256": "0231f7f3bcd9e9f2c4d810628be844dcd2584a13dc2fc7877b0e6578e0350e34"
+    },
+    {
+      "path": "runtime/internal/payments/provider.go",
+      "sourceSHA256": "3938fdc0884528b9c7b502e7d9a048b1e64335b560b93053be7fc6dd4eefc6f5",
+      "importedSHA256": "79f900335df280615ece8be5b42da2fbfa8a8068f3176674750c349753fdfb1f"
+    },
+    {
+      "path": "runtime/internal/payments/razorpay/razorpay.go",
+      "sourceSHA256": "4fd311351e655a88afc7b6994bda1012b72fcf21444b032c967a06c6e1f1e207",
+      "importedSHA256": "f4a126e47ade1d81d5b2499d7ad03daf5bd97a6da37b39262cd0343f113c01e8"
+    },
+    {
+      "path": "runtime/internal/payments/razorpay/razorpay_test.go",
+      "sourceSHA256": "59d29d061ce688d81ad572db8de344e7169cd84ad0bcd50eee6c9c972b6a2b03",
+      "importedSHA256": "0e2c13a75f9854a18a77c987abe477300d20ad263c592ea8922988316d6578a5"
+    },
+    {
+      "path": "runtime/internal/payments/razorpay/reconcile.go",
+      "sourceSHA256": "1ede58d83db308276f78ff2f75d9fff3551f8b81f78bf2665be94708b05f845e",
+      "importedSHA256": "20b2a7f2bbf2778bd0703b5155df3fe215bf7563b7005b091fb5b1d2c4316aa9"
+    },
+    {
+      "path": "runtime/internal/payments/razorpay/reconcile_test.go",
+      "sourceSHA256": "f56629527efa3b0fcc5c6df27bcdc8848082b907a496d35d1b82d5ce5c10b76a",
+      "importedSHA256": "04a85e9e66de931cfeca31c84521a11657a8949bbe7552120030620fa553da3f"
+    },
+    {
+      "path": "runtime/internal/payments/razorpay/test_connection_test.go",
+      "sourceSHA256": "f970e22e845e89f813475d5085fec58ebfda93fc4f9a691cbc3b014ecb990324",
+      "importedSHA256": "f970e22e845e89f813475d5085fec58ebfda93fc4f9a691cbc3b014ecb990324"
+    },
+    {
+      "path": "runtime/internal/payments/reconcile.go",
+      "sourceSHA256": "d6ed011af42e5d5ff4b4eda93a5c62c953f9ab7372e20bd80cc89c9343d20159",
+      "importedSHA256": "d6ed011af42e5d5ff4b4eda93a5c62c953f9ab7372e20bd80cc89c9343d20159"
+    },
+    {
+      "path": "runtime/internal/payments/reconcile_test.go",
+      "sourceSHA256": "99c822d99d087bcef3f06edbf9f4ea5bd90f89d71819f171ba63088dc48cf306",
+      "importedSHA256": "b51ef4c5b9cd6cc07c5bbf070c8c050c076d1321e1c3e3ae7a44fc8e7de79923"
+    },
+    {
+      "path": "runtime/internal/payments/service.go",
+      "sourceSHA256": "a025c2937cd4b048e2e1ccda44fd7cbd0fd81d140d5942e27e88e520fad1c5e2",
+      "importedSHA256": "6b9f1ce95e5636dd120428fa00fdf837b10e052b13820df9832770e38857e609"
+    },
+    {
+      "path": "runtime/internal/payments/service_test.go",
+      "sourceSHA256": "61649c6e2ebb35255206b8513f6336b35e1c9d8973a937c27555a4b0414bfd09",
+      "importedSHA256": "9f74dd08278e6c9d74f29883b5c14d34c68f480f21e195d66bbeb69581d7e1a2"
+    },
+    {
+      "path": "runtime/internal/payments/signature.go",
+      "sourceSHA256": "20380f1a812e153d860666ff20d12c76dbc9f9795f24594cc77cf361f789a030",
+      "importedSHA256": "ef08c884740c6a16cf2ea8e9e1b2cd9ab0d19834a59169ddfbdae02a3040b490"
+    },
+    {
+      "path": "runtime/internal/payments/types.go",
+      "sourceSHA256": "af118887bf7d42471da92edea2556ca9f4153b2c9c0bae5d584a0f6a6e5f8505",
+      "importedSHA256": "af118887bf7d42471da92edea2556ca9f4153b2c9c0bae5d584a0f6a6e5f8505"
+    },
+    {
+      "path": "runtime/internal/portalorigin/origin.go",
+      "sourceSHA256": "75335f746673d91ce4db8293d9e40ef60cb0fda6bf1cd38fef01dd9291cbf4e0",
+      "importedSHA256": "75335f746673d91ce4db8293d9e40ef60cb0fda6bf1cd38fef01dd9291cbf4e0"
+    },
+    {
+      "path": "runtime/internal/pricing/discount.go",
+      "sourceSHA256": "241e7c14b70b7688d29c552b683d2ebde12db58fb449c601470d6af9e91e4ddb",
+      "importedSHA256": "241e7c14b70b7688d29c552b683d2ebde12db58fb449c601470d6af9e91e4ddb"
+    },
+    {
+      "path": "runtime/internal/pricing/discount_test.go",
+      "sourceSHA256": "adce7ff23644c5d1a3474b1821b6d0f4a30499604662f25d1f043f45b7c107f4",
+      "importedSHA256": "adce7ff23644c5d1a3474b1821b6d0f4a30499604662f25d1f043f45b7c107f4"
+    },
+    {
+      "path": "runtime/internal/pricing/pricing.go",
+      "sourceSHA256": "db102b7f8d1f6a020b881de1dbf40a5fe9684a9d855c1fb3f1d027aae091f205",
+      "importedSHA256": "eee151d074a302328a59e68b1a732cfd2aa6b8f3af5c599c94912ed91cf57d2e"
+    },
+    {
+      "path": "runtime/internal/pricing/pricing_test.go",
+      "sourceSHA256": "610776e902e54debb498827bba82f11697dd6bcd6a791265176f813e8fd19b97",
+      "importedSHA256": "0710d795bb5b04e9c8a4a9a7517f70c23fc22fe33522e5b7f435c7f12c0b1116"
+    },
+    {
+      "path": "runtime/internal/pricing/printer_prices.go",
+      "sourceSHA256": "23c1fc741047c9a850ea6f8333b7422a081bbd899b749b1fd5f216682efe1a60",
+      "importedSHA256": "0115b01aabec710eb37e1bc5501cbd774af9cf7b97ad4a50074a27f40baa9da0"
+    },
+    {
+      "path": "runtime/internal/pricing/printer_prices_test.go",
+      "sourceSHA256": "d3067d3e04336b13c350b8bf247ac0f2b2bce7017e65638b94c515b62c57fde1",
+      "importedSHA256": "1097106d18ba8f88e4289cbbaef56ac8f1efa05352c6fe9c1f771c3155c29693"
+    },
+    {
+      "path": "runtime/internal/printers/discover/devmode_windows_test.go",
+      "sourceSHA256": "47addac3d8a03de2012700141dfa88323b0f5fcd0e6be53929fe89ce941713d2",
+      "importedSHA256": "47addac3d8a03de2012700141dfa88323b0f5fcd0e6be53929fe89ce941713d2"
+    },
+    {
+      "path": "runtime/internal/printers/discover/discover.go",
+      "sourceSHA256": "450e0d8a8e3926409ea48490890b51d4f926352f4f103ab53fc9114a0691f2e0",
+      "importedSHA256": "5e4fd79f3dbf091321df9ed4d12a08e88cf118643b76bdba57362827a7267560"
+    },
+    {
+      "path": "runtime/internal/printers/discover/discover_bluetooth_stub.go",
+      "sourceSHA256": "f10eeeb3a3f65c4ab6c99d83f22639062ab713222f221b6a983c2e800d580ce7",
+      "importedSHA256": "e55d3467270e0e04f851438726c9388555522aa4629fd6f0e3d501de8384e244"
+    },
+    {
+      "path": "runtime/internal/printers/discover/discover_bluetooth_windows.go",
+      "sourceSHA256": "42e995dd9ae706ff786b7523b44b972063a201bf7f3d91050b3801fdea650b2b",
+      "importedSHA256": "f4f9c24aaac85b65f17776fd79c70fac2291aba547eb780c4c2ccdc825c192cb"
+    },
+    {
+      "path": "runtime/internal/printers/discover/discover_ipp.go",
+      "sourceSHA256": "d6779dd020015a9eadf075abad798c23023f02912bb6fe4a54a0b6faff59dda8",
+      "importedSHA256": "327a14b43dd30965e10884be134c58a14fbc40e68b90461699c45279881aad76"
+    },
+    {
+      "path": "runtime/internal/printers/discover/discover_ipp_test.go",
+      "sourceSHA256": "3bda8e4a02632aa39d2c1994bba220478f1efc2e3b1537c297b71ffdc0fe42c2",
+      "importedSHA256": "3bda8e4a02632aa39d2c1994bba220478f1efc2e3b1537c297b71ffdc0fe42c2"
+    },
+    {
+      "path": "runtime/internal/printers/discover/discover_stub_dev.go",
+      "sourceSHA256": "9fab2d6683a42064cd046457cb6751ea44efbdb686e8c759357bd417eca559ca",
+      "importedSHA256": "b3cd66ea5970637beb268de71c1aa59281d9dd2990f7a57bbe7294334e3f4439"
+    },
+    {
+      "path": "runtime/internal/printers/discover/discover_test.go",
+      "sourceSHA256": "fdb55d600f9c16be8036435c9079967c8e46c1c01352fcb018460ded9cfe33b6",
+      "importedSHA256": "c1460cfcc4d3c8d43b6aca8325d6a16e230eddfb3384e226ed1faccc9d7967ad"
+    },
+    {
+      "path": "runtime/internal/printers/discover/discover_windows.go",
+      "sourceSHA256": "cb47a9248504133a57c9ba4f06d7b3ca1a6588a93f28b08ed43ea8a1186c229a",
+      "importedSHA256": "7c1e52f36b099501d954db47bfdc40dbba5bea51e4b4cfc4c33e795c699c4955"
+    },
+    {
+      "path": "runtime/internal/printers/discover/syscall_helpers_windows.go",
+      "sourceSHA256": "48b56efbd7614cd97cd8919eeb1edd57b5390d3655dafb382bc111bf26110f49",
+      "importedSHA256": "48b56efbd7614cd97cd8919eeb1edd57b5390d3655dafb382bc111bf26110f49"
+    },
+    {
+      "path": "runtime/internal/printers/discover/winspool_windows.go",
+      "sourceSHA256": "8ea449651d35499d534e69f0bfb41bb47c74f5dacb46dca0faaea99bf452f97e",
+      "importedSHA256": "8ea449651d35499d534e69f0bfb41bb47c74f5dacb46dca0faaea99bf452f97e"
+    },
+    {
+      "path": "runtime/internal/printers/dispatch/composition_preview_windows_test.go",
+      "sourceSHA256": "7f4e6ccf1ce8a30932e8cd48ef1ec741b19cc2a62c915dee6604b54df25564c7",
+      "importedSHA256": "e0c503e8c1ece9701539269b4360057538a60cf51ee69414592a6d7e96efd629"
+    },
+    {
+      "path": "runtime/internal/printers/dispatch/db_queue_resolver.go",
+      "sourceSHA256": "a628b00c165deb5b15cc7ebc2b107c167107c0b7a083c8096bea6b4eb60f5e7a",
+      "importedSHA256": "341fb9146fc4280c4f0311183e1fa7d6592cfb69887e6d13caccf23988c0472b"
+    },
+    {
+      "path": "runtime/internal/printers/dispatch/dispatch.go",
+      "sourceSHA256": "270f70d511b8a0cbcc68f81dab5fd93e19645438256080a741953442de8a03ba",
+      "importedSHA256": "d157e0697a02767ef713a5a817e510dd9bc7edb50b874f9cfd6c9168e9fda0b1"
+    },
+    {
+      "path": "runtime/internal/printers/dispatch/dispatch_stub.go",
+      "sourceSHA256": "8186d919f238aefd986c06df014f0448df8a12442f1691857d37fcdf8b0ff7ca",
+      "importedSHA256": "8186d919f238aefd986c06df014f0448df8a12442f1691857d37fcdf8b0ff7ca"
+    },
+    {
+      "path": "runtime/internal/printers/dispatch/dispatch_test.go",
+      "sourceSHA256": "e50bff5c8df4a293b8d0d3fb1caffbdb760bcc069e0ea19a0b74f231373d1f28",
+      "importedSHA256": "37cbd32c409823e2b794222134203697f2563ab21036174ea309fbd34eee4990"
+    },
+    {
+      "path": "runtime/internal/printers/dispatch/dispatch_test_print.go",
+      "sourceSHA256": "a0e7985c0ac566c1dd7568bb71f8189bff24cb6eb5e813b19aa04e6e7411dec7",
+      "importedSHA256": "a0e7985c0ac566c1dd7568bb71f8189bff24cb6eb5e813b19aa04e6e7411dec7"
+    },
+    {
+      "path": "runtime/internal/printers/dispatch/dispatch_windows.go",
+      "sourceSHA256": "21990da7161518987276ae4a7b6ec49b2ada9b8dbceceb27971368ceaeb06b94",
+      "importedSHA256": "35e8a209e930efbe54463a4282bbaf0f320f6fcaf995b250eb7a5ac130cea93c"
+    },
+    {
+      "path": "runtime/internal/printers/dispatch/duplex_orientation_test.go",
+      "sourceSHA256": "c3d4812688f3cedd8c286bf98ec2f080c328a4739646db69f75684b249fbaddf",
+      "importedSHA256": "c3d4812688f3cedd8c286bf98ec2f080c328a4739646db69f75684b249fbaddf"
+    },
+    {
+      "path": "runtime/internal/printers/dispatch/image_decode.go",
+      "sourceSHA256": "21a81207e72df19e7dfe9073b7f03c496cbdca50a759c27142c14c28e244a5f2",
+      "importedSHA256": "1e892e010a48e5e08479a5c94c4daa24e0c9dae6543c49fef8889f7964e6efc4"
+    },
+    {
+      "path": "runtime/internal/printers/dispatch/image_decode_test.go",
+      "sourceSHA256": "7bbf8896681d5425a2729d90aa6a3c3d755a8488c9aba6bb44bd404ecd00873d",
+      "importedSHA256": "7bbf8896681d5425a2729d90aa6a3c3d755a8488c9aba6bb44bd404ecd00873d"
+    },
+    {
+      "path": "runtime/internal/printers/dispatch/layout.go",
+      "sourceSHA256": "16e4d74a49e2681beae50c4092df67a5bcd63dce6045af098f3bb69e8dd6072d",
+      "importedSHA256": "b1e87016a0594a1a32de87c608bc8e5c0564d4f03e00c39356e45b2a26735bb4"
+    },
+    {
+      "path": "runtime/internal/printers/dispatch/paper_test_print_test.go",
+      "sourceSHA256": "30da0b42db03c74a208db48f6ab505b2746d9bd397b785ad260dde3294fd58a0",
+      "importedSHA256": "30da0b42db03c74a208db48f6ab505b2746d9bd397b785ad260dde3294fd58a0"
+    },
+    {
+      "path": "runtime/internal/printers/dispatch/preview_other.go",
+      "sourceSHA256": "b5fa9167b9015986805b158b8047121ed574f28d2039d4b1876cc5c42d87e59a",
+      "importedSHA256": "b5fa9167b9015986805b158b8047121ed574f28d2039d4b1876cc5c42d87e59a"
+    },
+    {
+      "path": "runtime/internal/printers/dispatch/preview_windows.go",
+      "sourceSHA256": "b2777d01b34317229dbecd1211d737bec4fcf8f580211652a398110422c5fae1",
+      "importedSHA256": "b2777d01b34317229dbecd1211d737bec4fcf8f580211652a398110422c5fae1"
+    },
+    {
+      "path": "runtime/internal/printers/dispatch/progress.go",
+      "sourceSHA256": "f4ca005b11eb7cc514cfaf75e40ff11829dcb93bbe55359333570d63c8183482",
+      "importedSHA256": "f4ca005b11eb7cc514cfaf75e40ff11829dcb93bbe55359333570d63c8183482"
+    },
+    {
+      "path": "runtime/internal/printers/dispatch/progress_test.go",
+      "sourceSHA256": "0f04525e481851a456d49a8811119cdffac5c5d482e58e2891f6f11a95143089",
+      "importedSHA256": "2929130f0a9db2035ea32ca7674a2d30c0d5e3202b0ad043b1903971651ca93b"
+    },
+    {
+      "path": "runtime/internal/printers/dispatch/progress_windows.go",
+      "sourceSHA256": "8d6eeb40346a04637977a3d817fbd8655c542b51dabc457c74002e8264f14b24",
+      "importedSHA256": "8d6eeb40346a04637977a3d817fbd8655c542b51dabc457c74002e8264f14b24"
+    },
+    {
+      "path": "runtime/internal/printers/dispatch/progress_windows_test.go",
+      "sourceSHA256": "0640d68e06237b523a66eba280f2a6da13d33921db49686a30098eec0bf7786c",
+      "importedSHA256": "0640d68e06237b523a66eba280f2a6da13d33921db49686a30098eec0bf7786c"
+    },
+    {
+      "path": "runtime/internal/printers/dispatch/queues_windows.go",
+      "sourceSHA256": "1f14c5d884e1bee044826b90ddd00464c70592ae3f880081da2da997c23f32c3",
+      "importedSHA256": "1f14c5d884e1bee044826b90ddd00464c70592ae3f880081da2da997c23f32c3"
+    },
+    {
+      "path": "runtime/internal/printers/dispatch/queues_windows_test.go",
+      "sourceSHA256": "eb9d33594bc6d51cde4488880c0b54341eca93a6f38324520dbac00cc2c133a0",
+      "importedSHA256": "eb9d33594bc6d51cde4488880c0b54341eca93a6f38324520dbac00cc2c133a0"
+    },
+    {
+      "path": "runtime/internal/printers/dispatch/render_windows_test.go",
+      "sourceSHA256": "7a7274442cf27d6818d9a9b72ae12fed90815eceb97bc072a876255272baa9bc",
+      "importedSHA256": "7a7274442cf27d6818d9a9b72ae12fed90815eceb97bc072a876255272baa9bc"
+    },
+    {
+      "path": "runtime/internal/printers/dispatch/retention_test.go",
+      "sourceSHA256": "0f2682cb6eb5e27ea0a367c5bb768b493671e2b468b8e4afbc95add9e84b5531",
+      "importedSHA256": "1559a942753a136e35a800b276d6e55873f9152c33b7d69c9c6b5a8d06429220"
+    },
+    {
+      "path": "runtime/internal/printers/dispatch/routing_test.go",
+      "sourceSHA256": "bb093b8281d8a0d639e2216b5858a583f42ba48df1f3b2520f1daceae3d9a8fe",
+      "importedSHA256": "2dc4b4bac48ffc1d015f4ee2f02be8a825812400c5b2311b10dc26fe9511e583"
+    },
+    {
+      "path": "runtime/internal/printers/dispatch/selected_pages_test.go",
+      "sourceSHA256": "b5db77b0bedb32647f69d317613dec13cddb16fc7c206fca56356dc982f00fbc",
+      "importedSHA256": "d0a07e017bc42a59c640b8b8f2009dec4896db94ae63cb1933f47b41877681ad"
+    },
+    {
+      "path": "runtime/internal/printers/dispatch/separator.go",
+      "sourceSHA256": "f700823daac4702d69d71956b0d366d189439b94b7d1d9e7b2df0ada5e6773a7",
+      "importedSHA256": "2aa33c42ecea126b9113cc7b73fc8cacdad1967f95270ecfab01e51eb7bbb6ba"
+    },
+    {
+      "path": "runtime/internal/printers/dispatch/separator_layout.go",
+      "sourceSHA256": "2e8281524b0c5cfe304ac17806e801b7b982a69eddc392a5d6725dfbe2e9c30c",
+      "importedSHA256": "2e8281524b0c5cfe304ac17806e801b7b982a69eddc392a5d6725dfbe2e9c30c"
+    },
+    {
+      "path": "runtime/internal/printers/dispatch/separator_preview_windows_test.go",
+      "sourceSHA256": "3acdc4f5893f6f61bd1fbca7d50d1ed73c89790b8ff28e21aaf4a3d56d18b9d4",
+      "importedSHA256": "3acdc4f5893f6f61bd1fbca7d50d1ed73c89790b8ff28e21aaf4a3d56d18b9d4"
+    },
+    {
+      "path": "runtime/internal/printers/dispatch/separator_progress.go",
+      "sourceSHA256": "d86befde7797c904f146693313eb7c1747b150564ee3a5f067da7e678d53278b",
+      "importedSHA256": "d86befde7797c904f146693313eb7c1747b150564ee3a5f067da7e678d53278b"
+    },
+    {
+      "path": "runtime/internal/printers/dispatch/separator_test.go",
+      "sourceSHA256": "db12841d5f5ce8638fe8c12f02f47a516a664b651838c8f44a2a0bd393bdf7c7",
+      "importedSHA256": "d3452934728dba750b774b43b10e28d225312ab4aac67bb8fb15cf88a5257366"
+    },
+    {
+      "path": "runtime/internal/printers/dispatch/separator_windows.go",
+      "sourceSHA256": "1a42ae2fce9d4cc4995260b044069875b1310dbf07bdff47b09f160d95ca2fa3",
+      "importedSHA256": "1a42ae2fce9d4cc4995260b044069875b1310dbf07bdff47b09f160d95ca2fa3"
+    },
+    {
+      "path": "runtime/internal/printers/dispatch/sheet_preview.go",
+      "sourceSHA256": "1733897bb196b2703451c8f92ebbe951b1e0a4f792a91abcb5522f131f6e5745",
+      "importedSHA256": "254301b3068b9353fce466de19282d3414d24b096563791bab4ed957c4477f8b"
+    },
+    {
+      "path": "runtime/internal/printers/dispatch/sheet_preview_test.go",
+      "sourceSHA256": "9f7e8ab14dd55aa29ac18ae7539e8aab1750e3a27ae2d61bb8baad70bcdfd36e",
+      "importedSHA256": "9f7e8ab14dd55aa29ac18ae7539e8aab1750e3a27ae2d61bb8baad70bcdfd36e"
+    },
+    {
+      "path": "runtime/internal/printers/dispatch/shop_regression_test.go",
+      "sourceSHA256": "9ec5a89d41b9d2cf003de2037f49d15d104ac71dcb0b9ed94b08ff44eb0a49ee",
+      "importedSHA256": "041941dd5b142b62b196dacdbe21cd7076311441e5c4cc3c761f293398b94049"
+    },
+    {
+      "path": "runtime/internal/printers/eligible.go",
+      "sourceSHA256": "187d5da91b8bcf66c2fc3f86218a1e98adf21b24162cb4fcb3bb83dd4b557092",
+      "importedSHA256": "187d5da91b8bcf66c2fc3f86218a1e98adf21b24162cb4fcb3bb83dd4b557092"
+    },
+    {
+      "path": "runtime/internal/printers/normalize.go",
+      "sourceSHA256": "4b96ca96c2ee6586d52beef73d8d0588cbae5f2d2be77c2ec81262144d741f97",
+      "importedSHA256": "4b96ca96c2ee6586d52beef73d8d0588cbae5f2d2be77c2ec81262144d741f97"
+    },
+    {
+      "path": "runtime/internal/printers/paper_settings.go",
+      "sourceSHA256": "2ead3f3e25e4d82d07da5f6997933aa0162fd0a7c31534038cd2aaf6d55beeaf",
+      "importedSHA256": "2ead3f3e25e4d82d07da5f6997933aa0162fd0a7c31534038cd2aaf6d55beeaf"
+    },
+    {
+      "path": "runtime/internal/printers/paper_settings_test.go",
+      "sourceSHA256": "9a63a82d4f875d7d8ef41efe77d65d453276c3a1eb65ea22b866ef47e7e55036",
+      "importedSHA256": "a5b26d24803790d86ca9bb80ca553c064b05f366f5548c0cf0081bdc4f3f53cb"
+    },
+    {
+      "path": "runtime/internal/printers/service.go",
+      "sourceSHA256": "98b339ea227739761e3ee56f404f7fe3f38c19246594182c866e92fea7c84e64",
+      "importedSHA256": "98b339ea227739761e3ee56f404f7fe3f38c19246594182c866e92fea7c84e64"
+    },
+    {
+      "path": "runtime/internal/printers/service_test.go",
+      "sourceSHA256": "4adcf131bf99da4e2f591680b7af390c7f9a8791bc0006da52e324cc3e299609",
+      "importedSHA256": "a5dfbf5ff2dc35d823a6cb88e0bfac2d1b47e398e6880ec7451ec070f1662af5"
+    },
+    {
+      "path": "runtime/internal/printers/types.go",
+      "sourceSHA256": "5bf22cab9d040dc849c27dbb5c77e8a653b0c1bde49e897a82fdeb7a4e60b96d",
+      "importedSHA256": "5bf22cab9d040dc849c27dbb5c77e8a653b0c1bde49e897a82fdeb7a4e60b96d"
+    },
+    {
+      "path": "runtime/internal/provisioning/local.go",
+      "sourceSHA256": "68225ca7888c722c68c73c0dd8ca28b95e8f07d99dbac45f39a1c99b363bc1af",
+      "importedSHA256": "68225ca7888c722c68c73c0dd8ca28b95e8f07d99dbac45f39a1c99b363bc1af"
+    },
+    {
+      "path": "runtime/internal/provisioning/state.go",
+      "sourceSHA256": "eaa183bce9bf8bde1e052d34b04d70836a80acd7fa9faa25b468e99488c0a471",
+      "importedSHA256": "eaa183bce9bf8bde1e052d34b04d70836a80acd7fa9faa25b468e99488c0a471"
+    },
+    {
+      "path": "runtime/internal/provisioning/state_test.go",
+      "sourceSHA256": "5f8a48c3fb02435f6b9e0737e7be7663987e86968f72a5230df50d804e0aadb1",
+      "importedSHA256": "54e89ffaf605d1f5857627484be5c100f7f57612c775979e30e8afbe7069ef6f"
+    },
+    {
+      "path": "runtime/internal/qr_theme/qr_theme.go",
+      "sourceSHA256": "b423e37e84dcfe4b58b1339d0624de54137313d470f0491c70c61e6e75b9d908",
+      "importedSHA256": "265d478717da2ee4aca8f61cc883bf72ff77d9fa2a0b3793449fe701c1adefc1"
+    },
+    {
+      "path": "runtime/internal/qr_theme/qr_theme_test.go",
+      "sourceSHA256": "e3d6199b4ca74afce667f476840a4ca784fcf126ba34238ec6f8a5b6c01d68b7",
+      "importedSHA256": "b1b3a1fd8f86abd55526a1fc269eb932c5e4a9f196386ef521d22db37d1e750a"
+    },
+    {
+      "path": "runtime/internal/reports/reports.go",
+      "sourceSHA256": "35a8b804ce973f21094a03c418244250ecb48e6122bff51729e8905ba1727c32",
+      "importedSHA256": "35a8b804ce973f21094a03c418244250ecb48e6122bff51729e8905ba1727c32"
+    },
+    {
+      "path": "runtime/internal/reports/reports_test.go",
+      "sourceSHA256": "8212665eb7b7e02354ba51ea5c940e376002ab1c6c5dc3295bffdac807e142f6",
+      "importedSHA256": "18ec94f86193033215805af9d9d9da6fc7e52fb554a51e9ea0690873405e76dc"
+    },
+    {
+      "path": "runtime/internal/store/backup.go",
+      "sourceSHA256": "2bf80659810e7ac0c2873c21d15db19fa23d3eee5998476e3f06b4cb4b7a1903",
+      "importedSHA256": "db3d5d561ce960350b366532c7e370185dabfa5bc8f5ed6559c62a8c89c4df68"
+    },
+    {
+      "path": "runtime/internal/store/migrations/001_initial.sql",
+      "sourceSHA256": "4f26307936d0380d585230232b8f2ba00efd1081236f8be3d708dbbed5bbb080",
+      "importedSHA256": "4f26307936d0380d585230232b8f2ba00efd1081236f8be3d708dbbed5bbb080"
+    },
+    {
+      "path": "runtime/internal/store/migrations/002_owner_business.sql",
+      "sourceSHA256": "25f61aaa304ec74b0b4d2cf0f87539c587f568a4b74b043c5c28eca43c3f33de",
+      "importedSHA256": "25f61aaa304ec74b0b4d2cf0f87539c587f568a4b74b043c5c28eca43c3f33de"
+    },
+    {
+      "path": "runtime/internal/store/migrations/003_pricing.sql",
+      "sourceSHA256": "90aa0bfc805452837153d47d43f1ccd3fb567152f465b1aa8fe3f9d607cef610",
+      "importedSHA256": "90aa0bfc805452837153d47d43f1ccd3fb567152f465b1aa8fe3f9d607cef610"
+    },
+    {
+      "path": "runtime/internal/store/migrations/004_pricing_tiers.sql",
+      "sourceSHA256": "e39c8da0cdfa2dc77380382fda3c28c9e4a418098679da78e3ff0fc2e7b5349c",
+      "importedSHA256": "e39c8da0cdfa2dc77380382fda3c28c9e4a418098679da78e3ff0fc2e7b5349c"
+    },
+    {
+      "path": "runtime/internal/store/migrations/005_operators.sql",
+      "sourceSHA256": "c676d346225d29540010d53de89e6dd22f3de2775348b39e6e6fcb3f94c7c437",
+      "importedSHA256": "c676d346225d29540010d53de89e6dd22f3de2775348b39e6e6fcb3f94c7c437"
+    },
+    {
+      "path": "runtime/internal/store/migrations/006_orders.sql",
+      "sourceSHA256": "973189dfcc9b67fc2b7c5cd061c8a07a2b7cdd92e2046c798632260115bfacef",
+      "importedSHA256": "973189dfcc9b67fc2b7c5cd061c8a07a2b7cdd92e2046c798632260115bfacef"
+    },
+    {
+      "path": "runtime/internal/store/migrations/007_invoices.sql",
+      "sourceSHA256": "bc711fcbeba9e044e964554f325e0c5b34a31825fdd87688894819b8935c89d3",
+      "importedSHA256": "bc711fcbeba9e044e964554f325e0c5b34a31825fdd87688894819b8935c89d3"
+    },
+    {
+      "path": "runtime/internal/store/migrations/008_notifications.sql",
+      "sourceSHA256": "cd9f605c2b5f62e771c58c35f569c45562f8cf50d76c49b8cc59bc770713872c",
+      "importedSHA256": "cd9f605c2b5f62e771c58c35f569c45562f8cf50d76c49b8cc59bc770713872c"
+    },
+    {
+      "path": "runtime/internal/store/migrations/009_printers.sql",
+      "sourceSHA256": "ad324cb920fedfcace06d863458f51c1b925ecf43d1870571f26f7191b0b4f85",
+      "importedSHA256": "ad324cb920fedfcace06d863458f51c1b925ecf43d1870571f26f7191b0b4f85"
+    },
+    {
+      "path": "runtime/internal/store/migrations/010_id_cards.sql",
+      "sourceSHA256": "05e6da36299b19047972c85c6bdab7c9a346cadf85515d3874aff42e2a88e67f",
+      "importedSHA256": "05e6da36299b19047972c85c6bdab7c9a346cadf85515d3874aff42e2a88e67f"
+    },
+    {
+      "path": "runtime/internal/store/migrations/011_passports.sql",
+      "sourceSHA256": "f31943d6f85255c4d3a29d918cc48171749ea213ebd13f99df61d4bcab4b4c3e",
+      "importedSHA256": "f31943d6f85255c4d3a29d918cc48171749ea213ebd13f99df61d4bcab4b4c3e"
+    },
+    {
+      "path": "runtime/internal/store/migrations/012_tunnel.sql",
+      "sourceSHA256": "4c37783f2fe3caa5faff23d86ce9606056ff88a66ef99bf55096456e3e4ec344",
+      "importedSHA256": "4c37783f2fe3caa5faff23d86ce9606056ff88a66ef99bf55096456e3e4ec344"
+    },
+    {
+      "path": "runtime/internal/store/migrations/013_licensing.sql",
+      "sourceSHA256": "ceb001cefa6e3089cd4a06dfb75f05a52d0fe2f04033d024f925104d9f2fd0a8",
+      "importedSHA256": "ceb001cefa6e3089cd4a06dfb75f05a52d0fe2f04033d024f925104d9f2fd0a8"
+    },
+    {
+      "path": "runtime/internal/store/migrations/014_payments.sql",
+      "sourceSHA256": "106ab0c2656b31f9db4bf9bc0d535dc2c7a398423cd446a2a22a696e4f285f22",
+      "importedSHA256": "106ab0c2656b31f9db4bf9bc0d535dc2c7a398423cd446a2a22a696e4f285f22"
+    },
+    {
+      "path": "runtime/internal/store/migrations/015_notification_transports.sql",
+      "sourceSHA256": "9c6e10edf1d81dcd47df28ac7cc494ce2a87c712ca176e40229e9a36d3d416b2",
+      "importedSHA256": "9c6e10edf1d81dcd47df28ac7cc494ce2a87c712ca176e40229e9a36d3d416b2"
+    },
+    {
+      "path": "runtime/internal/store/migrations/016_companion_pairing.sql",
+      "sourceSHA256": "896bcbdfe2332eb3c23788edf2d5a54e4ccba8b1bd548f80a55918e6b9f20aa3",
+      "importedSHA256": "896bcbdfe2332eb3c23788edf2d5a54e4ccba8b1bd548f80a55918e6b9f20aa3"
+    },
+    {
+      "path": "runtime/internal/store/migrations/017_order_submitted_at.sql",
+      "sourceSHA256": "26db882dcfc548f25c75f08f7b989f4bfaf4d8f836d2a9eee1ff481d94ff780e",
+      "importedSHA256": "26db882dcfc548f25c75f08f7b989f4bfaf4d8f836d2a9eee1ff481d94ff780e"
+    },
+    {
+      "path": "runtime/internal/store/migrations/018_documents_dispatched_at.sql",
+      "sourceSHA256": "16e9617a7e82a28ab2af92b93a59410752fa27c99692e3ffa19c2af3fcf8010c",
+      "importedSHA256": "16e9617a7e82a28ab2af92b93a59410752fa27c99692e3ffa19c2af3fcf8010c"
+    },
+    {
+      "path": "runtime/internal/store/migrations/019_orders_payment_method.sql",
+      "sourceSHA256": "b3e1f238d7cbc42777f6763d21ccc9f5201822e3bd1ec02d50cba50ba189020b",
+      "importedSHA256": "b3e1f238d7cbc42777f6763d21ccc9f5201822e3bd1ec02d50cba50ba189020b"
+    },
+    {
+      "path": "runtime/internal/store/migrations/020_business_settings.sql",
+      "sourceSHA256": "cf3e213a05e1df896cc9c7cee6ae062d62810b3d22affc5ce1f9640c2e2c209e",
+      "importedSHA256": "cf3e213a05e1df896cc9c7cee6ae062d62810b3d22affc5ce1f9640c2e2c209e"
+    },
+    {
+      "path": "runtime/internal/store/migrations/021_order_print_options.sql",
+      "sourceSHA256": "251c06aaaf7838223b20deca77033fea6f8c70ddd1745a9a479ba2a5d2d993b3",
+      "importedSHA256": "251c06aaaf7838223b20deca77033fea6f8c70ddd1745a9a479ba2a5d2d993b3"
+    },
+    {
+      "path": "runtime/internal/store/migrations/022_shop_runtime.sql",
+      "sourceSHA256": "ff7e0a66abf17a6ed8c0ebbddb8307afd89dfb9547e40c015ef1124e66891c39",
+      "importedSHA256": "ff7e0a66abf17a6ed8c0ebbddb8307afd89dfb9547e40c015ef1124e66891c39"
+    },
+    {
+      "path": "runtime/internal/store/migrations/023_portal_checkout.sql",
+      "sourceSHA256": "9706182c1a81b63428f5a1b421507cbb1ccfff4abd58101cd6177e51bc98adcb",
+      "importedSHA256": "9706182c1a81b63428f5a1b421507cbb1ccfff4abd58101cd6177e51bc98adcb"
+    },
+    {
+      "path": "runtime/internal/store/migrations/024_selected_pages.sql",
+      "sourceSHA256": "ea2798f88385d1fa6a0f7c8e6f03824e215c84a839e3edbb49e816c72e3fd6d6",
+      "importedSHA256": "ea2798f88385d1fa6a0f7c8e6f03824e215c84a839e3edbb49e816c72e3fd6d6"
+    },
+    {
+      "path": "runtime/internal/store/migrations/025_printer_prices.sql",
+      "sourceSHA256": "60a9881af5e89e26acb63f664a7b669d61032fc25ff18119d7876cad26058167",
+      "importedSHA256": "60a9881af5e89e26acb63f664a7b669d61032fc25ff18119d7876cad26058167"
+    },
+    {
+      "path": "runtime/internal/store/migrations/026_print_progress.sql",
+      "sourceSHA256": "9580d6735c3dad9c9d716fde35576a67c6679fc00a9519283ba2385908c61d8a",
+      "importedSHA256": "9580d6735c3dad9c9d716fde35576a67c6679fc00a9519283ba2385908c61d8a"
+    },
+    {
+      "path": "runtime/internal/store/migrations/027_portal_payment_buttons.sql",
+      "sourceSHA256": "d5bd32c91e3e15a3d1cfed5da3072f212e9250668f3b7503fcf6477048188002",
+      "importedSHA256": "d5bd32c91e3e15a3d1cfed5da3072f212e9250668f3b7503fcf6477048188002"
+    },
+    {
+      "path": "runtime/internal/store/migrations/028_portal_customer_details.sql",
+      "sourceSHA256": "2791a2430ecd4fda009e7bda0675f3c3aa9ddbb4a17daacbf2e7f6a38535103c",
+      "importedSHA256": "2791a2430ecd4fda009e7bda0675f3c3aa9ddbb4a17daacbf2e7f6a38535103c"
+    },
+    {
+      "path": "runtime/internal/store/migrations/029_customer_details_default.sql",
+      "sourceSHA256": "9670a530632a85ba1412f699eaae6c987b0d82ed7e1513f18045076d84479ecb",
+      "importedSHA256": "9670a530632a85ba1412f699eaae6c987b0d82ed7e1513f18045076d84479ecb"
+    },
+    {
+      "path": "runtime/internal/store/migrations/030_portal_branding.sql",
+      "sourceSHA256": "d70353e5cf62b8c5e9845277075b99845d237e6a47068565535057d0bdd4fec2",
+      "importedSHA256": "d70353e5cf62b8c5e9845277075b99845d237e6a47068565535057d0bdd4fec2"
+    },
+    {
+      "path": "runtime/internal/store/migrations/031_monitor_sessions.sql",
+      "sourceSHA256": "bcae14e2641e08d7ae22f424cf5e3a3d87394a757eae0f70390a7ed478244104",
+      "importedSHA256": "bcae14e2641e08d7ae22f424cf5e3a3d87394a757eae0f70390a7ed478244104"
+    },
+    {
+      "path": "runtime/internal/store/migrations/032_paper_stock.sql",
+      "sourceSHA256": "e698a8a4c6e70d1e5c7c9e31a1b1d35d4504caf7e1d281b3ca072967975408c0",
+      "importedSHA256": "e698a8a4c6e70d1e5c7c9e31a1b1d35d4504caf7e1d281b3ca072967975408c0"
+    },
+    {
+      "path": "runtime/internal/store/migrations/033_separator_invoices.sql",
+      "sourceSHA256": "0dd13a4a45c9091f522705bad99aa557196a260b8824184d28147542d000677c",
+      "importedSHA256": "0dd13a4a45c9091f522705bad99aa557196a260b8824184d28147542d000677c"
+    },
+    {
+      "path": "runtime/internal/store/migrations/034_permanent_licensing.sql",
+      "sourceSHA256": "9655122264420952e9035f77e247181ee90407d7c47c447449a6c23b6907c7ee",
+      "importedSHA256": "9655122264420952e9035f77e247181ee90407d7c47c447449a6c23b6907c7ee"
+    },
+    {
+      "path": "runtime/internal/store/permissions_unix_test.go",
+      "sourceSHA256": "b27c00d7ca4e8e59174256ab1ad46a2de9ddb1f63b1b151264e7e2ed6e0d02ed",
+      "importedSHA256": "b27c00d7ca4e8e59174256ab1ad46a2de9ddb1f63b1b151264e7e2ed6e0d02ed"
+    },
+    {
+      "path": "runtime/internal/store/recovery_test.go",
+      "sourceSHA256": "7f7b266cd62d49853732ae95952167c66060d7a6cda813611f4871b0c573dfb7",
+      "importedSHA256": "7f7b266cd62d49853732ae95952167c66060d7a6cda813611f4871b0c573dfb7"
+    },
+    {
+      "path": "runtime/internal/store/store.go",
+      "sourceSHA256": "4da994fea35abf24a2d6e4910e50276ad6b64e0bcbf4bf45410c04772e0e659b",
+      "importedSHA256": "bf40df2aec96a630106695f7636deac9d38711bd2696fc4990d4b4f333886f59"
+    },
+    {
+      "path": "runtime/internal/store/store_test.go",
+      "sourceSHA256": "610ede0768cb1dc7a43e343248d35b8e752636ee46c0cb0964ee190e14d73b45",
+      "importedSHA256": "610ede0768cb1dc7a43e343248d35b8e752636ee46c0cb0964ee190e14d73b45"
+    },
+    {
+      "path": "runtime/internal/supervisor/supervisor.go",
+      "sourceSHA256": "6a5e969850a3125e9fc7fffdad30021d7d5445df86a6173f053b927146f47c29",
+      "importedSHA256": "6a5e969850a3125e9fc7fffdad30021d7d5445df86a6173f053b927146f47c29"
+    },
+    {
+      "path": "runtime/internal/supervisor/supervisor_test.go",
+      "sourceSHA256": "bada496856dddaa7d6eb6502b599460af87597014177f7997c881c11dc39f72a",
+      "importedSHA256": "bada496856dddaa7d6eb6502b599460af87597014177f7997c881c11dc39f72a"
+    },
+    {
+      "path": "runtime/internal/traylauncher/traylauncher.go",
+      "sourceSHA256": "f12d17fadb05ea9619d0bf0c1648468a9e423eac95001e3e0941c14c5521797f",
+      "importedSHA256": "f12d17fadb05ea9619d0bf0c1648468a9e423eac95001e3e0941c14c5521797f"
+    },
+    {
+      "path": "runtime/internal/traylauncher/traylauncher_test.go",
+      "sourceSHA256": "2455d48f321c641d0978ed7c8da6a9b01c226463ae9bf5205ac1aa5a5b72b00a",
+      "importedSHA256": "2455d48f321c641d0978ed7c8da6a9b01c226463ae9bf5205ac1aa5a5b72b00a"
+    },
+    {
+      "path": "runtime/internal/traylauncher/traylauncher_unix.go",
+      "sourceSHA256": "17a4b7dc0bb77e87b912178b2ab14a44c5ae4f2d8fba3782574e7b4cc1a0fd97",
+      "importedSHA256": "17a4b7dc0bb77e87b912178b2ab14a44c5ae4f2d8fba3782574e7b4cc1a0fd97"
+    },
+    {
+      "path": "runtime/internal/traylauncher/traylauncher_windows.go",
+      "sourceSHA256": "1d7dea319a1b754b071a122c85a738356c7c279311c263f7ac0714d874587af9",
+      "importedSHA256": "1d7dea319a1b754b071a122c85a738356c7c279311c263f7ac0714d874587af9"
+    },
+    {
+      "path": "runtime/internal/traylauncher/traylauncher_windows_syscall.go",
+      "sourceSHA256": "b538a925c2962d13d958bfda5f9bb0c53d3b929d2d8f59a72734cca0cf1d1ce5",
+      "importedSHA256": "b538a925c2962d13d958bfda5f9bb0c53d3b929d2d8f59a72734cca0cf1d1ce5"
+    },
+    {
+      "path": "runtime/internal/tunnel/connection_test.go",
+      "sourceSHA256": "d258fa1e529935142241d8513b46da578cc6f1d3d68f3e9182af829bdf3ddba7",
+      "importedSHA256": "d258fa1e529935142241d8513b46da578cc6f1d3d68f3e9182af829bdf3ddba7"
+    },
+    {
+      "path": "runtime/internal/tunnel/qr.go",
+      "sourceSHA256": "a6851868386a91d108b9caac0b08a745fedec506a374637ea916bad1ea7b475a",
+      "importedSHA256": "a6851868386a91d108b9caac0b08a745fedec506a374637ea916bad1ea7b475a"
+    },
+    {
+      "path": "runtime/internal/tunnel/qr_test.go",
+      "sourceSHA256": "d71da5e56222fa314ab083b23b8e2832fa9fd2dc7d2d20762c21bc05200056f4",
+      "importedSHA256": "d71da5e56222fa314ab083b23b8e2832fa9fd2dc7d2d20762c21bc05200056f4"
+    },
+    {
+      "path": "runtime/internal/tunnel/service.go",
+      "sourceSHA256": "cb872bcfcf87f8b52d6bf6f03d551e2e9a79811b85cd733851db38a03ade40b0",
+      "importedSHA256": "cb872bcfcf87f8b52d6bf6f03d551e2e9a79811b85cd733851db38a03ade40b0"
+    },
+    {
+      "path": "runtime/internal/tunnel/service_test.go",
+      "sourceSHA256": "d93dcfd753a1a3cf349ffd83c95e1ad68338be48b71aed4a185b9b6fce56b8b5",
+      "importedSHA256": "d93dcfd753a1a3cf349ffd83c95e1ad68338be48b71aed4a185b9b6fce56b8b5"
+    },
+    {
+      "path": "runtime/internal/tunnel/types.go",
+      "sourceSHA256": "a9cd30f96fbf24a7350c27813deb52e1e53957ae6f837ddae1c2799e6b433a95",
+      "importedSHA256": "c1f0f63331c99de2fd769d12318cf18efb21b0e92a45a11a6abb28cecb47aadc"
+    },
+    {
+      "path": "runtime/internal/tunnel/verify.go",
+      "sourceSHA256": "edec1a4b5aa043d9ccee0ee2ff819e872ff37d026e3b34d34c5fb8cb43e6f998",
+      "importedSHA256": "03d31cc891994865733b0ceb81cc4712842ca8497bbfbf6276f6161b8fbedbe7"
+    },
+    {
+      "path": "test/image-composer.test.mjs",
+      "sourceSHA256": "ebc0cc7c2313269ae905a197ecb74c1384a6f6efa2eaa6c31047066f37ccef35",
+      "importedSHA256": "ebc0cc7c2313269ae905a197ecb74c1384a6f6efa2eaa6c31047066f37ccef35"
+    },
+    {
+      "path": "test/monitor-filters.test.mjs",
+      "sourceSHA256": "2ae28d99fea43309a3a8a7329c31e173dddaf665506d37157894d821ca7b5250",
+      "importedSHA256": "2ae28d99fea43309a3a8a7329c31e173dddaf665506d37157894d821ca7b5250"
+    },
+    {
+      "path": "test/monitor-refresh.test.mjs",
+      "sourceSHA256": "f2f9b46c86167ae71d145d17563b1a9da87d3036dcd8b69d4b8f37d420b5637e",
+      "importedSHA256": "f2f9b46c86167ae71d145d17563b1a9da87d3036dcd8b69d4b8f37d420b5637e"
+    },
+    {
+      "path": "test/operators-client.test.mjs",
+      "sourceSHA256": "99725deadcad7f1b6ddd84a3465a7c6048f1104c5a9961d81b139e4d3e950930",
+      "importedSHA256": "99725deadcad7f1b6ddd84a3465a7c6048f1104c5a9961d81b139e4d3e950930"
+    },
+    {
+      "path": "test/order-queue.test.mjs",
+      "sourceSHA256": "c741130ee93dfb24ffbd7d5cecefe67e1f4636d7da02f38b9f53e8b8e49d035f",
+      "importedSHA256": "c741130ee93dfb24ffbd7d5cecefe67e1f4636d7da02f38b9f53e8b8e49d035f"
+    },
+    {
+      "path": "test/orders-dashboard.test.mjs",
+      "sourceSHA256": "412c7210b50b67355e841096337b84a5a34ce9ebd6b5621af50500be2cd08434",
+      "importedSHA256": "412c7210b50b67355e841096337b84a5a34ce9ebd6b5621af50500be2cd08434"
+    },
+    {
+      "path": "test/owner-client.test.mjs",
+      "sourceSHA256": "0be74a2b9734975cd4af226f2c813aefe3907126f7b028520acb8264242fe1c6",
+      "importedSHA256": "0be74a2b9734975cd4af226f2c813aefe3907126f7b028520acb8264242fe1c6"
+    },
+    {
+      "path": "test/pairing-client.test.mjs",
+      "sourceSHA256": "423379063fed1c3c2b505bbe3e00398b3b18da34ae84840ea99fdac82616d481",
+      "importedSHA256": "423379063fed1c3c2b505bbe3e00398b3b18da34ae84840ea99fdac82616d481"
+    },
+    {
+      "path": "test/paper-stock-client.test.mjs",
+      "sourceSHA256": "b476a6b75aa3cf17e07857a114b1f9e92f32650e7c9e9a3fb300cf7685245696",
+      "importedSHA256": "b476a6b75aa3cf17e07857a114b1f9e92f32650e7c9e9a3fb300cf7685245696"
+    },
+    {
+      "path": "test/payment-connection-client.test.mjs",
+      "sourceSHA256": "586448fcd9603bcf874638fc8ce8012282090382164fd790e4804bc6439a67f8",
+      "importedSHA256": "586448fcd9603bcf874638fc8ce8012282090382164fd790e4804bc6439a67f8"
+    },
+    {
+      "path": "test/portal-checkout.test.mjs",
+      "sourceSHA256": "2c9fa3acc94c06b39abd703b063899fe2f5cf909718391342270643df7b2fcee",
+      "importedSHA256": "2c9fa3acc94c06b39abd703b063899fe2f5cf909718391342270643df7b2fcee"
+    },
+    {
+      "path": "test/portal-client.test.mjs",
+      "sourceSHA256": "05d660c5063435637d207da8573cb1207677912a297c876b1d202cbe4d493fa3",
+      "importedSHA256": "05d660c5063435637d207da8573cb1207677912a297c876b1d202cbe4d493fa3"
+    },
+    {
+      "path": "test/pricing-client.test.mjs",
+      "sourceSHA256": "a8ff896a21989a3b058f3930a8542bd5ab0224421c133678956dfce6039e805d",
+      "importedSHA256": "a8ff896a21989a3b058f3930a8542bd5ab0224421c133678956dfce6039e805d"
+    },
+    {
+      "path": "test/pricing-grid.test.mjs",
+      "sourceSHA256": "d1953866c3e1459ade67d82fe327b4a3c2cc17f486c3a0505cd3b6cb0912e342",
+      "importedSHA256": "d1953866c3e1459ade67d82fe327b4a3c2cc17f486c3a0505cd3b6cb0912e342"
+    },
+    {
+      "path": "test/printer-invoices.test.mjs",
+      "sourceSHA256": "05e3b84529e2a25db4939d136d80c671db7af8d7e46ed5f2cc1730f48ff6ec7c",
+      "importedSHA256": "05e3b84529e2a25db4939d136d80c671db7af8d7e46ed5f2cc1730f48ff6ec7c"
+    },
+    {
+      "path": "test/printer-setup.test.mjs",
+      "sourceSHA256": "f7c2f4416ba5f84deb717b3461064e490fc54d42f5186878b222194b5402c7cc",
+      "importedSHA256": "f7c2f4416ba5f84deb717b3461064e490fc54d42f5186878b222194b5402c7cc"
+    },
+    {
+      "path": "test/tunnel-client.test.mjs",
+      "sourceSHA256": "745a67e89d9c61e5470966c1bd9beb0ffdc48700410f5c9a552ada21dd0ce669",
+      "importedSHA256": "745a67e89d9c61e5470966c1bd9beb0ffdc48700410f5c9a552ada21dd0ce669"
+    }
+  ]
+}

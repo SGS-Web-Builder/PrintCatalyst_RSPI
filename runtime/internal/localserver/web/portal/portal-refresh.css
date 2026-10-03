@@ -1,0 +1,72 @@
+/* Compact customer flow, with a mobile source sheet and persistent checkout. */
+body{background:#f3f4fa}
+header{position:relative;display:flex;flex-wrap:wrap;background:linear-gradient(115deg,#5257ed,#7573f3);padding:22px max(20px,calc((100vw - 760px)/2)) 42px;gap:20px}
+.brand small{margin-top:3px}.brand strong{font-size:21px}.brand-icon{width:40px;height:40px;border-radius:13px}
+.portal-steps{display:flex;align-items:flex-start;justify-content:center;width:100%;max-width:480px;margin:0 auto;color:white}
+.portal-steps>span{display:grid;justify-items:center;gap:7px;font-size:11px;min-width:66px;opacity:.65}
+.portal-steps b{display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:#ffffff35;font-size:13px}
+.portal-steps i{height:2px;background:#ffffff40;flex:1;margin-top:13px}
+.portal-steps [aria-current],.portal-steps .complete{opacity:1}.portal-steps [aria-current] b,.portal-steps .complete b{background:white;color:#5c5ff0}
+main,main.upload-view{position:relative;margin-top:-22px;max-width:800px}
+main>section{border:0;border-radius:22px}.step-label{display:none}
+#upload-section{padding:22px}.upload-formats span{background:#f1f3fa}.upload-reassurance{font-size:12px}
+#upload-progress{padding:25px 16px;border:1px dashed #b9beff;background:#f8f9ff;margin:18px 0 0}
+#upload-filename{white-space:nowrap;text-overflow:ellipsis;overflow:hidden;font-size:12px}#upload-percent{text-align:center;font-size:12px}.upload-warning{font-size:12px;font-weight:500}
+.workspace-heading{background:white;padding:20px;border-radius:20px 20px 0 0;margin:0;align-items:center;gap:10px}
+.workspace-heading h1{font-size:20px}.workspace-heading .file-actions{width:auto;gap:6px}
+.workspace-heading .file-actions button{font-size:12px;padding:8px 10px;min-height:44px;flex:none}
+#discard-draft-btn{border:0;font-weight:500}#add-files-btn{border:1px dashed #b3b9ff;border-radius:12px;background:#f9faff}
+#document-tabs{background:white;border-radius:0 0 20px 20px;padding:0 20px 18px;display:flex;overflow-x:auto;gap:10px;margin-bottom:18px;scroll-snap-type:x proximity}
+#document-tabs .document-card{flex:0 0 132px;min-width:0;scroll-snap-align:start}#document-tabs .document-tab{border-radius:13px;min-height:100px}
+#image-composer:empty{display:none}.config-row{border:0;background:transparent;box-shadow:none;overflow:visible}
+.preview-title{border-radius:18px 18px 0 0;background:#22213f;color:white;padding:13px 14px;font-size:12px}
+.preview-container{background:#292844;padding:16px;min-height:140px}.preview-badges{background:#292844;justify-content:flex-start;padding:10px 14px;border-radius:0 0 16px 16px}.preview-badges span{background:#ffffff20;font-size:10px}
+.preview-toolbar{padding:8px 12px}.edit-panel{background:white;border:0;border-radius:20px;padding:20px;margin-top:10px;box-shadow:0 5px 20px #24305708}.edit-panel>h2{margin:0 0 14px;font-size:18px}
+.config-grid{gap:12px}.config-grid>label:has(.option-pills){font-size:13px;padding-bottom:12px;gap:9px}
+.option-pills{display:grid;grid-template-columns:repeat(auto-fit,minmax(108px,1fr));gap:8px}.option-pills button{min-width:0;min-height:46px;padding:10px;font-size:12px;font-weight:500;border-radius:12px;line-height:1.35;background:#f8f9fd;position:relative;justify-content:center;text-align:center;padding:10px 28px}
+.option-pills button[aria-pressed=true]{padding:9px 27px;background:#eff1ff}.option-pills button[aria-pressed=true]::before{position:absolute;left:9px;top:50%;transform:translateY(-50%);line-height:1;content:'✓';font-size:12px}.print-option-icon{order:2;width:20px;height:20px;flex-basis:20px}
+.checkout-dock{max-width:768px;border:1px solid #e2e5f4;border-radius:18px;padding:12px;padding-bottom:max(12px,env(safe-area-inset-bottom));box-shadow:0 -4px 24px #28315912;background:#fff}
+#quote-total{font-size:23px}.payment-actions button{border-radius:12px;min-height:48px}.copies-control>div{gap:3px}.copies-control button{min-width:40px}.copies-control output{font-size:15px}
+#upload-source-dialog{border:0;border-radius:22px;padding:22px;max-width:440px}#upload-source-dialog::backdrop{background:#17163366;backdrop-filter:blur(5px)}.source-heading h2{font-size:19px}#upload-source-dialog p{font-size:12px;margin-top:5px}.source-options{margin-top:16px;grid-template-columns:1fr 1fr}.source-options button{min-height:130px;border-radius:15px;gap:8px;font-size:14px}.source-options svg{width:36px;height:36px;padding:8px;border-radius:10px;background:#eef0ff}.source-options button span{font-size:12px}#close-upload-source{width:36px;height:36px;min-height:36px;font-size:22px}
+@media(max-width:540px){header{padding:18px 18px 40px;gap:18px}.brand strong{font-size:19px}.brand small{font-size:11px}.portal-steps{max-width:350px}main,main.upload-view{margin-top:-22px;padding-left:12px;padding-right:12px}.workspace-heading{padding:16px 12px;flex-wrap:wrap}.workspace-heading h1{font-size:18px}.workspace-heading .file-actions{gap:2px}#document-tabs{padding:0 12px 16px}.edit-panel{padding:16px}.option-pills{grid-template-columns:repeat(auto-fit,minmax(90px,1fr))}.option-pills button{font-size:12px}.checkout-dock{bottom:8px;width:calc(100% - 24px)}#quote-total{font-size:20px}.copies-control small{display:none}#upload-source-dialog{position:fixed;inset:auto 0 0;width:100%;max-width:none;margin:0;border-radius:22px 22px 0 0;padding:16px 20px max(20px,env(safe-area-inset-bottom));max-height:85dvh}#upload-source-dialog::before{content:'';display:block;width:34px;height:4px;border-radius:4px;background:#e1e4f0;margin:0 auto 14px}.source-hint{display:none}.source-options button{min-height:122px}.source-options{grid-template-columns:1fr 1fr}}
+@media(prefers-reduced-motion:no-preference){#upload-source-dialog[open]{animation:source-enter .18s ease-out}@keyframes source-enter{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}}
+
+/* Balanced compact header: brand, progress, then a clear card gap. */
+header{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;padding:12px max(16px,calc((100vw - 760px)/2)) 28px;gap:12px 8px;z-index:auto}
+#shop-name:empty{display:none}
+.brand{gap:9px;min-height:32px}.brand-icon{width:32px;height:32px;flex:0 0 32px;border-radius:10px;font-size:23px}
+.brand strong{font-size:17px;line-height:1.2}.brand small{font-size:10px;line-height:1.3;margin-top:3px}.portal-header-logo{height:29px;max-width:100%}
+.portal-steps{grid-column:1/-1;width:100%;max-width:330px}
+.portal-steps>span{min-width:58px;gap:5px;font-size:10px;line-height:1.2;color:white;letter-spacing:0;text-transform:none}
+.portal-steps b{width:20px;height:20px;font-size:11px;line-height:1}.portal-steps i{margin-top:9px;height:2px}
+main,main.upload-view{margin-top:-14px}
+@media(max-width:540px){header{padding:12px 16px 28px;gap:12px 8px}.brand strong{font-size:17px}.brand small{font-size:10px}.portal-header-logo{height:29px}.portal-steps{max-width:310px}main,main.upload-view{margin-top:-14px}}
+
+#remember-phone-label { display:flex; align-items:center; gap:8px; font-size:13px; }
+#remember-phone-label[hidden] { display:none; }
+#remember-phone { width:18px; height:18px; flex:none; }
+
+/* Compact document list with an independent, accessible delete action. */
+.workspace-heading{padding:12px 14px 8px;display:flex;flex-wrap:wrap;gap:6px;justify-content:space-between}
+.workspace-heading h1{font-size:17px;margin:0}.workspace-heading .file-actions{margin:0;gap:4px;display:flex}
+.workspace-heading .file-actions button{min-height:36px;font-size:11px;padding:6px 8px}
+#document-tabs{padding:4px 14px 12px;gap:8px;margin-bottom:12px}
+#document-tabs .document-card{flex:0 0 108px;width:108px;max-width:108px;aspect-ratio:1}
+#document-tabs .document-tab{height:108px;min-height:108px;padding:10px 9px 30px;text-align:left;justify-content:flex-start}
+#document-tabs .document-tab[aria-pressed=true]{padding:9px 8px 29px}
+#document-tabs .document-number{padding-right:28px;font-size:10px}
+#document-tabs .document-tab strong{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+#document-tabs .document-tab small{font-size:10px}
+.document-delete{position:absolute;top:3px;right:3px;width:32px;height:32px;min-height:32px;padding:7px;border:0;border-radius:9px;background:#fff0f0;color:#d8384f;display:grid;place-items:center;z-index:2}
+.document-delete svg{width:17px;height:17px}.document-delete:hover{background:#ffe0e4}.document-delete:focus-visible{outline:2px solid #4f56ff;outline-offset:1px}
+@media(max-width:380px){.workspace-heading{padding:10px 10px 6px}.workspace-heading h1{font-size:15px}.workspace-heading .file-actions button{font-size:10px;padding:5px 6px}#document-tabs{padding:4px 10px 10px}}
+
+#image-composer .image-tools{padding:8px 10px;margin:0 0 10px;border-radius:12px}
+#image-composer .image-pick-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+#image-composer [data-all]{border:0;background:transparent;padding:4px 0;min-height:32px}
+#image-composer [data-count]{font-size:11px;margin-right:auto}
+#image-composer [data-settings]{background:#505bfa;color:white;border-color:#505bfa;margin-left:auto}
+#image-composer [hidden]{display:none!important}
+#image-composer .composition-message:empty{display:none}
+#image-composer [data-layout-options]{font-size:11px;margin-top:6px;color:#64748b}
+#image-composer [data-layout-options] summary{cursor:pointer}

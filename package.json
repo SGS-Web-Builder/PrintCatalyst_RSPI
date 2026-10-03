@@ -1,0 +1,10 @@
+{
+  "name": "@print-catalyst/raspberry-pi-kiosk",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test:web": "node --test test/*.test.mjs",
+    "test": "node --test test/*.test.mjs && cd runtime && go test ./..."
+  }
+}

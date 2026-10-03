@@ -1,0 +1,18 @@
+-- 019_orders_payment_method.sql — record the customer's chosen
+-- payment method on each order. The customer portal exposes two
+-- choices on the confirmation page:
+--
+--   razorpay          — Pay online; the runtime creates a Razorpay
+--                       payment link and the customer is redirected
+--                       to the gateway. The webhook moves the order
+--                       to "paid" once Razorpay confirms payment.
+--   cash_on_counter   — Pay at the counter; the order stays in
+--                       pending_payment and the merchant uses the
+--                       dashboard's manual approval action to
+--                       capture the cash payment.
+--
+-- The column is nullable for backward compatibility with orders
+-- placed before this migration (the dashboard treats NULL as
+-- "cash_on_counter" so the merchant's existing flow continues to
+-- work).
+ALTER TABLE orders ADD COLUMN payment_method TEXT NOT NULL DEFAULT 'cash_on_counter';

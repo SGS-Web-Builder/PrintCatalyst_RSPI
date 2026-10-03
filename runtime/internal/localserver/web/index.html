@@ -1,0 +1,784 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Print Catalyst · Local setup</title>
+    <link rel="stylesheet" href="/setup.css">
+    <link rel="stylesheet" href="/order-queue.css">
+<link rel="stylesheet" href="/printer-setup.css">
+<link rel="stylesheet" href="/pricing-grid.css">
+    <link rel="stylesheet" href="/dashboard-shell.css">
+    <script type="module" src="/setup.js"></script>
+  <link rel="stylesheet" href="/paper-stock.css"></head>
+  <body>
+
+    <!-- ===================== UNAUTHENTICATED LAYOUT ===================== -->
+    <div id="auth-screen" class="auth-screen">
+      <div class="auth-brand">
+        <svg class="auth-logo" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect width="40" height="40" rx="8" fill="#2563EB"/>
+          <path d="M10 28L20 12L30 28H10Z" fill="white" opacity="0.9"/>
+          <rect x="17" y="20" width="6" height="10" fill="white" opacity="0.7"/>
+        </svg>
+        <div>
+          <strong>Print Catalyst</strong>
+          <span>On-Premise · Local Server</span>
+        </div>
+      </div>
+      <div class="auth-card">
+        <p id="message" role="status" aria-live="polite">Connecting to the local server…</p>
+
+        <!-- Create owner -->
+        <section id="create-panel" hidden>
+          <h2>Create the local owner</h2>
+          <p class="help">Read the setup token in <code>owner-setup-token.txt</code> inside your data directory.</p>
+          <form id="create-form">
+            <label>Owner username<input name="username" autocomplete="username" minlength="3" maxlength="80" required></label>
+            <label>Password <small>At least 12 characters</small><input name="password" type="password" autocomplete="new-password" minlength="12" maxlength="1024" required></label>
+            <label>Installation setup token<input name="setupToken" type="password" autocomplete="off" maxlength="64" required></label>
+            <label id="setup-license-label" hidden>Permanent licence key<input name="licenseKey" type="password" autocomplete="off" maxlength="128" disabled><small>Enter the key supplied by Print Catalyst. Internet is required for first activation.</small></label>
+            <button type="submit">Create owner</button>
+          </form>
+        </section>
+
+        <!-- Login -->
+        <section id="login-panel" hidden>
+          <h2>Owner sign-in</h2>
+          <p class="help">Use the owner account created on this installation, not your SaaS account.</p>
+          <form id="login-form">
+            <label>Username<input name="username" autocomplete="username" maxlength="80" required></label>
+            <label>Password<input name="password" type="password" autocomplete="current-password" maxlength="1024" required></label>
+            <button type="submit">Sign in locally</button>
+          </form>
+        </section>
+      </div>
+      <p class="auth-footnote">All data stays on this computer.</p>
+    </div>
+
+    <!-- ===================== AUTHENTICATED LAYOUT ===================== -->
+    <div id="app-shell" class="app-shell" hidden>
+
+      <!-- Mobile overlay backdrop -->
+      <div id="sidebar-backdrop" class="sidebar-backdrop" hidden></div>
+
+      <!-- ================= SIDEBAR ================= -->
+      <aside id="sidebar" class="sidebar" role="navigation" aria-label="Main navigation">
+
+        <!-- Brand -->
+        <div class="sidebar-brand">
+          <svg class="sidebar-logo" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <rect width="40" height="40" rx="8" fill="#2563EB"/>
+            <path d="M10 28L20 12L30 28H10Z" fill="white" opacity="0.9"/>
+            <rect x="17" y="20" width="6" height="10" fill="white" opacity="0.7"/>
+          </svg>
+          <div class="sidebar-brand-text">
+            <strong>Print Catalyst</strong>
+            <span>On-Premise</span>
+          </div>
+          <button id="sidebar-close" class="sidebar-close-btn" aria-label="Collapse navigation">‹</button>
+        </div>
+
+        <!-- Nav scrollable area -->
+        <nav class="sidebar-nav" aria-label="Dashboard pages">
+<a class="nav-item" href="#orders" data-section="orders" title="Orders" aria-label="Orders"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V2h6v2M9 10h6M9 14h6M9 18h4"/></svg><span class="nav-label">Orders</span></a>
+<a class="nav-item" hidden href="#idcards" data-section="idcards" title="ID Card" aria-label="ID Card"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="3"/><circle cx="8" cy="10" r="2"/><path d="M5 16c0-3 6-3 6 0M14 9h5M14 13h5"/></svg><span class="nav-label">ID Card</span></a>
+<a class="nav-item" hidden href="#passports" data-section="passports" title="Passport Photo" aria-label="Passport Photo"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="2" width="18" height="20" rx="2"/><circle cx="12" cy="9" r="3"/><path d="M7 18c0-6 10-6 10 0"/></svg><span class="nav-label">Passport Photo</span></a>
+<a class="nav-item" href="#pricing" data-section="pricing" title="Prices" aria-label="Prices"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 3h9l8 8-10 10-8-8V4z"/><circle cx="8" cy="8" r="1"/></svg><span class="nav-label">Prices</span></a>
+<a class="nav-item" href="#paper-stock" data-section="paper-stock" title="Paper stock" aria-label="Paper stock"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M5 3h14v14H5zM8 20h14V6M8 7h8M8 11h8"/></svg><span class="nav-label">Paper stock</span></a>
+<a class="nav-item" href="#printers" data-section="printers" title="Printers" aria-label="Printers"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8V3h12v5M6 17H3V9h18v8h-3M6 14h12v7H6zM17 11h1"/></svg><span class="nav-label">Printers</span></a>
+<a class="nav-item" href="#operators" data-section="operators" title="Operators" aria-label="Operators"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M3 21v-3a6 6 0 0 1 12 0v3M16 5a3 3 0 0 1 0 6M18 15a5 5 0 0 1 3 6"/></svg><span class="nav-label">Operators</span></a>
+<a class="nav-item" href="#business" data-section="business" title="Business Setting" aria-label="Business Setting"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10h18L19 3H5l-2 7zM5 10v11h14V10M9 21v-7h6v7M3 10a3 3 0 0 0 6 0 3 3 0 0 0 6 0 3 3 0 0 0 6 0"/></svg><span class="nav-label">Business Setting</span></a>
+</nav>
+
+        <!-- Sidebar footer -->
+        <div class="sidebar-footer">
+          <div class="sidebar-user">
+            <span id="sidebar-user-avatar" class="sidebar-user-avatar" aria-hidden="true">P</span>
+            <div class="sidebar-user-info">
+              <span id="sidebar-user-name" class="sidebar-user-name">Print Catalyst</span>
+              <span id="sidebar-user-role" class="sidebar-user-role">Local server</span>
+            </div>
+          </div>
+          <div class="sidebar-status">
+            <span id="sidebar-status-dot" class="status-dot status-dot--ok"></span>
+            <span class="sidebar-status-text">Server online</span>
+          </div>
+          <button id="logout" type="button" class="sidebar-logout-btn" title="Sign out" aria-label="Sign out"><span aria-hidden="true">↪</span><span class="nav-label">Sign out</span></button>
+        </div>
+      </aside>
+
+      <!-- ================= MAIN CONTENT ================= -->
+      <div class="content-shell">
+
+        <!-- Top bar (mobile / tablet) -->
+        <header class="topbar" role="banner">
+          <button id="sidebar-open" class="topbar-menu-btn" aria-label="Open navigation">☰</button>
+          <strong class="topbar-brand">Print Catalyst</strong>
+          <span class="topbar-divider" aria-hidden="true"></span>
+          <span id="topbar-section" class="topbar-section"></span>
+          <div class="topbar-actions"><details class="more-menu"><summary>More</summary><nav aria-label="Additional tools"><a href="#reports" data-section="reports">Reports</a><a href="#notifications" data-section="notifications">Alerts</a><a href="#payments" data-section="payments">Payments</a><a href="#pairing" data-section="pairing">Companion app</a><a href="#licence" data-section="licence">Licence</a></nav></details>
+            <button id="topbar-logout" type="button" class="btn btn--ghost btn--sm" title="Sign out">Sign out</button>
+          </div>
+        </header>
+
+        <!-- Scrollable content -->
+        <main class="content-main" id="content-main">
+          <p id="software-license-banner" class="section-card" hidden role="status">Activate your permanent software licence to accept new orders. <a href="#licence" data-section="licence">Open licence settings</a></p>
+
+          <!-- ── Business ── -->
+          <section id="business-panel" class="content-section" hidden>
+            <div class="section-header">
+              <div>
+                <h1 class="section-title">Business Setting</h1>
+                <p class="section-subtitle">Shop name, address and regional settings</p>
+              </div>
+            </div>
+            <div class="settings-tabs" role="tablist" aria-label="Business settings">
+              <button id="settings-tab-business" type="button" role="tab" aria-controls="settings-business" aria-selected="true" data-settings-tab="business">Business setting</button>
+              <button id="settings-tab-qr" type="button" role="tab" aria-controls="settings-qr" aria-selected="false" tabindex="-1" data-settings-tab="qr">QR setup</button>
+              <button id="settings-tab-printing" type="button" role="tab" aria-controls="settings-printing" aria-selected="false" tabindex="-1" data-settings-tab="printing">Printing setting</button>
+            </div>
+            <div id="settings-business" role="tabpanel" aria-labelledby="settings-tab-business">
+            <div class="section-card">
+              <form id="business-form">
+                <div class="form-grid">
+                  <label class="form-field form-field--full">Business name<input name="name" maxlength="200" required></label>
+                  <label class="form-field">Owner name<input name="ownerName" maxlength="200" autocomplete="name"></label>
+                  <label class="form-field form-field--full">Address<textarea name="address" maxlength="2000" rows="3"></textarea></label>
+                  <label class="form-field">Business number<input name="phone" type="tel" maxlength="40"></label>
+                  <label class="form-field">Country<input name="country" value="IN" pattern="[A-Za-z]{2}" maxlength="2" required></label>
+                  <label class="form-field">Currency<input name="currency" value="INR" pattern="[A-Za-z]{3}" maxlength="3" required></label>
+                  <label class="form-field">Language<input name="locale" value="en-IN" maxlength="80" required></label>
+                  <label class="form-field form-field--full">Time zone<input name="timeZone" value="Asia/Kolkata" maxlength="100" required></label>
+                </div>
+                <p class="help">Use country/currency codes such as IN / INR and an IANA time zone such as Asia/Kolkata.</p>
+                <div class="form-actions">
+                  <button type="submit" class="btn btn--primary">Save changes</button>
+                  <p id="setup-progress" class="help form-progress"></p>
+                </div>
+              </form>
+            </div>
+            </div>
+            <div id="settings-qr" role="tabpanel" aria-labelledby="settings-tab-qr" hidden>
+              <div class="qr-navigation" role="tablist" aria-label="QR setup sections">
+                <button id="qr-tab-domain" type="button" role="tab" data-qr-tab="domain" aria-controls="qr-panel-domain" aria-selected="true">Domain connection &amp; QR</button>
+                <button id="qr-tab-payments" type="button" role="tab" data-qr-tab="payments" aria-controls="qr-panel-payments" aria-selected="false" tabindex="-1">Customer payment buttons</button>
+                <button id="qr-tab-details" type="button" role="tab" data-qr-tab="details" aria-controls="qr-panel-details" aria-selected="false" tabindex="-1">Customer details</button>
+                <button id="qr-tab-branding" type="button" role="tab" data-qr-tab="branding" aria-controls="qr-panel-branding" aria-selected="false" tabindex="-1">Portal branding</button>
+                <button id="qr-tab-appearance" type="button" role="tab" data-qr-tab="appearance" aria-controls="qr-panel-appearance" aria-selected="false" tabindex="-1">QR appearance</button>
+              </div>
+              <div id="qr-panel-domain" role="tabpanel" aria-labelledby="qr-tab-domain"></div>
+              <div id="qr-panel-payments" role="tabpanel" aria-labelledby="qr-tab-payments" hidden></div>
+              <div id="qr-panel-details" role="tabpanel" aria-labelledby="qr-tab-details" hidden></div>
+              <div id="qr-panel-branding" role="tabpanel" aria-labelledby="qr-tab-branding" hidden></div>
+              <div id="qr-panel-appearance" role="tabpanel" aria-labelledby="qr-tab-appearance" hidden></div>
+            </div>
+            <div id="settings-printing" role="tabpanel" aria-labelledby="settings-tab-printing" hidden></div>
+          </section>
+
+          <!-- ── Pricing ── -->
+          <section id="pricing-panel" class="content-section" hidden>
+            <div class="section-header">
+              <div>
+                <h1 class="section-title">Print pricing</h1>
+                <p class="section-subtitle" id="pricing-currency"></p>
+              </div>
+            </div>
+            <div class="section-card">
+              <form id="pricing-form">
+                <p class="help" id="pricing-precision">Decimal places are fixed by your business currency.</p>
+                <label id="pricing-confirm" class="form-confirm" hidden><input type="checkbox"> <span id="pricing-confirm-text"></span></label>
+                <p class="help warning" id="pricing-warning"></p>
+                <div id="pricing-entries"></div>
+                <div class="form-actions">
+                  <button type="button" id="pricing-add" class="btn btn--secondary">Add row</button>
+                  <button type="submit" class="btn btn--primary">Save pricing</button>
+                </div>
+                <p class="help" id="pricing-tiers-help">Quantity discounts apply separately to each price row.</p>
+                <p class="help warning" id="pricing-free-warning" hidden></p>
+                <label id="pricing-confirm-free" class="form-confirm" hidden><input type="checkbox"> <span id="pricing-confirm-free-text"></span></label>
+              </form>
+            </div>
+            <p id="pricing-message" class="help" role="status" aria-live="polite"></p>
+          </section>
+
+          <!-- ── Operators ── -->
+          <section id="operators-panel" class="content-section" hidden>
+            <div class="section-header">
+              <div>
+                <h1 class="section-title">Operators</h1>
+                <p class="section-subtitle">Additional local sign-ins for staff</p>
+              </div>
+              <button id="operators-refresh" type="button" class="btn btn--ghost">Refresh</button>
+            </div>
+            <div class="section-card">
+              <p class="help">Operators can quote prices and manage orders. They cannot edit business details, pricing, or other operators.</p>
+              <form id="operators-create-form" class="inline-form">
+                <label>Username<input name="username" autocomplete="off" minlength="3" maxlength="80" pattern="[a-z0-9][a-z0-9._@+-]{2,79}" required></label>
+                <label>Password <small>12+ chars</small><input name="password" type="password" autocomplete="new-password" minlength="12" maxlength="1024" required></label>
+                <button type="submit" class="btn btn--primary">Add operator</button>
+              </form>
+            </div>
+            <p id="operators-message" class="help" role="status" aria-live="polite"></p>
+            <div id="operators-list" class="card-list"></div>
+          </section>
+
+          <!-- ── Orders ── -->
+          <section id="orders-panel" class="content-section" hidden>
+            <div class="section-header">
+              <div>
+                <h1 class="section-title">Customer orders</h1>
+                <p class="section-subtitle">Active and completed print jobs</p>
+              </div>
+              <button id="orders-refresh" type="button" class="btn btn--ghost">Refresh</button>
+            </div>
+            <p id="orders-message" class="help" role="status" aria-live="polite"></p>
+            <div id="orders-list" class="card-list"></div>
+            <div id="order-detail"></div>
+          </section>
+
+          <!-- ── Reports ── -->
+          <section id="reports-panel" class="content-section" hidden>
+            <div class="section-header">
+              <div>
+                <h1 class="section-title">Reports</h1>
+                <p class="section-subtitle">Order totals and top print combinations</p>
+              </div>
+              <button id="reports-refresh" type="button" class="btn btn--ghost">Refresh</button>
+            </div>
+            <div class="section-card">
+              <div class="reports-controls">
+                <label>From <small>Unix seconds</small><input id="reports-from" type="number" inputmode="numeric"></label>
+                <label>To <small>Unix seconds</small><input id="reports-to" type="number" inputmode="numeric"></label>
+                <label>Top<input id="reports-limit" type="number" min="1" max="50" value="10" inputmode="numeric"></label>
+                <button type="button" id="reports-run" class="btn btn--secondary">Run report</button>
+              </div>
+            </div>
+            <p id="reports-message" class="help" role="status" aria-live="polite"></p>
+            <div id="reports-status"></div>
+            <div id="reports-daily"></div>
+            <div id="reports-combinations"></div>
+          </section>
+
+          <!-- ── Notifications ── -->
+          <section id="notifications-panel" class="content-section" hidden>
+            <div class="section-header">
+              <div>
+                <h1 class="section-title">New-order alerts</h1>
+                <p class="section-subtitle">Desktop, email and WhatsApp notifications</p>
+              </div>
+              <span id="notifications-stream-status" class="help">Disconnected</span>
+            </div>
+            <div class="section-card">
+              <p class="help">The dashboard raises a notification each time a new order arrives. Every delivery is appended to the audit log.</p>
+              <form id="notifications-form">
+                <div class="form-grid">
+                  <label class="form-field form-field--full"><input type="checkbox" name="desktopAlertsEnabled"> Desktop alerts</label>
+                  <label class="form-field form-field--full"><input type="checkbox" name="audioAlertsEnabled"> Audio alerts</label>
+                </div>
+                <fieldset class="form-fieldset">
+                  <legend>Email (SMTP)</legend>
+                  <label><input type="checkbox" name="emailEnabled"> Enable email</label>
+                  <label>SMTP host<input name="emailHost" maxlength="200" placeholder="smtp.example.com" autocomplete="off"></label>
+                  <label>Port<input name="emailPort" type="number" min="1" max="65535" value="587"></label>
+                  <label>Username<input name="emailUsername" maxlength="200" autocomplete="off"></label>
+                  <label>Password <small>Leave blank to keep existing</small><input name="emailToken" type="password" autocomplete="off"></label>
+                  <label>From address<input name="emailFrom" maxlength="200" placeholder="orders@shop.example" autocomplete="off"></label>
+                </fieldset>
+                <fieldset class="form-fieldset">
+                  <legend>WhatsApp</legend>
+                  <label><input type="checkbox" name="whatsappEnabled"> Enable WhatsApp</label>
+                  <label>API URL<input name="whatsappApiUrl" maxlength="200" autocomplete="off"></label>
+                  <label>Recipient<input name="whatsappTo" maxlength="40" placeholder="+919999999999" autocomplete="off"></label>
+                  <label>API token <small>Leave blank to keep existing</small><input name="whatsappToken" type="password" autocomplete="off"></label>
+                </fieldset>
+                <button type="submit" class="btn btn--primary">Save</button>
+              </form>
+              <p id="notifications-message" class="help" role="status" aria-live="polite"></p>
+            </div>
+            <details class="section-details">
+              <summary>Delivery audit log</summary>
+              <p id="notifications-deliveries-message" class="help" role="status"></p>
+              <div id="notifications-deliveries-list"></div>
+            </details>
+          </section>
+
+          <!-- ── Printers ── -->
+          <section id="paper-stock-panel" class="content-section" hidden></section>
+          <section id="printers-panel" class="content-section" hidden>
+            <div class="section-header">
+              <div>
+                <h1 class="section-title">Printers</h1>
+                <p class="section-subtitle">Discovered, enrolled and verified printers</p>
+              </div>
+              <button id="printers-refresh" type="button" class="btn btn--ghost">Refresh</button>
+            </div>
+            <p id="printers-message" class="help" role="status" aria-live="polite"></p>
+            <div id="printers-list" class="card-list"></div>
+            <details class="section-details">
+              <summary>Manual URI enrollment</summary>
+              <p class="help">Add a printer by direct IPP/IPPS address when DNS-SD discovery is blocked.</p>
+              <form id="printers-enroll-form">
+                <div class="form-grid">
+                  <label class="form-field">Backend<select name="backend"><option value="ipp">IPP</option><option value="ipps">IPPS</option><option value="windows">Windows queue</option><option value="cups">CUPS queue</option><option value="mock">Mock</option></select></label>
+                  <label class="form-field">Queue name<input name="queueName" maxlength="200" required></label>
+                  <label class="form-field form-field--full">URI<input name="uri" maxlength="500" placeholder="ipp://192.168.1.50/ipp/print"></label>
+                  <label class="form-field">Display name<input name="displayName" maxlength="200"></label>
+                  <label class="form-field">Location<input name="location" maxlength="200"></label>
+                </div>
+                <button type="submit" class="btn btn--primary">Register printer</button>
+              </form>
+            </details>
+          </section>
+
+          <!-- ── ID Cards ── -->
+          <section id="idcards-panel" class="content-section" hidden>
+            <div class="section-header">
+              <div>
+                <h1 class="section-title">ID Card Studio</h1>
+                <p class="section-subtitle">Build print-ready cards from customer scans</p>
+              </div>
+              <button id="idcards-refresh" type="button" class="btn btn--ghost">Refresh</button>
+            </div>
+            <p id="idcards-message" class="help" role="status" aria-live="polite"></p>
+            <div id="idcards-list" class="card-list"></div>
+            <details class="section-details">
+              <summary>New session</summary>
+              <form id="idcards-new-form">
+                <div class="form-grid">
+                  <label class="form-field">Front document<select name="frontDocId" required></select></label>
+                  <label class="form-field">Back <small>Optional</small><select name="backDocId"><option value="">— none —</option></select></label>
+                  <label class="form-field">Sheet<select name="sheet"><option value="A4">A4</option><option value="A3">A3</option><option value="Letter">Letter</option><option value="Legal">Legal</option></select></label>
+                  <label class="form-field">Card preset<select name="card">
+                    <option value="cr80">CR80 / ID-1</option>
+                    <option value="aadhaar">Aadhaar</option>
+                    <option value="pan">PAN</option>
+                    <option value="voter">Voter ID</option>
+                    <option value="driving">Driving licence</option>
+                    <option value="visiting">Visiting card</option>
+                    <option value="custom">Custom size</option>
+                  </select></label>
+                </div>
+                <label class="form-field"><span>Custom size (mm) <small>Width × Height</small></span>
+                  <div class="form-grid form-grid--2">
+                    <input name="cardWidthMm" type="number" min="10" max="400" step="0.1" placeholder="85.6">
+                    <input name="cardHeightMm" type="number" min="10" max="400" step="0.1" placeholder="53.98">
+                  </div>
+                </label>
+                <div class="form-grid">
+                  <label class="form-field">Layout<select name="layoutKind"><option value="front_only">Front only</option><option value="side_by_side">Side-by-side</option><option value="vertical">Vertical</option><option value="duplex_front">Duplex front</option><option value="duplex_back">Duplex back</option></select></label>
+                  <label class="form-field">Flip edge<select name="flipEdge"><option value="long_edge">Long edge</option><option value="short_edge">Short edge</option></select></label>
+                  <label class="form-field"><input type="checkbox" name="actualSize" checked> Actual size</label>
+                  <label class="form-field">DPI<input name="dpi" type="number" min="72" max="1200" value="300"></label>
+                </div>
+                <button type="submit" class="btn btn--primary">Create session</button>
+              </form>
+            </details>
+            <details class="section-details" id="idcards-detail" hidden>
+              <summary>Session detail</summary>
+              <div id="idcards-detail-body"></div>
+            </details>
+            <details class="section-details">
+              <summary>Duplex calibrations</summary>
+              <form id="idcards-calibration-form">
+                <div class="form-grid">
+                  <label class="form-field">Name<input name="name" maxlength="80" required></label>
+                  <label class="form-field">Sheet<select name="sheet"><option value="A4">A4</option><option value="A3">A3</option><option value="Letter">Letter</option></select></label>
+                  <label class="form-field">Flip<select name="flipEdge"><option value="long_edge">Long edge</option><option value="short_edge">Short edge</option></select></label>
+                  <label class="form-field">dx (mm)<input name="dxMm" type="number" min="-25" max="25" step="0.1" value="0"></label>
+                  <label class="form-field">dy (mm)<input name="dyMm" type="number" min="-25" max="25" step="0.1" value="0"></label>
+                </div>
+                <label class="form-field">Notes<input name="notes" maxlength="200"></label>
+                <button type="submit" class="btn btn--primary">Save calibration</button>
+              </form>
+              <p id="idcards-calibrations-message" class="help" role="status"></p>
+              <div id="idcards-calibrations-list"></div>
+            </details>
+          </section>
+
+          <!-- ── Passports ── -->
+          <section id="passports-panel" class="content-section" hidden>
+            <div class="section-header">
+              <div>
+                <h1 class="section-title">Passport Photo Studio</h1>
+                <p class="section-subtitle">Country-compliant passport and visa photos</p>
+              </div>
+              <button id="passports-refresh" type="button" class="btn btn--ghost">Refresh</button>
+            </div>
+            <p id="passports-message" class="help" role="status" aria-live="polite"></p>
+            <div id="passports-list" class="card-list"></div>
+            <details class="section-details">
+              <summary>New session</summary>
+              <form id="passports-new-form">
+                <div class="form-grid">
+                  <label class="form-field">Source document<select name="documentId" required></select></label>
+                  <label class="form-field">Country preset<select name="preset">
+                    <option value="india_passport">India passport (35×45mm)</option>
+                    <option value="india_visa">India visa (35×45mm)</option>
+                    <option value="schengen_visa">Schengen visa (35×45mm)</option>
+                    <option value="uk_passport">UK passport (35×45mm)</option>
+                    <option value="us_passport">US passport (2×2in)</option>
+                    <option value="canada_passport">Canada passport (50×70mm)</option>
+                    <option value="australia_passport">Australia passport (35×45mm)</option>
+                    <option value="custom">Custom</option>
+                  </select></label>
+                  <label class="form-field">Sheet<select name="sheet"><option value="A4">A4</option><option value="A3">A3</option><option value="Letter">Letter</option><option value="4x6">4×6 in</option></select></label>
+                  <label class="form-field">Background<select name="background"><option value="white">White</option><option value="light_blue">Light blue</option><option value="keep">Keep original</option></select></label>
+                </div>
+                <label class="form-field">Custom dimensions (mm)
+                  <div class="form-grid form-grid--2">
+                    <input name="widthMm" type="number" min="10" max="200" step="0.1" placeholder="35">
+                    <input name="heightMm" type="number" min="10" max="200" step="0.1" placeholder="45">
+                  </div>
+                </label>
+                <div class="form-grid">
+                  <label class="form-field">Photos/sheet<input name="photosPerSheet" type="number" min="0" max="64" value="0"></label>
+                  <label class="form-field">DPI<input name="dpi" type="number" min="72" max="1200" value="300"></label>
+                </div>
+                <label class="form-field">Compliance note<input name="complianceNote" maxlength="200" placeholder="e.g. head must be 31mm tall"></label>
+                <button type="submit" class="btn btn--primary">Create session</button>
+              </form>
+            </details>
+            <details class="section-details" id="passports-detail" hidden>
+              <summary>Session detail</summary>
+              <div id="passports-detail-body"></div>
+            </details>
+          </section>
+
+          <!-- ── Tunnel ── -->
+          <section id="tunnel-panel" class="content-section" hidden>
+            <div class="section-header">
+              <div>
+                <h1 class="section-title">1. Domain connection &amp; QR</h1>
+                <p class="section-subtitle">Connect customers to the portal using your shop IP or configured address</p>
+              </div>
+              <button id="tunnel-refresh" type="button" class="btn btn--ghost">Refresh</button>
+            </div>
+            <p id="tunnel-message" class="help" role="status" aria-live="polite"></p>
+            <div class="section-card">
+              <dl class="info-list">
+                <dt>Status</dt><dd id="tunnel-status-value">unconfigured</dd>
+                <dt>Public origin</dt><dd id="tunnel-public-origin"></dd>
+                <dt>Provider</dt><dd id="tunnel-provider"></dd>
+                <dt>Last probe</dt><dd id="tunnel-last-probe"></dd>
+              </dl>
+              <div class="btn-group">
+                <button type="button" id="tunnel-verify" class="btn btn--secondary">Verify origin</button>
+                <button type="button" id="tunnel-disconnect" class="btn btn--secondary">Mark offline</button>
+                <button type="button" id="tunnel-download-qr" class="btn btn--secondary" hidden>Download QR</button>
+              </div>
+            </div>
+            <div id="tunnel-qr-preview" class="qr-preview" hidden>
+              <p class="help">Scan this on a customer phone to open the portal.</p>
+              <img id="tunnel-qr-image" alt="Branded QR code" width="200" height="200">
+            </div>
+            <details class="section-details" open>
+              <summary>Step 1 — Connect your domain or subdomain</summary>
+              <ol class="connection-steps">
+                <li>Add your domain to Cloudflare. Create a Cloudflare Tunnel and install its Windows connector on this shop PC using the Administrator PowerShell command Cloudflare provides.</li>
+                <li>Add a published application route: hostname <code>print.yourshop.com</code>, service type <strong>HTTP</strong>, service URL <code>localhost:8080</code> (use your app's port). Leave the path empty so the portal and payment webhooks reach this app.</li>
+                <li>Select Cloudflare below, enter <code>https://print.yourshop.com</code>, save, then click <strong>Verify origin</strong>. Test the QR on a phone using mobile data.</li>
+                <li>Once verified online, open Payments for Step 2. Local IP access remains available for local testing; Razorpay requires a public HTTPS domain.</li>
+              </ol>
+              <p class="help">Saving here does not install or start Cloudflare. Its connector runs as a separate Windows service. Mark offline only changes this app's status; stop the Cloudflare service to disconnect the public route. Do not add a login challenge to customer or webhook routes.</p>
+              <p><a href="https://developers.cloudflare.com/cloudflare-one/networks/connectors/cloudflare-tunnel/get-started/create-remote-tunnel/" target="_blank" rel="noopener">Cloudflare Windows setup instructions</a></p>
+              <form id="tunnel-form">
+                <div class="form-grid">
+                  <label class="form-field">Provider<select name="provider"><option value="direct">Direct shop IP (no hosting)</option><option value="cloudflared">Cloudflare Tunnel (installed on this PC)</option></select></label>
+                  <label class="form-field form-field--full">Portal address <small>Shop IP and port, or HTTPS</small><input name="publicOrigin" maxlength="200" placeholder="http://192.168.1.10:8080" required></label>
+                  <label class="form-field">Shop route<input name="shopRoute" maxlength="80" placeholder="shop-42"></label>
+                  <label class="form-field">QR target path<input name="qrTargetPath" maxlength="120" value="/portal/"></label>
+                </div>
+                <button type="submit" class="btn btn--primary">Save</button>
+              </form>
+            </details>
+            <p><a href="#payments" data-section="payments" class="btn btn--primary">Continue to Step 2: Razorpay</a></p><p>To monitor orders on your phone, open your connected HTTPS domain followed by <code>/monitor/</code>. Sign in with your local owner username and password. Monitoring is read-only.</p>
+            <details class="section-details">
+              <summary>Recent transitions</summary>
+              <p id="tunnel-events-message" class="help" role="status"></p>
+              <div id="tunnel-events-list"></div>
+            </details>
+          </section>
+
+          <!-- ── Licence ── -->
+          <section id="licence-panel" class="content-section" hidden>
+            <div class="section-header">
+              <div>
+                <h1 class="section-title">Licence &amp; device identity</h1>
+                <p class="section-subtitle">Local device key pair and entitlement</p>
+              </div>
+              <button id="licence-refresh" type="button" class="btn btn--ghost">Refresh</button>
+            </div>
+            <p id="licence-message" class="help" role="status" aria-live="polite"></p>
+            <div class="section-card">
+              <dl class="info-list">
+                <dt>Installation id</dt><dd id="licence-installation-id"></dd>
+                <dt>Device fingerprint</dt><dd id="licence-fingerprint"></dd>
+                <dt>Verification</dt><dd id="licence-public-key"></dd>
+                <dt>Edition</dt><dd id="licence-edition"></dd>
+                <dt>Licence validity</dt><dd id="licence-support-until"></dd>
+                <dt>Verified at</dt><dd id="licence-verified-at"></dd>
+                <dt>Status</dt><dd id="licence-state"></dd>
+              </dl>
+              <label>Permanent licence key<input id="permanent-license-key" type="password" maxlength="128" autocomplete="off" placeholder="PC-…"></label>
+              <p class="help">Activate once for lifetime use on this shop PC. No recurring online licence checks. A different PC requires activation.</p>
+              <div class="btn-group">
+                <button type="button" id="licence-activate" class="btn btn--primary">Activate licence</button>
+                <button type="button" id="licence-refresh-now" class="btn btn--secondary">Activation status</button>
+                <button type="button" id="licence-transfer" class="btn btn--secondary">Transfer device</button>
+                <button type="button" id="licence-revoke" class="btn btn--danger">Revoke</button>
+              </div>
+            </div>
+            <details class="section-details">
+              <summary>Entitlements</summary>
+              <div id="licence-entitlements-list"></div>
+            </details>
+            <details class="section-details" id="licence-revoke-form" hidden>
+              <summary>Revoke licence</summary>
+              <form id="licence-revoke-form-element">
+                <label>Reason <small>Required</small><input name="reason" maxlength="200" required></label>
+                <button type="submit" class="btn btn--danger">Confirm revocation</button>
+              </form>
+            </details>
+            <details class="section-details">
+              <summary>Audit log</summary>
+              <p id="licence-events-message" class="help" role="status"></p>
+              <div id="licence-events-list"></div>
+            </details>
+          </section>
+
+          <!-- ── Payments ── -->
+          <section id="payments-panel" class="content-section" hidden>
+            <div class="section-header">
+              <div>
+                <h1 class="section-title">Payments &amp; reconciliation</h1>
+                <p class="section-subtitle">Gateway providers and manual approvals</p>
+              </div>
+              <button id="payments-refresh" type="button" class="btn btn--ghost">Refresh</button>
+            </div>
+            <p id="payments-message" class="help" role="status" aria-live="polite"></p>
+            <div id="payments-providers"></div>
+            <details class="section-details" open>
+              <summary>Step 2 — Connect Razorpay</summary>
+              <p><a href="#tunnel" data-section="tunnel">Open Step 1: domain &amp; QR setup</a></p>
+              <p id="payments-domain-status" class="help" role="status">Checking domain connection…</p>
+              <p class="help">Verify your public HTTPS domain in QR setup first. Then open Razorpay Account &amp; Settings → API Keys. Start with Test Mode; Live Mode uses a different key pair.</p>
+              <form id="payments-provider-form">
+                <label class="form-field">Connection to save<select id="payments-edit-provider"><option value="">New Razorpay connection</option></select></label>
+                <div class="form-grid">
+                  <label class="form-field">Kind<select name="kind"><option value="razorpay_merchant">Razorpay (merchant-owned)</option></select></label>
+                  <label class="form-field">Display name<input name="displayName" maxlength="80" placeholder="Razorpay Live" required></label>
+                  <label class="form-field"><input type="checkbox" name="enabled" checked> Enabled</label>
+                  <label class="form-field"><input type="checkbox" name="isDefault"> Default provider</label>
+                </div>
+                <fieldset class="form-fieldset">
+                  <legend>Razorpay credentials</legend>
+                  <p class="help">Get these from your Razorpay Dashboard → Settings → API Keys.</p>
+                  <label>Key ID <small>rzp_live_... / rzp_test_...</small><input name="razorpayKeyId" type="text" autocomplete="off" spellcheck="false" placeholder="rzp_live_xxxxxxxxxxxx"></label>
+                  <label>Key Secret <small>For updates, leave all three credential fields blank to keep saved credentials</small><input name="razorpayKeySecret" type="password" autocomplete="off" spellcheck="false"></label>
+                  <label>Webhook Secret <small>Generate here and paste the same value in Razorpay → Webhooks → Secret. This is separate from your API Key Secret.</small><input name="razorpayWebhookSecret" type="password" autocomplete="off" spellcheck="false"></label>
+                  <div class="btn-group"><button type="button" id="payments-generate-secret" class="btn btn--secondary">Generate webhook secret</button><button type="button" id="payments-copy-secret" class="btn btn--secondary">Copy webhook secret</button></div>
+                  <p class="help">Keep a secure copy before leaving this page. Generating a replacement only takes effect when you save; update Razorpay with the replacement too.</p>
+                  <button type="button" id="payments-provider-test" class="btn btn--secondary">Test connection</button>
+                </fieldset>
+                <div id="payments-webhook-section">
+                  <p id="payments-webhook-message" class="help" role="status" aria-live="polite"></p>
+                  <div id="payments-webhook-info"></div>
+                </div>
+                <button type="submit" class="btn btn--primary">Save provider</button>
+              </form>
+            </details>
+            <details class="section-details" id="payments-webhook-setup" open>
+              <summary>Step 3 — Register the webhook in Razorpay</summary>
+              <ol class="connection-steps">
+                <li>Save the connection above. Copy its webhook URL and the generated secret.</li>
+                <li>In Razorpay, select the same Test or Live Mode as your keys. Open Account &amp; Settings → Webhooks → Add New Webhook.</li>
+                <li>Paste the URL and secret, select the events below, then create the webhook.</li>
+                <li>Complete a customer payment in Test Mode. Check successful webhook delivery in Razorpay and confirm the corresponding order becomes paid in this dashboard.</li>
+                <li>When ready, repeat with Live Mode keys and a Live Mode webhook. Keep this PC and both Windows services running.</li>
+              </ol>
+              <p><a href="https://razorpay.com/docs/webhooks/setup-edit-payments/" target="_blank" rel="noopener">Razorpay webhook instructions</a></p>
+              <p class="help">After saving a Razorpay provider, copy the webhook URL below and register it in your Razorpay dashboard so the on-premise server receives real-time payment confirmations.</p>
+              <div id="payments-webhook-url-row" class="payments-webhook-url-row">
+                <div class="payments-webhook-url-label">Webhook URL</div>
+                <div id="payments-webhook-url" class="payments-webhook-url-value"></div>
+                <button type="button" id="payments-copy-webhook-url" class="btn btn--secondary btn--sm" title="Copy URL">Copy</button>
+              </div>
+              <p id="payments-webhook-url-hint" class="help">Save a Razorpay provider first to see the webhook URL.</p>
+              <details class="section-details">
+                <summary>Required Razorpay event subscriptions</summary>
+                <p class="help">In your Razorpay Dashboard → Settings → Webhooks, add the webhook URL above and enable these events. Only these events are consumed by the on-premise server.</p>
+                <div id="payments-webhook-events"></div>
+              </details>
+              <button type="button" id="payments-webhook-test" class="btn btn--secondary" disabled>Check API &amp; domain</button>
+              <p id="payments-webhook-test-result" class="help"></p>
+            </details>
+            <details class="section-details" open>
+              <summary>Recent payment intents</summary>
+              <div id="payments-intents-list"></div>
+            </details>
+            <details class="section-details">
+              <summary>Manual approval / rejection</summary>
+              <form id="payments-manual-form">
+                <div class="form-grid">
+                  <label class="form-field">Intent id<input name="intentId" maxlength="64" required></label>
+                  <label class="form-field">Method<select name="method"><option value="cash">Cash</option><option value="upi">UPI</option><option value="bank_transfer">Bank transfer</option><option value="other">Other</option></select></label>
+                  <label class="form-field">Amount (minor units)<input name="amountMinor" type="number" min="1" required></label>
+                  <label class="form-field">Currency<input name="currency" maxlength="6" value="INR" required></label>
+                  <label class="form-field">Reference<input name="reference" maxlength="120"></label>
+                </div>
+                <label class="form-field">Note<input name="note" maxlength="240"></label>
+                <div class="btn-group">
+                  <button type="submit" class="btn btn--primary">Approve manually</button>
+                  <button type="button" id="payments-manual-reject" class="btn btn--danger">Reject</button>
+                </div>
+              </form>
+            </details>
+            <details class="section-details">
+              <summary>Audit ledger</summary>
+              <div id="payments-ledger-list"></div>
+            </details>
+          </section>
+
+          <!-- ── Pairing ── -->
+          <section id="pairing-panel" class="content-section" hidden>
+            <div class="section-header">
+              <div>
+                <h1 class="section-title">Companion app pairing</h1>
+                <p class="section-subtitle">iOS and Android companion app authentication</p>
+              </div>
+              <button id="pairing-refresh" type="button" class="btn btn--ghost">Refresh</button>
+            </div>
+            <p id="pairing-message" class="help" role="status" aria-live="polite"></p>
+            <div class="section-card">
+              <p class="help">Mint a pairing code, open the link on the merchant's phone, and the device appears in the paired list.</p>
+              <div class="pairing-mint-row">
+                <button type="button" id="pairing-mint" class="btn btn--primary">Mint pairing code</button>
+                <label>Deep link template <small>{{code}} is the placeholder</small><input id="pairing-deeplink" maxlength="240" placeholder="printcatalyst://pair?code={{code}}"></label>
+              </div>
+            </div>
+            <div id="pairing-active" class="section-card pairing-active-card" hidden>
+              <h3>Active pairing code</h3>
+              <div class="pairing-code-display">
+                <strong id="pairing-active-code" class="pairing-code"></strong>
+                <span id="pairing-active-expires" class="help"></span>
+              </div>
+              <a id="pairing-active-link" target="_blank" rel="noopener" class="pairing-deep-link"></a>
+              <button type="button" id="pairing-copy" class="btn btn--secondary">Copy code</button>
+            </div>
+            <details class="section-details" open>
+              <summary>Recent pairing codes</summary>
+              <p id="pairing-codes-message" class="help" role="status"></p>
+              <div id="pairing-codes-list"></div>
+            </details>
+            <details class="section-details" open>
+              <summary>Paired devices</summary>
+              <p id="pairing-devices-message" class="help" role="status"></p>
+              <div id="pairing-devices-list"></div>
+            </details>
+            <details class="section-details" id="pairing-revoke-details" hidden>
+              <summary>Revoke device</summary>
+              <form id="pairing-revoke-form">
+                <label>Device id<input name="deviceId" maxlength="64" required></label>
+                <label>Reason<input name="reason" maxlength="240" required></label>
+                <button type="submit" class="btn btn--danger">Revoke device</button>
+              </form>
+            </details>
+          </section>
+
+        </main><!-- end content-main -->
+      </div><!-- end content-shell -->
+    </div><!-- end app-shell -->
+
+    <!-- ===================== TEMPLATES ===================== -->
+    <template id="pricing-row">
+      <div class="entry">
+        <div class="entry-header">
+          <label class="form-field">Paper size<input name="paperSize" maxlength="64" placeholder="A4" required></label>
+          <label class="form-field">Colour<select name="colourMode"><option value="monochrome">Monochrome</option><option value="colour">Colour</option></select></label>
+          <label class="form-field">Sides<select name="sides"><option value="one-sided">Single-sided</option><option value="two-sided-long-edge">Double-sided (long)</option><option value="two-sided-short-edge">Double-sided (short)</option></select></label>
+          <label class="form-field">Price/sheet<input name="amount" inputmode="decimal" placeholder="2.50" required></label>
+          <button type="button" class="btn btn--icon btn--danger remove" title="Remove row">✕</button>
+        </div>
+        <div class="tiers">
+          <div class="tiers-heading">
+            <span>Quantity discounts</span>
+            <button type="button" class="btn btn--ghost btn--sm add-tier">+ Add tier</button>
+          </div>
+          <div class="tier-list" data-tier-list></div>
+        </div>
+      </div>
+    </template>
+    <template id="tier-row">
+      <div class="tier">
+        <label>From sheets<input name="tierQuantity" type="number" min="2" step="1" placeholder="50" required></label>
+        <label>Price/sheet<input name="tierAmount" inputmode="decimal" placeholder="2.00" required></label>
+        <button type="button" class="btn btn--icon btn--ghost btn--sm remove-tier" title="Remove tier">✕</button>
+      </div>
+    </template>
+    <template id="operator-row">
+      <div class="list-card operator">
+        <div class="list-card-body">
+          <strong class="operator-name"></strong>
+          <span class="operator-status badge"></span>
+        </div>
+        <div class="list-card-actions">
+          <button type="button" class="btn btn--sm btn--secondary operator-toggle"></button>
+          <button type="button" class="btn btn--sm btn--danger operator-delete">Delete</button>
+        </div>
+      </div>
+    </template>
+    <template id="idcard-row">
+      <div class="list-card idcard-row">
+        <div class="list-card-body idcard-meta">
+          <strong class="idcard-title"></strong>
+          <span class="idcard-status badge"></span>
+          <span class="idcard-layout help"></span>
+        </div>
+        <div class="list-card-actions">
+          <button type="button" class="btn btn--sm btn--secondary idcard-select">Open</button>
+          <button type="button" class="btn btn--sm btn--secondary idcard-compose">Render</button>
+          <button type="button" class="btn btn--sm btn--danger idcard-delete">Remove</button>
+        </div>
+      </div>
+    </template>
+    <template id="passport-row">
+      <div class="list-card passport-row">
+        <div class="list-card-body passport-meta">
+          <strong class="passport-title"></strong>
+          <span class="passport-status badge"></span>
+          <span class="passport-layout help"></span>
+        </div>
+        <div class="list-card-actions">
+          <button type="button" class="btn btn--sm btn--secondary passport-select">Open</button>
+          <button type="button" class="btn btn--sm btn--secondary passport-compose">Render</button>
+          <button type="button" class="btn btn--sm btn--danger passport-delete">Remove</button>
+        </div>
+      </div>
+    </template>
+    <template id="pairing-code-row">
+      <div class="list-card pairing-code-row">
+        <div class="list-card-body">
+          <span class="pairing-code-status"></span>
+          <span class="pairing-code-time help"></span>
+          <span class="pairing-code-expires help"></span>
+        </div>
+      </div>
+    </template>
+    <template id="pairing-device-row">
+      <div class="list-card pairing-device-row">
+        <div class="list-card-body">
+          <strong class="pairing-device-label"></strong>
+          <span class="pairing-device-fingerprint help"></span>
+          <span class="pairing-device-paired help"></span>
+          <span class="pairing-device-seen help"></span>
+        </div>
+        <div class="list-card-actions">
+          <button type="button" class="btn btn--sm btn--danger pairing-device-revoke">Revoke</button>
+        </div>
+      </div>
+    </template>
+
+  </body>
+</html>

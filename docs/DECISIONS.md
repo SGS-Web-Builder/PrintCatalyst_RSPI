@@ -12,6 +12,6 @@
 | D08 | Proposed | 24-hour code expiry with paid-order preservation and merchant reissue. |
 | D09 | Open | Cash checkout behaviour for an otherwise payment-gated kiosk. |
 | D10 | Open | Exact Pi/touchscreen/printer models and qualified performance budget. |
-| D11 | Open | ARM renderer selection and protected Linux key storage design. |
+| D11 | Partially implemented | Linux key storage uses root-provisioned systemd credentials plus Pi serial binding; see LINUX-SECURITY.md for limits. ARM renderer selection and hardware validation remain open. |
 
 Supersede decisions explicitly; do not silently change payment, printing or security semantics across chats.

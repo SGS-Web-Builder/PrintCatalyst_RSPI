@@ -2,7 +2,7 @@
 
 Independent Raspberry Pi touchscreen kiosk edition of Print Catalyst.
 
-**Status: documentation foundation only. No application code has been imported, no ARM build exists, and no Pi/printer acceptance test has run.**
+**Status: development prototype. Linux key protection, verified-payment pickup issuance/recovery, portal code display, authenticated loopback release API, persistent throttling and dispatch guards are implemented. Linux ARM64 compilation passes. Touchscreen credential delivery/keypad UI, preparation/CUPS printing and Pi hardware acceptance remain unfinished. Not deployable yet.**
 
 Repository: https://github.com/SGS-Web-Builder/PrintCatalyst_RSPI
 
@@ -29,3 +29,5 @@ Payment alone must never release a kiosk job. No SMS is required.
 - `docs/DECISIONS.md`: decision log and proposals awaiting confirmation.
 
 Do not distribute licence-server private keys, live databases, customer documents, payment secrets or tunnel tokens with this repository.
+
+Touchscreen UI and manual local-administrator pairing are now implemented. See packaging/linux/README.md for http://127.0.0.1:8081/ setup. Preparation/CUPS and actual Pi qualification remain incomplete; this is not a production-ready kiosk.

@@ -1,0 +1,29 @@
+name: Pi development checks
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  linux:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: runtime/go.mod
+          cache-dependency-path: runtime/go.sum
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+      - run: node --test test/*.test.mjs
+      - run: go test -timeout 5m ./...
+        working-directory: runtime
+      - run: go vet ./...
+        working-directory: runtime
+      - run: go build ./...
+        working-directory: runtime
+        env:
+          GOOS: linux
+          GOARCH: arm64
+          CGO_ENABLED: '0'
+      - run: sh -n packaging/linux/provision-device.sh
+      # This pipeline does not publish an installer or claim hardware qualification.
