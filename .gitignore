@@ -1,0 +1,25 @@
+# Local configuration, credentials and customer data
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.pfx
+*.p12
+*.db
+*.db-*
+*.sqlite*
+*.log
+/data/
+/uploads/
+/documents/
+/private/
+/build/
+/release/
+node_modules/
+*.exe
+*.msi
+*.deb
+*.img
+*.img.xz
+.DS_Store
