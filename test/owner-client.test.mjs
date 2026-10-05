@@ -19,3 +19,12 @@ test('owner client exposes a failed local save and never treats it as success',a
  const client=createOwnerClient(async()=>({ok:false,status:403,text:async()=> 'invalid CSRF token'}));
  await assert.rejects(client.request('PUT','/api/v1/owner/business',{}),/invalid CSRF token/);
 });
+
+test('kiosk recovery actions use authenticated owner writes',async()=>{
+ const calls=[];const client=createOwnerClient(async(path,options)=>{calls.push({path,options});return {ok:true,status:200,json:async()=>({csrfToken:'recovery-csrf'})};});
+ await client.request('POST','/api/v1/owner/login',{});
+ for(const action of ['pickup/reissue','preparation/retry']){
+ await client.request('POST','/api/v1/owner/orders/abc12345abc12345abc12345abc12345/'+action,{});
+ assert.equal(calls.at(-1).options.headers['X-CSRF-Token'],'recovery-csrf');
+ }
+});

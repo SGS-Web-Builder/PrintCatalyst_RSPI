@@ -17,6 +17,8 @@
 /build/
 /release/
 node_modules/
+__pycache__/
+*.pyc
 *.exe
 *.msi
 *.deb

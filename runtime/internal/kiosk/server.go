@@ -93,6 +93,13 @@ func (s *Server) handle(w http.ResponseWriter, r *http.Request) {
 		respond(w, 403, "forbidden")
 		return
 	}
+	if !bearer {
+		http.SetCookie(w, &http.Cookie{Name: "pc_kiosk", Value: r.CookiesNamed("pc_kiosk")[0].Value, Path: "/api/v1/kiosk/", HttpOnly: true, SameSite: http.SameSiteStrictMode, MaxAge: 365 * 24 * 60 * 60})
+	}
+	if r.URL.Path == "/api/v1/kiosk/progress" {
+		s.progress(w, r)
+		return
+	}
 	if r.URL.Path != "/api/v1/kiosk/claim" || r.URL.RawQuery != "" {
 		respond(w, 404, "not_found")
 		return
@@ -127,10 +134,10 @@ func (s *Server) handle(w http.ResponseWriter, r *http.Request) {
 		respond(w, 503, "assistance")
 		return
 	}
-	_, err = s.pickup.Claim(r.Context(), input.Code)
+	order, err := s.pickup.Claim(r.Context(), input.Code)
 	switch {
 	case err == nil:
-		respond(w, 202, "accepted")
+		s.accepted(w, r, order)
 	case errors.Is(err, pickup.ErrPreparing):
 		respond(w, 409, "preparing")
 	case errors.Is(err, pickup.ErrUnavailable):

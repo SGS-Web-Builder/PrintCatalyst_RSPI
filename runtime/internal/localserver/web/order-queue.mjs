@@ -50,7 +50,11 @@ export function createOrderQueue(client,getRole) {
   function metric(label,value){const box=el('div','oq-metric');box.append(el('strong','',value),el('small','',label));return box;}
   function actionButtons(o) {
     const group=el('div','oq-actions'),state=queueState(o),jobs=[...o.documents,...(o.separators||[])];
-    if(getRole()==='owner' && state==='pending' && !o.documents.some(d=>d.printState)){
+    if(getRole()==='owner' && o.kioskMode && o.preparationFailed && o.status==='paid'){const b=button('Retry document preparation',()=>retryPreparation(o),'oq-button oq-preview');b.disabled=busy.has(o.id);group.append(b);}
+    if(getRole()==='owner' && o.kioskMode && o.pickupExpired && o.status==='paid'){
+      const b=button('Replace expired pickup code',()=>reissue(o),'oq-button oq-preview');b.disabled=busy.has(o.id);group.append(b);
+    }
+    if(getRole()==='owner' && !o.kioskMode && state==='pending' && !o.documents.some(d=>d.printState)){
       const b=button(busy.has(o.id)?'Releasing…':'One-Click Print',()=>release(o), 'oq-button oq-release');b.disabled=busy.has(o.id);group.append(b);
     }
     if(getRole()==='owner' && ((state==='failed' && jobs.some(d=>d.printState==='failed')) || (state==='processing' && jobs.some(d=>d.printState==='submitting')))){
@@ -61,9 +65,21 @@ export function createOrderQueue(client,getRole) {
     }
     return group;
   }
+  async function retryPreparation(o){
+    if(busy.has(o.id)||!window.confirm('Check printer configuration, renderer dependencies and the document first. Retry preparation? This does not release printing.'))return;
+    busy.add(o.id);render();
+    try{await client.request('POST',`/api/v1/owner/orders/${o.id}/preparation/retry`,{});await refresh();announce('Preparation queued. The customer still needs to enter their pickup code.');}
+    catch(error){announce(error.message);}finally{busy.delete(o.id);render();}
+  }
+  async function reissue(o) {
+    if(busy.has(o.id) || !window.confirm('Replace the expired pickup code? The customer must still enter the new code at this kiosk to print.'))return;
+    busy.add(o.id);render();
+    try{await client.request('POST',`/api/v1/owner/orders/${o.id}/pickup/reissue`,{});await refresh();announce('Pickup code replaced. Ask the customer to refresh their order receipt. Printing still requires entry at the kiosk.');}
+    catch(error){announce(error.message);}finally{busy.delete(o.id);render();}
+  }
   async function release(o,retry=false) {
     if(busy.has(o.id))return;
-    if(retry && !window.confirm('Check the Windows printer queue and output tray first. An interrupted submission may have printed. Retry only failed or interrupted documents and separator invoices?'))return;
+    if(retry && !window.confirm('Check the printer queue and output tray first. An interrupted submission may have printed. Retry only failed or interrupted documents and separator invoices?'))return;
     busy.add(o.id);render();
     try{await client.request('POST',`/api/v1/owner/orders/${o.id}/print`,{retry});announce('Print release accepted. Customer settings preserved. Payment status is unchanged.');await refresh();}
     catch(error){announce(error.message);}
@@ -72,7 +88,7 @@ export function createOrderQueue(client,getRole) {
   async function transition(o,target) {
     if(busy.has(o.id))return;
     if(target==='print_completed' && !window.confirm('Confirm that all documents and any separator invoices physically printed. This does not record payment.'))return;
-    if(target==='cancelled' && !window.confirm('Reject this order? Jobs already sent to Windows must be cancelled in the printer queue.'))return;
+    if(target==='cancelled' && !window.confirm('Reject this order? Jobs already sent to the printer must be cancelled in the printer queue.'))return;
     busy.add(o.id);render();
     try{await client.request('PUT',`/api/v1/owner/orders/${o.id}/status`,{status:target});await refresh();announce(target==='print_completed'?'Print marked done. Payment status is unchanged.':'Order rejected.');}
     catch(error){announce(error.message);}finally{busy.delete(o.id);render();}

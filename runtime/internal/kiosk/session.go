@@ -61,9 +61,13 @@ func (s *Server) validSession(r *http.Request) bool {
 		return false
 	}
 	hash := sha256.Sum256([]byte(cookies[0].Value))
-	s.sessionMu.Lock()
-	defer s.sessionMu.Unlock()
-	return s.now().Before(s.sessionUntil) && subtle.ConstantTimeCompare(hash[:], s.sessionHash[:]) == 1
+	var saved, credential []byte
+	var until int64
+	if err := s.db.QueryRowContext(r.Context(), `SELECT token_hash,credential_hash,expires_at FROM kiosk_screen_session WHERE singleton=1`).Scan(&saved, &credential, &until); err != nil {
+		return false
+	}
+	return s.now().Unix() < until && subtle.ConstantTimeCompare(hash[:], saved) == 1 && subtle.ConstantTimeCompare(s.credential[:], credential) == 1
+
 }
 
 func (s *Server) handleSession(w http.ResponseWriter, r *http.Request, bearer bool) bool {
@@ -130,9 +134,13 @@ func (s *Server) handleSession(w http.ResponseWriter, r *http.Request, bearer bo
 	s.ticketUntil = time.Time{}
 	s.ticketHash = [32]byte{}
 	s.sessionHash = sha256.Sum256([]byte(token))
-	s.sessionUntil = s.now().Add(12 * time.Hour)
+	s.sessionUntil = s.now().Add(10 * 365 * 24 * time.Hour)
+	if _, err = s.db.ExecContext(r.Context(), `INSERT INTO kiosk_screen_session VALUES(1,?,?,?) ON CONFLICT(singleton) DO UPDATE SET token_hash=excluded.token_hash,credential_hash=excluded.credential_hash,expires_at=excluded.expires_at`, s.sessionHash[:], s.credential[:], s.sessionUntil.Unix()); err != nil {
+		respond(w, 503, "unavailable")
+		return true
+	}
 	// Secure is intentionally absent: this listener is literal HTTP loopback only.
-	http.SetCookie(w, &http.Cookie{Name: "pc_kiosk", Value: token, Path: "/api/v1/kiosk/", HttpOnly: true, SameSite: http.SameSiteStrictMode, MaxAge: 43200})
+	http.SetCookie(w, &http.Cookie{Name: "pc_kiosk", Value: token, Path: "/api/v1/kiosk/", HttpOnly: true, SameSite: http.SameSiteStrictMode, MaxAge: 10 * 365 * 24 * 3600})
 	respond(w, 200, "paired")
 	return true
 }

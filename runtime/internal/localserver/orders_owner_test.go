@@ -6,11 +6,56 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"strings"
 	"testing"
 
 	"github.com/SGS-Web-Builder/PrintCatalyst_RSPI/runtime/internal/orders"
 	"github.com/SGS-Web-Builder/PrintCatalyst_RSPI/runtime/internal/pricing"
 )
+
+func TestPickupReissueRequiresSessionAndCSRF(t *testing.T) {
+	ts, _ := portalFixture(t)
+	url := ts.URL + "/api/v1/owner/orders/abc12345abc12345abc12345abc12345/pickup/reissue"
+	request := func(path string, cookie *http.Cookie, csrf, body string) *http.Response {
+		req, err := http.NewRequest("POST", path, strings.NewReader(body))
+		if err != nil {
+			t.Fatal(err)
+		}
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Origin", ts.URL)
+		req.Header.Set("X-CSRF-Token", csrf)
+		if cookie != nil {
+			req.AddCookie(cookie)
+		}
+		resp, err := http.DefaultClient.Do(req)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return resp
+	}
+	unauth := request(url, nil, "", "{}")
+	unauth.Body.Close()
+	if unauth.StatusCode != 401 {
+		t.Fatalf("unauthenticated status %d", unauth.StatusCode)
+	}
+	login := request(ts.URL+"/api/v1/owner/login", nil, "", `{"username":"owner","password":"a sufficiently long password"}`)
+	defer login.Body.Close()
+	if login.StatusCode != 200 {
+		t.Fatalf("login %d", login.StatusCode)
+	}
+	csrf := readCSRF(t, login)
+	cookie := login.Cookies()[0]
+	noCSRF := request(url, cookie, "", "{}")
+	noCSRF.Body.Close()
+	if noCSRF.StatusCode != 403 {
+		t.Fatalf("missing CSRF status %d", noCSRF.StatusCode)
+	}
+	valid := request(url, cookie, csrf, "{}")
+	valid.Body.Close()
+	if valid.StatusCode != 503 {
+		t.Fatalf("non-kiosk route status %d", valid.StatusCode)
+	}
+}
 
 // TestOwnerOrdersListRequiresOwnerAuth verifies that the owner orders endpoint
 // refuses unauthenticated callers.

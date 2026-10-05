@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/SGS-Web-Builder/PrintCatalyst_RSPI/runtime/internal/orders"
 	"github.com/SGS-Web-Builder/PrintCatalyst_RSPI/runtime/internal/owner"
@@ -62,7 +63,89 @@ func (s *Server) registerOwnerOrders(mux *http.ServeMux) {
 			ownerError(w, err)
 			return
 		}
+		failed := map[string]bool{}
+		if s.pickup != nil {
+			rows, e := s.db.QueryContext(r.Context(), `SELECT p.order_id FROM kiosk_preparations p WHERE p.state='failed' AND NOT EXISTS(SELECT 1 FROM kiosk_releases r WHERE r.order_id=p.order_id)`)
+			if e != nil {
+				ownerError(w, e)
+				return
+			}
+			for rows.Next() {
+				var id string
+				if e = rows.Scan(&id); e != nil {
+					break
+				}
+				failed[id] = true
+			}
+			if e == nil {
+				e = rows.Err()
+			}
+			rows.Close()
+			if e != nil {
+				ownerError(w, e)
+				return
+			}
+		}
+		if s.pickup != nil {
+			expired := map[string]bool{}
+			rows, err := s.db.QueryContext(r.Context(), `SELECT p.order_id FROM kiosk_pickups p WHERE (p.state='expired' OR (p.state='active' AND p.expires_at<=?)) AND NOT EXISTS(SELECT 1 FROM kiosk_releases k WHERE k.order_id=p.order_id)`, time.Now().Unix())
+			if err != nil {
+				ownerError(w, err)
+				return
+			}
+			for rows.Next() {
+				var id string
+				if err = rows.Scan(&id); err != nil {
+					break
+				}
+				expired[id] = true
+			}
+			if err == nil {
+				err = rows.Err()
+			}
+			rows.Close()
+			if err != nil {
+				ownerError(w, err)
+				return
+			}
+			for i := range views {
+				views[i].KioskMode = true
+				views[i].PreparationFailed = failed[views[i].ID]
+				views[i].PickupExpired = expired[views[i].ID]
+			}
+		}
 		_ = json.NewEncoder(w).Encode(map[string]any{"orders": views})
+	}))
+	mux.HandleFunc("POST /api/v1/owner/orders/{id}/preparation/retry", protect(func(w http.ResponseWriter, r *http.Request) {
+		_, subject, ok := s.ownerSession(w, r)
+		if !ok || !requireOwner(w, subject) {
+			return
+		}
+		if s.pickup == nil {
+			http.Error(w, "pickup unavailable", 503)
+			return
+		}
+		if err := s.pickup.RetryPreparation(r.Context(), r.PathValue("id")); err != nil {
+			http.Error(w, "Cannot retry preparation. Check pickup expiry and print history; released orders require printer review.", 409)
+			return
+		}
+		writeJSON(w, map[string]string{"status": "pending"})
+	}))
+	mux.HandleFunc("POST /api/v1/owner/orders/{id}/pickup/reissue", protect(func(w http.ResponseWriter, r *http.Request) {
+		_, subject, ok := s.ownerSession(w, r)
+		if !ok || !requireOwner(w, subject) {
+			return
+		}
+		w.Header().Set("Cache-Control", "no-store")
+		if s.pickup == nil {
+			http.Error(w, "pickup unavailable", 503)
+			return
+		}
+		if err := s.pickup.ReissueExpired(r.Context(), r.PathValue("id")); err != nil {
+			http.Error(w, "Cannot replace this pickup code. Check payment and print history; released orders require review.", 409)
+			return
+		}
+		writeJSON(w, map[string]string{"status": "active"})
 	}))
 
 	mux.HandleFunc("GET /api/v1/owner/orders/{id}", protect(func(w http.ResponseWriter, r *http.Request) {
@@ -82,10 +165,13 @@ func (s *Server) registerOwnerOrders(mux *http.ServeMux) {
 
 // orderListView is a compact summary for the order queue list.
 type orderListView struct {
-	Separators     []queueSeparator `json:"separators"`
-	PaymentMethod  string           `json:"paymentMethod"`
-	PrintRequested bool             `json:"printRequested"`
-	Documents      []queueDocument  `json:"documents"`
+	KioskMode         bool             `json:"kioskMode,omitempty"`
+	PreparationFailed bool             `json:"preparationFailed,omitempty"`
+	PickupExpired     bool             `json:"pickupExpired,omitempty"`
+	Separators        []queueSeparator `json:"separators"`
+	PaymentMethod     string           `json:"paymentMethod"`
+	PrintRequested    bool             `json:"printRequested"`
+	Documents         []queueDocument  `json:"documents"`
 
 	CurrencyMU    int    `json:"currencyMinorUnits"`
 	ID            string `json:"id"`

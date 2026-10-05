@@ -1,5 +1,16 @@
 const $ = id => document.getElementById(id);
 let code = '', busy = false, locked = false, until = 0, idle;
+let receipt='',pollTimer,resetTimer;
+function resetScreen(){clearTimeout(pollTimer);clearTimeout(resetTimer);receipt='';try{sessionStorage.removeItem('pc-kiosk-receipt');}catch{} locked=false;code='';$('next').hidden=true;status('Enter the pickup code shown on your phone.');render();}
+async function pollProgress(){
+ const current=receipt;if(!current)return;
+ try{const {response,data}=await post('progress',{receipt:current});if(receipt!==current)return;
+ const messages={pending:'Order released to the print queue.',processing:'Your documents are printing…',printing:'Your documents are printing…',done:'Print Done. Please collect your documents.',assistance:'Print status needs review. Please ask the attendant.',failed:'Printer needs assistance. Please ask the attendant.',rejected:'Order cancelled. Please ask the attendant.'};
+ status(messages[data.state] || 'Unable to confirm printer progress. Please ask the attendant.');
+ if(!response.ok || ['done','failed','rejected','assistance','unavailable'].includes(data.state)){resetTimer=setTimeout(resetScreen,15000);return;}
+ }catch{if(receipt!==current)return;status('Connection interrupted. Checking print progress—do not enter the code again.');}
+ pollTimer=setTimeout(pollProgress,1500);
+}
 const status = message => { $('status').textContent = message; };
 function render() {
  $('digits').textContent = (code.padEnd(4, '—')).split('').join(' ');
@@ -32,6 +43,7 @@ $('release').onclick = async () => {
   const {response, data} = await post('claim', {code:submitted});
   if (response.status === 202 && data.state === 'accepted') {
    locked = true; $('next').hidden = false; status('Order released to the print queue. Please wait for your print.');
+   if(typeof data.receipt==='string' && /^[a-f0-9]{64}$/.test(data.receipt)){receipt=data.receipt;try{sessionStorage.setItem('pc-kiosk-receipt',receipt);}catch{}pollTimer=setTimeout(pollProgress,500);}
   } else if (data.state === 'preparing') status('Your files are still being prepared. Please wait, then enter your code again.');
   else if (response.status === 403) { status('This screen needs merchant pairing. Please ask the attendant.'); $('setup').open = true; }
   else if (response.status === 429) status('Too many attempts. Please wait for the countdown.');
@@ -41,7 +53,7 @@ $('release').onclick = async () => {
   locked = true; $('next').hidden = false; status('Connection interrupted. Your order may have been released. Ask the attendant to check; do not submit it again.');
  } finally { busy = false; render(); }
 };
-$('next').onclick = () => { locked = false; code = ''; $('next').hidden = true; status('Enter the pickup code shown on your phone.'); render(); };
+$('next').onclick = resetScreen;
 $('pair').onclick = async () => {
  if (busy || Date.now() < until) return;
  const ticket = $('ticket').value.trim().toLowerCase(); $('ticket').value = '';
@@ -49,7 +61,7 @@ $('pair').onclick = async () => {
  busy = true; render();
  try {
   const {response, data} = await post('session', {ticket});
-  $('pair-status').textContent = response.ok && data.state === 'paired' ? 'Screen paired for 12 hours.' : 'Pairing failed or expired. Check the code with the administrator.';
+  $('pair-status').textContent = response.ok && data.state === 'paired' ? 'Screen paired. Pairing survives restarts.' : 'Pairing failed or expired. Check the code with the administrator.';
   if (response.ok && data.state === 'paired') { $('setup').open = false; status('Screen ready. Enter your pickup code.'); }
  } catch { $('pair-status').textContent = 'Connection interrupted. Request a new pairing code.'; }
  finally { busy = false; render(); }
@@ -67,3 +79,5 @@ setInterval(() => {
  render();
 }, 500);
 render();
+
+try{const saved=sessionStorage.getItem('pc-kiosk-receipt');if(/^[a-f0-9]{64}$/.test(saved||'')){receipt=saved;locked=true;$('next').hidden=false;render();pollTimer=setTimeout(pollProgress,0);}}catch{}

@@ -31,3 +31,5 @@ Payment alone must never release a kiosk job. No SMS is required.
 Do not distribute licence-server private keys, live databases, customer documents, payment secrets or tunnel tokens with this repository.
 
 Touchscreen UI and manual local-administrator pairing are now implemented. See packaging/linux/README.md for http://127.0.0.1:8081/ setup. Preparation/CUPS and actual Pi qualification remain incomplete; this is not a production-ready kiosk.
+
+2026-10-05: durable preparation/freeze workflow, verified prepared dispatch and a local CUPS protocol adapter are implemented with mock-renderer/transport tests. They are not activated at startup; a real Linux renderer and hardware qualification remain required. See docs/PREPARATION-CUPS.md.

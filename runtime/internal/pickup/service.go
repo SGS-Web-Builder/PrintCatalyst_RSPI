@@ -147,7 +147,7 @@ func (s *Service) MarkPrepared(ctx context.Context, order, digest string) error 
 	if decodeErr != nil || len(decoded) != 32 {
 		return errors.New("prepared SHA-256 digest required")
 	}
-	result, err := s.db.ExecContext(ctx, `UPDATE kiosk_pickups SET preparation='ready',prepared_digest=? WHERE order_id=? AND state='active'`, digest, order)
+	result, err := s.db.ExecContext(ctx, `UPDATE kiosk_pickups SET preparation='ready',prepared_digest=? WHERE order_id=? AND state='active' AND (preparation<>'ready' OR prepared_digest=?)`, digest, order, digest)
 	if err != nil {
 		return err
 	}

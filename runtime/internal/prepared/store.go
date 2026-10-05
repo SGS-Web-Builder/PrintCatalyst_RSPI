@@ -14,6 +14,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
+	"time"
 )
 
 const MaxPDFBytes = 50 << 20
@@ -23,6 +25,7 @@ const maxManifest = 1 << 20
 // Settings describe the final PDF: source page selection, rotation and N-up
 // composition must already be baked into it. Copies and sides remain spool options.
 type Settings struct {
+	Pages  int    `json:"pages,omitempty"` // Final PDF pages; zero only for earlier development bundles.
 	Paper  string `json:"paper"`
 	Tray   string `json:"tray"`
 	Colour string `json:"colour"`
@@ -50,7 +53,10 @@ type Manifest struct {
 	OrderID string `json:"order_id"`
 	Jobs    []Job  `json:"jobs"`
 }
-type Store struct{ root *os.Root }
+type Store struct {
+	root        *os.Root
+	publication sync.Mutex
+}
 
 // Open requires a dedicated existing private service-owned directory.
 func Open(path string) (*Store, error) {
@@ -83,7 +89,7 @@ func identifier(v string) bool {
 	return len(v) > 0 && len(v) <= 256 && !strings.ContainsAny(v, "\x00\r\n")
 }
 func validSettings(v Settings) bool {
-	return identifier(v.Paper) && len(v.Tray) <= 256 && !strings.ContainsAny(v.Tray, "\x00\r\n") && (v.Colour == "monochrome" || v.Colour == "color") && (v.Sides == "one-sided" || v.Sides == "two-sided-long-edge" || v.Sides == "two-sided-short-edge") && v.Copies >= 1 && v.Copies <= 999
+	return identifier(v.Paper) && len(v.Tray) <= 256 && !strings.ContainsAny(v.Tray, "\x00\r\n") && (v.Colour == "monochrome" || v.Colour == "color") && (v.Sides == "one-sided" || v.Sides == "two-sided-long-edge" || v.Sides == "two-sided-short-edge") && v.Copies >= 1 && v.Copies <= 999 && v.Pages >= 0 && v.Pages <= 1000
 }
 func pdf(b []byte) bool {
 	return len(b) >= 5 && len(b) <= MaxPDFBytes && bytes.HasPrefix(b, []byte("%PDF-"))
@@ -93,13 +99,33 @@ func pdf(b []byte) bool {
 // Repeating an identical preparation reuses the bundle only after verification.
 // PDF syntax/render validation belongs to the renderer, not this storage layer.
 func (s *Store) Publish(order string, inputs []Input) (string, error) {
-	if !identifier(order) || len(inputs) == 0 || len(inputs) > 100 {
+	return s.PublishJobs(order, len(inputs), func(i int) (Input, error) { return inputs[i], nil })
+}
+
+// PublishJobs renders/writes one job at a time rather than retaining an order's PDFs.
+func (s *Store) PublishJobs(order string, count int, next func(int) (Input, error)) (string, error) {
+	s.publication.Lock()
+	defer s.publication.Unlock()
+	if !identifier(order) || count < 1 || count > 100 {
 		return "", errors.New("invalid prepared order")
 	}
+	nonce := make([]byte, 16)
+	if _, err := rand.Read(nonce); err != nil {
+		return "", err
+	}
+	tmp := ".preparing-" + hex.EncodeToString(nonce)
+	if err := s.root.Mkdir(tmp, 0700); err != nil {
+		return "", err
+	}
+	defer s.root.RemoveAll(tmp)
 	manifest := Manifest{Version: 1, OrderID: order}
-	total := 0
 	seen := map[string]bool{}
-	for i, in := range inputs {
+	total := 0
+	for i := 0; i < count; i++ {
+		in, err := next(i)
+		if err != nil {
+			return "", err
+		}
 		if !identifier(in.LineID) || seen[in.LineID] || !identifier(in.Queue) || !validSettings(in.Settings) || !pdf(in.PDF) {
 			return "", errors.New("invalid prepared job")
 		}
@@ -108,7 +134,19 @@ func (s *Store) Publish(order string, inputs []Input) (string, error) {
 		if total > MaxOrderBytes {
 			return "", errors.New("prepared order exceeds size limit")
 		}
-		manifest.Jobs = append(manifest.Jobs, Job{in.LineID, in.Queue, in.Invoice, in.Settings, fmt.Sprintf("%03d.pdf", i), digest(in.PDF), len(in.PDF)})
+		job := Job{in.LineID, in.Queue, in.Invoice, in.Settings, fmt.Sprintf("%03d.pdf", i), digest(in.PDF), len(in.PDF)}
+		if err = s.write(filepath.Join(tmp, job.File), in.PDF); err != nil {
+			return "", err
+		}
+		in.PDF = nil
+		body, err := s.read(filepath.Join(tmp, job.File), MaxPDFBytes)
+		if err != nil {
+			return "", err
+		}
+		if digest(body) != job.SHA256 {
+			return "", errors.New("PDF changed during preparation")
+		}
+		manifest.Jobs = append(manifest.Jobs, job)
 	}
 	encoded, err := json.Marshal(manifest)
 	if err != nil {
@@ -119,33 +157,10 @@ func (s *Store) Publish(order string, inputs []Input) (string, error) {
 	}
 	id := digest(encoded)
 	if _, err = s.root.Lstat(id); err == nil {
-		_, _, err = s.Load(order, id)
+		_, err = s.Verify(order, id)
 		return id, err
 	} else if !errors.Is(err, os.ErrNotExist) {
 		return "", err
-	}
-	nonce := make([]byte, 16)
-	if _, err = rand.Read(nonce); err != nil {
-		return "", err
-	}
-	tmp := ".preparing-" + hex.EncodeToString(nonce)
-	if err = s.root.Mkdir(tmp, 0700); err != nil {
-		return "", err
-	}
-	defer s.root.RemoveAll(tmp)
-	for i, job := range manifest.Jobs {
-		// Verify again after writing: a caller changing its buffer cannot publish
-		// bytes that disagree with the manifest computed above.
-		if err = s.write(filepath.Join(tmp, job.File), inputs[i].PDF); err != nil {
-			return "", err
-		}
-		b, e := s.read(filepath.Join(tmp, job.File), MaxPDFBytes)
-		if e != nil {
-			return "", e
-		}
-		if digest(b) != job.SHA256 {
-			return "", errors.New("PDF changed during preparation")
-		}
 	}
 	if err = s.write(filepath.Join(tmp, "manifest.json"), encoded); err != nil {
 		return "", err
@@ -154,8 +169,7 @@ func (s *Store) Publish(order string, inputs []Input) (string, error) {
 		return "", err
 	}
 	if err = s.root.Rename(tmp, id); err != nil {
-		// A concurrent identical publisher may have won the atomic rename.
-		if _, _, verifyErr := s.Load(order, id); verifyErr != nil {
+		if _, verifyErr := s.Verify(order, id); verifyErr != nil {
 			return "", err
 		}
 	}
@@ -163,6 +177,48 @@ func (s *Store) Publish(order string, inputs []Input) (string, error) {
 		return "", err
 	}
 	return id, nil
+}
+
+// CleanupAbandoned removes only old incomplete staging directories. Published
+// bundles are deliberately excluded, even if their database reference is absent.
+// The service must remain the sole process owning this prepared directory.
+func (s *Store) CleanupAbandoned(now time.Time) error {
+	s.publication.Lock()
+	defer s.publication.Unlock()
+	dir, err := s.root.Open(".")
+	if err != nil {
+		return err
+	}
+	defer dir.Close()
+	for {
+		entries, readErr := dir.ReadDir(100)
+		for _, entry := range entries {
+			name := entry.Name()
+			suffix := strings.TrimPrefix(name, ".preparing-")
+			if suffix == name || len(suffix) != 32 {
+				continue
+			}
+			if _, err := hex.DecodeString(suffix); err != nil {
+				continue
+			}
+			info, err := s.root.Lstat(name)
+			if err != nil {
+				return err
+			}
+			if !info.IsDir() || info.Mode()&os.ModeSymlink != 0 || !info.ModTime().Before(now.Add(-24*time.Hour)) {
+				continue
+			}
+			if err := s.root.RemoveAll(name); err != nil {
+				return err
+			}
+		}
+		if errors.Is(readErr, io.EOF) {
+			return nil
+		}
+		if readErr != nil {
+			return readErr
+		}
+	}
 }
 func (s *Store) write(name string, b []byte) error {
 	f, err := s.root.OpenFile(name, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0600)
@@ -204,7 +260,27 @@ func (s *Store) read(name string, limit int) ([]byte, error) {
 
 // Load verifies the entire order before returning any bytes. Submit these exact
 // returned bytes, never reopen original upload paths after verification.
-func (s *Store) Load(order, id string) (Manifest, [][]byte, error) {
+func (s *Store) Load(order, id string) (Manifest, [][]byte, error) { return s.load(order, id, true) }
+
+// Verify preflights all files but keeps only one PDF in memory.
+func (s *Store) Verify(order, id string) (Manifest, error) {
+	m, _, err := s.load(order, id, false)
+	return m, err
+}
+
+// ReadJob verifies the exact bytes that will be sent, including after preflight.
+func (s *Store) ReadJob(id string, j Job) ([]byte, error) {
+	if len(j.File) != 7 || j.File[3:] != ".pdf" || j.File[0] < '0' || j.File[0] > '9' || j.File[1] < '0' || j.File[1] > '9' || j.File[2] < '0' || j.File[2] > '9' || !validDigest(id) || !validDigest(j.SHA256) || j.Size < 5 || j.Size > MaxPDFBytes {
+		return nil, errors.New("invalid prepared job")
+	}
+	b, err := s.read(filepath.Join(id, j.File), MaxPDFBytes)
+	if err != nil || len(b) != j.Size || digest(b) != j.SHA256 || !pdf(b) {
+		return nil, errors.New("prepared job changed or missing")
+	}
+	return b, nil
+}
+
+func (s *Store) load(order, id string, retain bool) (Manifest, [][]byte, error) {
 	fail := func() (Manifest, [][]byte, error) {
 		return Manifest{}, nil, errors.New("prepared bundle is missing or invalid")
 	}
@@ -245,7 +321,39 @@ func (s *Store) Load(order, id string) (Manifest, [][]byte, error) {
 		if err != nil || len(b) != j.Size || digest(b) != j.SHA256 || !pdf(b) {
 			return fail()
 		}
-		data = append(data, b)
+		if retain {
+			data = append(data, b)
+		}
 	}
 	return m, data, nil
+}
+
+// DeleteCompleted removes only the named, order-bound bundle. The caller must
+// establish completion from durable job evidence before invoking this method.
+func (s *Store) DeleteCompleted(order, id string) error {
+	if !identifier(order) || !validDigest(id) {
+		return errors.New("invalid prepared identity")
+	}
+	info, err := s.root.Lstat(id)
+	if errors.Is(err, os.ErrNotExist) {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	if !info.IsDir() || info.Mode()&os.ModeSymlink != 0 {
+		return errors.New("invalid prepared directory")
+	}
+	encoded, err := s.read(filepath.Join(id, "manifest.json"), maxManifest)
+	if err != nil {
+		return err
+	}
+	var m Manifest
+	if digest(encoded) != id || json.Unmarshal(encoded, &m) != nil || m.OrderID != order || m.Version != 1 {
+		return errors.New("prepared identity mismatch")
+	}
+	if err = s.root.RemoveAll(id); err != nil {
+		return err
+	}
+	return syncDirectory(s.root, ".")
 }

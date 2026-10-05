@@ -267,7 +267,20 @@ func (d *IPPDiscoverer) probe(ctx context.Context, uri string) (map[string][]str
 	if err != nil {
 		return nil, err
 	}
-	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, uri, bytes.NewReader(req))
+	endpoint, err := url.Parse(uri)
+	if err != nil {
+		return nil, err
+	}
+	switch endpoint.Scheme {
+	case "ipp":
+		endpoint.Scheme = "http"
+	case "ipps":
+		endpoint.Scheme = "https"
+	case "http", "https":
+	default:
+		return nil, errors.New("unsupported IPP transport")
+	}
+	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, endpoint.String(), bytes.NewReader(req))
 	if err != nil {
 		return nil, err
 	}
@@ -312,8 +325,8 @@ func buildGetPrinterAttributesRequest(uri string) ([]byte, error) {
 	ippURI := parsed.String()
 
 	var b bytes.Buffer
-	b.WriteByte(0x02)                              // version-major (RFC 8010 §3.1.1)
-	b.WriteByte(0x00)                              // version-minor
+	b.WriteByte(0x02) // version-major (RFC 8010 §3.1.1)
+	b.WriteByte(0x00) // version-minor
 	binary.Write(&b, binary.BigEndian, uint16(ippOpGetPrinterAttributes))
 	binary.Write(&b, binary.BigEndian, uint32(0x1234)) // request-id (any unique number)
 	// operation-attributes-tag.
@@ -635,7 +648,7 @@ func buildDNSSDQuery(service string) []byte {
 		q = append(q, byte(len(label)))
 		q = append(q, []byte(label)...)
 	}
-	q = append(q, 0x00) // terminator
+	q = append(q, 0x00)       // terminator
 	q = append(q, 0x00, 0x0c) // type = PTR
 	q = append(q, 0x80, 0x01) // class = IN with cache-flush bit
 	return q

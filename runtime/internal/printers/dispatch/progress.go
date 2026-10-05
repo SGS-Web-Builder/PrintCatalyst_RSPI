@@ -66,7 +66,7 @@ func (d *Dispatcher) refreshJobs(ctx context.Context) {
 		state, detail, e := monitor.JobProgress(ctx, j.queue, j.id, j.order)
 		if e != nil {
 			state = "blocked"
-			detail = "Cannot read Windows printer status: " + e.Error()
+			detail = "Cannot read printer status: " + e.Error()
 		}
 		switch state {
 		case "pending", "processing", "printing", "completed", "blocked", "review":

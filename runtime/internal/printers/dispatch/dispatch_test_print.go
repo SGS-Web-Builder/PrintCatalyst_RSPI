@@ -94,7 +94,7 @@ func (d *Dispatcher) TestPrint(ctx context.Context) (TestPrintResult, error) {
 	if strings.TrimSpace(queue) == "" {
 		return TestPrintResult{}, ErrTestPrintNoQueue
 	}
-	jobID, err := d.backend.Submit(ctx, queue, TestPrintContent, DocumentRef{
+	jobID, err := d.submitTest(ctx, queue, TestPrintContent, DocumentRef{
 		OrderID:    "test-print",
 		DocumentID: "test-print",
 		PageCount:  1,
@@ -150,7 +150,7 @@ func (d *Dispatcher) TestPrintOn(ctx context.Context, queue, paper string, width
 		return TestPrintResult{}, fmt.Errorf("paper dimensions are missing; refresh the Windows printer driver")
 	}
 	content := sizedTestPDF(paper, widthMM, heightMM)
-	id, err := d.backend.Submit(ctx, queue, content, DocumentRef{OrderID: "paper-test", DocumentID: "paper-test", MIMEType: "application/pdf", PageCount: 1, PageStart: 1, PageEnd: 1, PagesPerSheet: 1, ColourMode: "monochrome", Sides: "one-sided", PaperSize: paper, Copies: 1, Orientation: "portrait"})
+	id, err := d.submitTest(ctx, queue, content, DocumentRef{OrderID: "paper-test", DocumentID: "paper-test", MIMEType: "application/pdf", PageCount: 1, PageStart: 1, PageEnd: 1, PagesPerSheet: 1, ColourMode: "monochrome", Sides: "one-sided", PaperSize: paper, Copies: 1, Orientation: "portrait"})
 	if err != nil {
 		return TestPrintResult{}, fmt.Errorf("test print failed: %w", err)
 	}
