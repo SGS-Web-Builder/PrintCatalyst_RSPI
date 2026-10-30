@@ -4,6 +4,7 @@ import (
 	"crypto/subtle"
 	"encoding/json"
 	"errors"
+	"github.com/SGS-Web-Builder/PrintCatalyst_RSPI/runtime/internal/licensegate"
 	"io"
 	"mime"
 	"net"
@@ -119,7 +120,7 @@ func ownerError(w http.ResponseWriter, err error) {
 		errors.Is(err, passport.ErrInvalid), errors.Is(err, passport.ErrBadFaceRegion), errors.Is(err, passport.ErrCompose),
 		errors.Is(err, passport.ErrUnknownPreset), errors.Is(err, passport.ErrInvalidBackground):
 		http.Error(w, err.Error(), 400)
-	case errors.Is(err, owner.ErrSetup), errors.Is(err, pricing.ErrSetup),
+	case errors.Is(err, pricing.ErrConflict), errors.Is(err, owner.ErrSetup), errors.Is(err, pricing.ErrSetup),
 		errors.Is(err, pricing.ErrUnsupportedCurrency), errors.Is(err, pricing.ErrPrecisionCorrection),
 		errors.Is(err, pricing.ErrConfirmFreePricing):
 		// 409: the request itself is well formed, but local state has to change
@@ -192,7 +193,7 @@ func (s *Server) registerOwner(mux *http.ServeMux) {
 			ownerError(w, err)
 			return
 		}
-		_ = json.NewEncoder(w).Encode(map[string]bool{"ownerExists": exists, "licenseRequired": s.licenseGate != nil})
+		_ = json.NewEncoder(w).Encode(map[string]bool{"ownerExists": exists, "licenseRequired": s.licenseGate != nil && !licensegate.Disabled})
 	}))
 	mux.HandleFunc("POST /api/v1/setup/owner", protect(func(w http.ResponseWriter, r *http.Request) {
 		var input struct {
@@ -208,7 +209,7 @@ func (s *Server) registerOwner(mux *http.ServeMux) {
 			http.Error(w, "invalid installation setup token", 403)
 			return
 		}
-		if s.licenseGate != nil {
+		if s.licenseGate != nil && !licensegate.Disabled {
 			if err := owner.ValidateCredentials(input.Username, input.Password); err != nil {
 				ownerError(w, err)
 				return

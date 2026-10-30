@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 )
 
 var ErrUnsafePath = errors.New("path escapes the protected data directory")
@@ -98,7 +99,7 @@ func (f *Files) WriteAtomic(relative string, source io.Reader) (returnError erro
 	if err := protectFile(temporaryName, temporary); err != nil {
 		return fmt.Errorf("protect temporary document: %w", err)
 	}
-	if _, err := io.Copy(temporary, source); err != nil {
+	if _, err := io.Copy(&reserveWriter{file: temporary, files: f, budget: available - f.minimumFreeBytes}, source); err != nil {
 		return fmt.Errorf("write temporary document: %w", err)
 	}
 	if err := temporary.Sync(); err != nil {
@@ -194,4 +195,35 @@ func (f *Files) rejectSymlinks(targetDirectory string) error {
 		}
 	}
 	return nil
+}
+
+// Serialize capacity checks and writes across uploads, not network reads.
+var capacityWriteMu sync.Mutex
+
+type reserveWriter struct {
+	file   *os.File
+	files  *Files
+	budget uint64
+}
+
+func (w *reserveWriter) Write(p []byte) (int, error) {
+	capacityWriteMu.Lock()
+	defer capacityWriteMu.Unlock()
+	free, err := w.files.capacity(w.files.root)
+	if err != nil {
+		return 0, err
+	}
+	needed := uint64(len(p))
+	if needed > w.budget || free < w.files.minimumFreeBytes || needed > free-w.files.minimumFreeBytes {
+		return 0, &CapacityError{Available: free, Required: w.files.minimumFreeBytes + needed}
+	}
+	n, err := w.file.Write(p)
+	w.budget -= uint64(n)
+	return n, err
+}
+
+// Capacity reports the document volume's available bytes and configured reserve.
+func (f *Files) Capacity() (uint64, uint64, error) {
+	available, err := f.capacity(f.root)
+	return available, f.minimumFreeBytes, err
 }

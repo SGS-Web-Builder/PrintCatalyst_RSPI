@@ -260,12 +260,20 @@ func (s *Store) read(name string, limit int) ([]byte, error) {
 
 // Load verifies the entire order before returning any bytes. Submit these exact
 // returned bytes, never reopen original upload paths after verification.
-func (s *Store) Load(order, id string) (Manifest, [][]byte, error) { return s.load(order, id, true) }
+func (s *Store) Load(order, id string) (Manifest, [][]byte, error) {
+	return s.load(order, id, MaxOrderBytes)
+}
 
 // Verify preflights all files but keeps only one PDF in memory.
 func (s *Store) Verify(order, id string) (Manifest, error) {
-	m, _, err := s.load(order, id, false)
+	m, _, err := s.load(order, id, 0)
 	return m, err
+}
+
+// VerifyCached preflights the whole order and retains at most 16 MiB of exact
+// verified bytes. Entries not retained are nil and must use ReadJob.
+func (s *Store) VerifyCached(order, id string) (Manifest, [][]byte, error) {
+	return s.load(order, id, 16<<20)
 }
 
 // ReadJob verifies the exact bytes that will be sent, including after preflight.
@@ -280,7 +288,7 @@ func (s *Store) ReadJob(id string, j Job) ([]byte, error) {
 	return b, nil
 }
 
-func (s *Store) load(order, id string, retain bool) (Manifest, [][]byte, error) {
+func (s *Store) load(order, id string, cacheBytes int) (Manifest, [][]byte, error) {
 	fail := func() (Manifest, [][]byte, error) {
 		return Manifest{}, nil, errors.New("prepared bundle is missing or invalid")
 	}
@@ -321,8 +329,11 @@ func (s *Store) load(order, id string, retain bool) (Manifest, [][]byte, error) 
 		if err != nil || len(b) != j.Size || digest(b) != j.SHA256 || !pdf(b) {
 			return fail()
 		}
-		if retain {
+		if len(b) <= cacheBytes {
 			data = append(data, b)
+			cacheBytes -= len(b)
+		} else {
+			data = append(data, nil)
 		}
 	}
 	return m, data, nil

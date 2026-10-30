@@ -9,8 +9,8 @@ export async function loadShopSettings(client) {
     section.innerHTML = `<h2>Printing and file retention</h2>
       <p id="shop-settings-message" role="status"></p>
       <form id="shop-policy-form" class="form-grid">
-        <label>Automatic printing<select name="autoPrintMode"><option value="off">Off — print from the orders screen</option><option value="on_payment_captured">After payment approval</option><option value="all_documents">Immediately, including unpaid orders</option></select></label>
-        <label>Default printer<select name="primaryPrinterId"></select></label>
+        <label>Automatic printing<select name="autoPrintMode"><option value="off">Off — print from the orders screen</option><option value="on_payment_captured">After payment approval</option><option value="all_documents">Allow unpaid cash orders</option></select></label>
+        <p>On this Pi, unpaid cash orders receive a pickup code when this policy is enabled. OTP entry is still required unless OTP is disabled in Kiosk settings. Online orders always require verified payment. Already released jobs continue if this policy changes.</p><label>Default printer<select name="primaryPrinterId"></select></label>
         <p>Files are deleted as soon as printing is confirmed complete. Unfinished uploads are deleted after 24 hours. Order details remain available for cross-checking, including previous days.</p><input type="hidden" name="autoDeleteEnabled" value="true">
         <input type="hidden" name="autoDeleteMinutes" value="1">
         <button type="submit">Save printing settings</button>

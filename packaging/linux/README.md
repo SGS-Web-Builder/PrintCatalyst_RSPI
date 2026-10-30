@@ -1,3 +1,19 @@
+> **Current kiosk deployment:** Follow `KIOSK-SETUP-2026-10-31.md` included in this archive. Epson configuration details are in `EPSON-EM-C800.md`. The default installation is licence-free; later development-only sections below are historical alternatives.
+
+# Current default: licence-free Linux installation
+
+Use Debian/Ubuntu with systemd on an Intel/AMD PC, or 64-bit Raspberry Pi OS on a Pi. This package retains the same dashboard and customer portal, plus the kiosk pickup flow. It does not require licence activation. Owner account and printer/shop configuration are still required.
+
+Build with `python packaging/linux/build-package.py --arch amd64` for a PC, or `--arch arm64` for Pi. Extract the matching `printcatalyst-pi-ARCH-license-free.tar.gz`, enter the extracted `printcatalyst-pi` directory, then run:
+
+```sh
+sudo sh install.sh
+```
+
+Installation downloads dependencies, starts CUPS and PrintCatalyst, and attempts to open your desktop browser. If no window appears, open **http://localhost:8080/** yourself. Customer portal: **http://localhost:8080/portal/**. Retrieve the first-owner setup token with `sudo cat /var/lib/printcatalyst-kiosk/owner-setup-token.txt`, then create your owner login and configure the shop/printers. No licence key is needed. Phone access still requires LAN/domain configuration; localhost always means the device running the browser.
+
+The installer preserves existing credentials/data and refuses to replace an actively running service: check no print is active, then `sudo systemctl stop printcatalyst-kiosk` before updating. Diagnostics: `sudo journalctl -u printcatalyst-kiosk -n 80`. This is a testable package, not a hardware-qualified release. The optional licensed/development build instructions below describe alternate modes; the default installer now starts/enables the service in every mode.
+
 # Development Pi startup
 
 These files are scaffolding, not a qualified installer. Use a development Raspberry Pi with a 64-bit Linux OS and systemd supporting LoadCredential. Read ../../docs/LINUX-SECURITY.md first. No production licence signing keys belong on the Pi.
@@ -20,8 +36,8 @@ The runtime now serves the touchscreen and numeric keypad at http://127.0.0.1:80
 1. Provision the Pi keys and start the runtime using the development service instructions above.
 2. Open Chromium under a separate, unprivileged desktop account: `chromium --kiosk http://127.0.0.1:8081/` (binary naming depends on your Pi image).
 3. From a local administrator terminal in this repository, run `sudo python3 packaging/linux/pair-screen.py`.
-4. Open **Merchant · Pair this screen** on the touchscreen and enter the displayed 12-character code within two minutes. Do not save/share the code or capture it in logs.
-5. Pairing grants this browser a 12-hour session. Pair again after expiry or a runtime restart. Pairing a new screen invalidates the previous session. Browser automatic startup is not installed by this change.
+4. Open `http://127.0.0.1:8081/admin/pair/` in the same Chromium profile used by the touchscreen and enter the displayed 12-character code within two minutes. Do not save/share the code or capture it in logs.
+5. Pairing survives runtime restarts. Pair again if the browser profile is cleared, the pairing expires or the kiosk credential changes. Pairing a new screen invalidates the previous session. Browser automatic startup is not installed by this change.
 6. Customers enter their four-digit pickup code and press **Print my order**. An accepted response means queued, not physically printed. For an interrupted response, ask the attendant to check the order rather than resubmitting.
 
 The helper reads only the separate root-owned kiosk credential. It disables environment proxies and HTTP redirects, sends the credential only to literal loopback, and displays only a temporary one-use pairing code. Chromium never receives the permanent credential. Do not grant the browser account access to the key or unrestricted sudo. This setup requires Linux/Pi acceptance testing; real printer and systemd execution remain unqualified.
@@ -76,14 +92,13 @@ Development builds must not be distributed as merchant releases.
 On a development Pi, extract the archive, enter `printcatalyst-pi`, and run
 `sudo sh install.sh`. Internet access is needed for OS/Python packages. The installer
 refuses an active application service and preserves existing device credentials.
-It installs dependencies and verifies the unit, but does not start or enable the
-application. Configure a CUPS queue, then follow the startup/pairing steps above.
+It installs dependencies, verifies the unit, and starts/enables the application and CUPS. Configure a CUPS queue, then complete dashboard setup and touchscreen pairing.
 In the extracted archive, helper paths are directly `provision-device.sh`,
 `pair-screen.py`, `screen-autostart.py`, and `requirements.txt`.
 
 Optional desktop autostart: run `python3 screen-autostart.py` as the desktop user,
 without sudo. Chromium opens the kiosk after desktop login. Use `--remove` to undo.
-This does not enable automatic OS login or bypass screen pairing. The desktop account
+Desktop autostart alone does not enable automatic OS login or bypass screen pairing. The desktop account
 must remain separate from the service account and must not have credential access.
 
 Before restarting for an update, confirm no printing is active and stop the service.

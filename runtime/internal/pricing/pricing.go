@@ -20,6 +20,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/SGS-Web-Builder/PrintCatalyst_RSPI/runtime/internal/currency"
+	"github.com/SGS-Web-Builder/PrintCatalyst_RSPI/runtime/internal/licensegate"
 	"github.com/SGS-Web-Builder/PrintCatalyst_RSPI/runtime/internal/provisioning"
 )
 
@@ -37,6 +38,7 @@ const (
 )
 
 var (
+	ErrConflict = errors.New("prices changed; reload and review before saving")
 	ErrInvalid  = errors.New("invalid pricing configuration")
 	ErrSetup    = errors.New("business details must be saved before pricing")
 	ErrNotFound = errors.New("pricing is not configured")
@@ -95,7 +97,8 @@ type Book struct {
 // as an unknown field rather than trusted, because it would change the meaning of
 // every amount in the same request.
 type Input struct {
-	Entries []Entry `json:"entries"`
+	ExpectedRevision *int64  `json:"expectedRevision,omitempty"`
+	Entries          []Entry `json:"entries"`
 	// ConfirmPrecisionCorrection must be true to overwrite a book that was saved
 	// under a different exponent. It is the merchant's explicit acknowledgement,
 	// given after reviewing each amount on screen.
@@ -164,6 +167,9 @@ func (s *Service) Save(ctx context.Context, input Input) (Book, error) {
 		return Book{}, err
 	}
 	defer transaction.Rollback()
+	if err := checkRevision(ctx, transaction, input.ExpectedRevision); err != nil {
+		return Book{}, err
+	}
 
 	var profileRaw string
 	err = transaction.QueryRowContext(ctx, `SELECT profile_json FROM business_profile WHERE singleton = 1`).Scan(&profileRaw)
@@ -230,10 +236,16 @@ func (s *Service) Save(ctx context.Context, input Input) (Book, error) {
 	}
 
 	var gateCount int
-	if err := transaction.QueryRowContext(ctx, `SELECT COUNT(*) FROM provisioning_gates WHERE completed_at IS NOT NULL AND gate IN ('licence','owner','business')`).Scan(&gateCount); err != nil {
+	prerequisiteQuery := `SELECT COUNT(*) FROM provisioning_gates WHERE completed_at IS NOT NULL AND gate IN ('licence','owner','business')`
+	requiredGates := 3
+	if licensegate.Disabled {
+		prerequisiteQuery = `SELECT COUNT(*) FROM provisioning_gates WHERE completed_at IS NOT NULL AND gate IN ('owner','business')`
+		requiredGates = 2
+	}
+	if err := transaction.QueryRowContext(ctx, prerequisiteQuery).Scan(&gateCount); err != nil {
 		return Book{}, err
 	}
-	if gateCount != 3 {
+	if gateCount != requiredGates {
 		return Book{}, ErrSetup
 	}
 
@@ -280,7 +292,14 @@ ON CONFLICT(singleton) DO UPDATE SET currency = excluded.currency, currency_mino
 	}
 	// Complete the pricing gate only now that valid pricing is durably stored
 	// and every earlier gate is complete. Later gates stay incomplete.
-	if err := provisioning.CompleteGateInTx(ctx, transaction, provisioning.GatePricing, fmt.Sprintf("local pricing persisted: %d entries", len(normalized)), s.now()); err != nil {
+	if licensegate.Disabled {
+		// Local readiness reads persisted prices. Record completion without inventing
+		// a licence activation or requiring the legacy licensed gate order.
+		_, err = transaction.ExecContext(ctx, `INSERT INTO provisioning_gates(gate,completed_at,evidence) VALUES('pricing',?,?) ON CONFLICT(gate) DO UPDATE SET completed_at=excluded.completed_at,evidence=excluded.evidence`, s.now().UTC().Format(time.RFC3339Nano), fmt.Sprintf("local pricing persisted: %d entries", len(normalized)))
+	} else {
+		err = provisioning.CompleteGateInTx(ctx, transaction, provisioning.GatePricing, fmt.Sprintf("local pricing persisted: %d entries", len(normalized)), s.now())
+	}
+	if err != nil {
 		return Book{}, err
 	}
 	auditID, err := randomID()

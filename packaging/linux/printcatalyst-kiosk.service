@@ -17,7 +17,7 @@ Environment=HOME=/var/lib/printcatalyst-kiosk
 LoadCredential=device-sealing-key:/etc/printcatalyst-kiosk/device-sealing.key
 LoadCredential=kiosk-client-key:/etc/printcatalyst-kiosk/kiosk-client.key
 ExecStart=/usr/local/lib/printcatalyst-kiosk/printcatalyst-kiosk
-Restart=on-failure
+Restart=always
 RestartSec=5
 TimeoutStopSec=30
 UMask=0077

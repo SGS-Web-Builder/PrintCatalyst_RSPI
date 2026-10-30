@@ -19,6 +19,7 @@ var hexIDPattern = regexp.MustCompile(`^[a-f0-9]{32}$`)
 // Both routes require a valid owner/operator session and CanViewOrders
 // permission (owner and operator may see the queue).
 func (s *Server) registerOwnerOrders(mux *http.ServeMux) {
+	s.registerCashConfirmation(mux)
 	protect := func(fn http.HandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
 			if !s.localOwnerRequest(w, r) {

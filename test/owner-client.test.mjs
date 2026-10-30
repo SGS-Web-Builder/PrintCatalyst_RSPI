@@ -23,8 +23,14 @@ test('owner client exposes a failed local save and never treats it as success',a
 test('kiosk recovery actions use authenticated owner writes',async()=>{
  const calls=[];const client=createOwnerClient(async(path,options)=>{calls.push({path,options});return {ok:true,status:200,json:async()=>({csrfToken:'recovery-csrf'})};});
  await client.request('POST','/api/v1/owner/login',{});
- for(const action of ['pickup/reissue','preparation/retry']){
+ for(const action of ['pickup/reissue','preparation/retry','cash-confirm']){
  await client.request('POST','/api/v1/owner/orders/abc12345abc12345abc12345abc12345/'+action,{});
  assert.equal(calls.at(-1).options.headers['X-CSRF-Token'],'recovery-csrf');
  }
+});
+
+test('cash action allowlist remains restricted to local order paths',async()=>{
+ let calls=0;const client=createOwnerClient(async()=>{calls++;return {ok:true,json:async()=>({})};});
+ for(const path of ['https://example.com/api/v1/owner/orders/id/cash-confirm','//example.com/api/v1/owner/orders/id/cash-confirm','/api/v1/owner/orders/id/cash-confirm/extra'])await assert.rejects(client.request('POST',path,{}),/local owner endpoints/);
+ assert.equal(calls,0);
 });

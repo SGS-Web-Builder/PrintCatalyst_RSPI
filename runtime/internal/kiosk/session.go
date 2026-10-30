@@ -18,7 +18,7 @@ import (
 var assets embed.FS
 
 func (s *Server) serveAsset(w http.ResponseWriter, r *http.Request) bool {
-	names := map[string]string{"/": "index.html", "/kiosk.js": "kiosk.js", "/kiosk.css": "kiosk.css"}
+	names := map[string]string{"/": "index.html", "/kiosk.js": "kiosk.js", "/kiosk.css": "kiosk.css", "/ads.js": "ads.js", "/admin/pair/": "pair.html", "/pair.js": "pair.js"}
 	name, ok := names[r.URL.Path]
 	if !ok {
 		return false
@@ -40,9 +40,9 @@ func (s *Server) serveAsset(w http.ResponseWriter, r *http.Request) bool {
 		respond(w, 503, "unavailable")
 		return true
 	}
-	types := map[string]string{"index.html": "text/html; charset=utf-8", "kiosk.js": "text/javascript; charset=utf-8", "kiosk.css": "text/css; charset=utf-8"}
+	types := map[string]string{"index.html": "text/html; charset=utf-8", "pair.html": "text/html; charset=utf-8", "pair.js": "text/javascript; charset=utf-8", "kiosk.js": "text/javascript; charset=utf-8", "ads.js": "text/javascript; charset=utf-8", "kiosk.css": "text/css; charset=utf-8"}
 	w.Header().Set("Content-Type", types[name])
-	w.Header().Set("Content-Security-Policy", "default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'")
+	w.Header().Set("Content-Security-Policy", "default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self'; media-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'")
 	_, _ = w.Write(data)
 	return true
 }

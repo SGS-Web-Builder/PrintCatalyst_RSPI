@@ -95,6 +95,7 @@ type QueueResolver interface {
 
 // DispatcherConfig bundles the tunables for the dispatcher loop.
 type DispatcherConfig struct {
+	OnPrepared    func()
 	Prepared      *prepared.Store
 	Renderer      PreparationRenderer
 	RequirePickup bool // Production Pi releases require a durable physical kiosk claim.
@@ -130,6 +131,7 @@ type Dispatcher struct {
 	mu        sync.Mutex
 	seen      map[string]bool // order ids already submitted (idempotency)
 	lastError error
+	wake      chan struct{}
 	tickMu    sync.Mutex
 }
 
@@ -147,6 +149,7 @@ func New(db *sql.DB, docs *documents.Service, backend PrinterBackend, resolver Q
 		resolver: resolver,
 		config:   config,
 		seen:     map[string]bool{},
+		wake:     make(chan struct{}, 1),
 	}
 }
 
@@ -179,6 +182,8 @@ func (d *Dispatcher) Run(ctx context.Context) error {
 		select {
 		case <-ctx.Done():
 			return ctx.Err()
+		case <-d.wake:
+			d.tick(ctx)
 		case <-ticker.C:
 			d.tick(ctx)
 		}
@@ -527,4 +532,13 @@ func (d *Dispatcher) recordManualFailure(ctx context.Context, id, line, queue st
 	_, err := d.db.ExecContext(ctx, `INSERT OR IGNORE INTO print_submissions(line_id,state,queue_name,error,updated_at)
  SELECT ?,'failed',?,?,? FROM orders WHERE id=? AND print_requested=1`, line, queue, cause.Error(), time.Now().Unix(), id)
 	return errors.Join(fmt.Errorf("order %s: %w", id, cause), err)
+}
+
+// Wake requests an immediate scan after a committed pickup release. Requests
+// coalesce; the normal durable polling loop remains the restart fallback.
+func (d *Dispatcher) Wake() {
+	select {
+	case d.wake <- struct{}{}:
+	default:
+	}
 }

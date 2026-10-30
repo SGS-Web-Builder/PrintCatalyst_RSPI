@@ -28,6 +28,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"github.com/SGS-Web-Builder/PrintCatalyst_RSPI/runtime/internal/webnotify"
 	"log"
 	"net"
 	"os"
@@ -297,12 +298,14 @@ func main() {
 	docs := documents.New(files, database.DB())
 	dispatchConfig := dispatch.DefaultDispatcherConfig()
 	dispatchConfig.LicenseCheck = softwareLicense.Check
+	dispatchConfig.OnPrepared = pickupSvc.NotifyPrepared
 	backend, dispatchConfig, closePrinting, err := platformPrinting(settings.DataDirectory, dispatchConfig)
 	if err != nil {
 		fatalf(diagnostic, "print runtime startup failed: %v", err)
 	}
 	defer closePrinting()
 	dispatcher := dispatch.New(database.DB(), docs, backend, dispatch.NewDBQueueResolver(database.DB()), dispatchConfig)
+	go pickupSvc.RunWaiting(runCtx, softwareLicense.Check, dispatcher.Wake)
 	var printWorkers *dispatch.Workers
 	if dispatchConfig.Prepared != nil {
 		printWorkers = dispatch.NewWorkers(dispatcher)
@@ -366,11 +369,21 @@ func main() {
 			return state.reload(ctx, server)
 		}),
 	)
+	customerPush, pushErr := webnotify.New(database.DB())
+	if pushErr != nil {
+		fatalf(diagnostic, "customer notification initialization failed: %v", pushErr)
+	}
+	localserver.WithCustomerPush(customerPush)(server)
+	go server.RunRemote(runCtx)
 	kioskServer, err := kiosk.NewPlatform(database.DB(), pickupSvc, softwareLicense.Check)
+	if kioskServer != nil {
+		kioskServer.SetReleaseNotifier(dispatcher.Wake)
+		kioskServer.SetAdsDirectory(filepath.Join(dataDir, "ads"))
+	}
 	if err != nil {
 		fatalf(diagnostic, "physical kiosk startup failed: %v", err)
 	}
-	components := []supervisor.Component{database, server, kioskServer}
+	components := []supervisor.Component{database, server, kioskServer, customerPush}
 	if printWorkers != nil {
 		components = append(components, printWorkers)
 	}

@@ -5,8 +5,8 @@ export function queueState(order) {
   const docs=[...(order.documents || []),...(order.separators || [])];
   if(docs.length && docs.every(d=>d.printState==='completed'))return 'done';
   if(order.status==='failed' || docs.some(d=>['failed','blocked'].includes(d.printState)))return 'failed';
-  if(docs.some(d=>['waiting','submitting','processing','review'].includes(d.printState)) || order.printRequested)return 'processing';
   if(docs.some(d=>['printing','submitted'].includes(d.printState)))return 'printing';
+  if(docs.some(d=>['waiting','submitting','processing','review'].includes(d.printState)) || order.printRequested)return 'processing';
   if(!docs.length && order.status==='dispatched')return 'printing';
   return 'pending';
 }
@@ -50,8 +50,9 @@ export function createOrderQueue(client,getRole) {
   function metric(label,value){const box=el('div','oq-metric');box.append(el('strong','',value),el('small','',label));return box;}
   function actionButtons(o) {
     const group=el('div','oq-actions'),state=queueState(o),jobs=[...o.documents,...(o.separators||[])];
-    if(getRole()==='owner' && o.kioskMode && o.preparationFailed && o.status==='paid'){const b=button('Retry document preparation',()=>retryPreparation(o),'oq-button oq-preview');b.disabled=busy.has(o.id);group.append(b);}
-    if(getRole()==='owner' && o.kioskMode && o.pickupExpired && o.status==='paid'){
+    if(getRole()==='owner' && o.kioskMode && o.status==='pending_payment' && o.paymentMethod==='cash_on_counter'){const b=button('Confirm cash received',()=>confirmCash(o),'oq-button oq-release');b.disabled=busy.has(o.id);group.append(b);}
+    if(getRole()==='owner' && o.kioskMode && o.preparationFailed && ['paid','pending_payment'].includes(o.status)){const b=button('Retry document preparation',()=>retryPreparation(o),'oq-button oq-preview');b.disabled=busy.has(o.id);group.append(b);}
+    if(getRole()==='owner' && o.kioskMode && o.pickupExpired && ['paid','pending_payment'].includes(o.status)){
       const b=button('Replace expired pickup code',()=>reissue(o),'oq-button oq-preview');b.disabled=busy.has(o.id);group.append(b);
     }
     if(getRole()==='owner' && !o.kioskMode && state==='pending' && !o.documents.some(d=>d.printState)){
@@ -64,6 +65,12 @@ export function createOrderQueue(client,getRole) {
       const done=button('Confirm printed · Mark done',()=>transition(o,'print_completed'),'oq-button oq-preview');done.disabled=busy.has(o.id);group.append(done);
     }
     return group;
+  }
+  async function confirmCash(o){
+    if(busy.has(o.id)||!window.confirm('Confirm you received the full cash amount for this order? Printing follows the kiosk OTP / AutoPrint setting.'))return;
+    busy.add(o.id);render();
+    try{await client.request('POST',`/api/v1/owner/orders/${o.id}/cash-confirm`,{confirm:true});await refresh();announce('Cash receipt recorded. Ask the customer to keep their receipt open for print release.');}
+    catch(error){announce(error.message);}finally{busy.delete(o.id);render();}
   }
   async function retryPreparation(o){
     if(busy.has(o.id)||!window.confirm('Check printer configuration, renderer dependencies and the document first. Retry preparation? This does not release printing.'))return;
@@ -139,7 +146,7 @@ export function createOrderQueue(client,getRole) {
     if(getRole()==='owner'){
       if(['pending_payment','paid','dispatched'].includes(o.status)){const reject=button('✕ Reject',()=>transition(o,'cancelled'),'oq-button oq-danger');reject.disabled=busy.has(o.id);actions.append(reject);}
     }
-    footer.append(actions);main.append(footer,el('p','oq-footnote','One-click release uses the customer’s saved settings. Status follows Windows every second. If Windows removes a job without reporting completion, confirm the output and mark done. Payment is tracked separately.'));
+    footer.append(actions);main.append(footer,el('p','oq-footnote','CUPS finishing a job does not confirm physical output. Check every page, copy and invoice before choosing Confirm printed. Files are retained while output needs review. Check the printer queue before retrying; some pages may already have printed.'));
   }
   async function refresh(){
     if(loading)return;loading=true;

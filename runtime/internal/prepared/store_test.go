@@ -268,3 +268,36 @@ func TestStreamedPublicationAndTamperAfterPreflight(t *testing.T) {
 		t.Fatal("tamper accepted after preflight")
 	}
 }
+
+func TestBoundedVerifiedCache(t *testing.T) {
+	s, dir := fixture(t)
+	inputs := input()
+	first := inputs[0]
+	first.PDF = append([]byte("%PDF-"), bytes.Repeat([]byte("x"), 9<<20)...)
+	second := first
+	second.LineID = "second"
+	id, err := s.Publish("cache-order", []Input{first, second})
+	if err != nil {
+		t.Fatal(err)
+	}
+	m, data, err := s.VerifyCached("cache-order", id)
+	if err != nil || len(data) != 2 || !bytes.Equal(data[0], first.PDF) || data[1] != nil {
+		t.Fatal("cache bound/contents", err)
+	}
+	original := append([]byte(nil), data[0]...)
+	if err = os.WriteFile(filepath.Join(dir, id, m.Jobs[0].File), []byte("%PDF-changed"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(original, data[0]) {
+		t.Fatal("verified snapshot changed")
+	}
+	if err = os.WriteFile(filepath.Join(dir, id, m.Jobs[1].File), []byte("%PDF-changed"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	if _, err = s.ReadJob(id, m.Jobs[1]); err == nil {
+		t.Fatal("uncached tamper accepted")
+	}
+	if _, data, err = s.VerifyCached("cache-order", id); err == nil || data != nil {
+		t.Fatal("corrupt preflight returned bytes")
+	}
+}

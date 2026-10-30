@@ -27,6 +27,20 @@ def pixels(data):
 
 
 class RendererTests(unittest.TestCase):
+    def test_all_pages_survive_one_up_rendering(self):
+        metadata, data = render(header(pages=[1,2,3], nup=1), source_pdf())
+        self.assertEqual(metadata["pages"], 3)
+        doc = pdfium.PdfDocument(data)
+        self.assertEqual(len(doc), 3)
+        for i in range(3):
+            page = doc[i]; bitmap = page.render(scale=0.5)
+            image = bitmap.to_pil().convert("RGB")
+            rgb = image.getpixel((image.width//2, image.height//2))
+            self.assertGreater(rgb[i], 240)
+            self.assertLess(sum(rgb)-rgb[i], 30)
+            bitmap.close(); page.close()
+        doc.close()
+
     def test_preview_selects_page_and_bounds_dimensions(self):
         metadata, data = render_preview({"page": 2}, source_pdf())
         image = Image.open(io.BytesIO(data))

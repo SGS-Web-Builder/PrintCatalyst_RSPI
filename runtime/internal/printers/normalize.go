@@ -1,6 +1,9 @@
 package printers
 
 import (
+	"math"
+	"regexp"
+	"strconv"
 	"strings"
 )
 
@@ -38,10 +41,8 @@ func NormalizeIPPAttributes(attrs RawAttributes) *Snapshot {
 			continue
 		}
 		if !containsPaperSize(snap.PaperSizes, key) {
-			snap.PaperSizes = append(snap.PaperSizes, PaperSize{
-				Key:      key,
-				RawLabel: label,
-			})
+			width, height := mediaDimensions(label)
+			snap.PaperSizes = append(snap.PaperSizes, PaperSize{Key: key, RawLabel: label, WidthMM: width, HeightMM: height})
 		}
 	}
 
@@ -53,11 +54,7 @@ func NormalizeIPPAttributes(attrs RawAttributes) *Snapshot {
 		if !ok {
 			continue
 		}
-		merged := upsertPaperSize(snap.PaperSizes, size)
-		if merged.WidthMM == 0 && merged.HeightMM == 0 {
-			// Driver gave us a structured entry but no dimensions; skip.
-			_ = merged
-		}
+		snap.PaperSizes = upsertPaperSize(snap.PaperSizes, size)
 	}
 
 	// Tray list.
@@ -82,6 +79,17 @@ func NormalizeIPPAttributes(attrs RawAttributes) *Snapshot {
 		}
 	}
 
+	// Legacy CUPS PPD queues may report color-supported without modern modes.
+	if len(snap.ColourModes) == 0 {
+		for _, value := range attrs["color-supported"] {
+			switch strings.ToLower(value) {
+			case "false":
+				snap.ColourModes = []string{"monochrome"}
+			case "true":
+				snap.ColourModes = []string{"monochrome", "colour"}
+			}
+		}
+	}
 	// Sides.
 	for _, v := range attrs["sides-supported"] {
 		switch strings.ToLower(strings.TrimSpace(v)) {
@@ -94,6 +102,10 @@ func NormalizeIPPAttributes(attrs RawAttributes) *Snapshot {
 		}
 	}
 
+	// IPP permits omission of sides-supported for simplex-only printers.
+	if len(attrs["sides-supported"]) == 0 {
+		snap.SidesModes = []string{"one-sided"}
+	}
 	// Finishings (staple, punch).
 	for _, v := range attrs["finishings-supported"] {
 		ft, key := normalizeFinishing(v)
@@ -146,7 +158,7 @@ func containsPaperSize(list []PaperSize, key string) bool {
 	return false
 }
 
-func upsertPaperSize(list []PaperSize, size PaperSize) PaperSize {
+func upsertPaperSize(list []PaperSize, size PaperSize) []PaperSize {
 	for i, p := range list {
 		if p.Key == size.Key {
 			merged := p
@@ -160,11 +172,10 @@ func upsertPaperSize(list []PaperSize, size PaperSize) PaperSize {
 				merged.HeightMM = size.HeightMM
 			}
 			list[i] = merged
-			return merged
+			return list
 		}
 	}
-	list = append(list, size)
-	return size
+	return append(list, size)
 }
 
 // parseMediaColDatabase extracts a paper key + dimensions from one
@@ -262,4 +273,24 @@ func atoiSafe(s string) int {
 		n = n*10 + int(c-'0')
 	}
 	return n
+}
+
+// PWG media names carry their physical dimensions; do not guess custom sizes.
+var mediaDimensionPattern = regexp.MustCompile(`(?i)(?:_| )([0-9]+(?:\.[0-9]+)?)x([0-9]+(?:\.[0-9]+)?)(mm|in)$`)
+
+func mediaDimensions(label string) (int, int) {
+	m := mediaDimensionPattern.FindStringSubmatch(strings.TrimSpace(label))
+	if m == nil {
+		return 0, 0
+	}
+	w, _ := strconv.ParseFloat(m[1], 64)
+	h, _ := strconv.ParseFloat(m[2], 64)
+	if strings.EqualFold(m[3], "in") {
+		w *= 25.4
+		h *= 25.4
+	}
+	if w <= 0 || h <= 0 || w > 10000 || h > 10000 {
+		return 0, 0
+	}
+	return int(math.Round(w)), int(math.Round(h))
 }

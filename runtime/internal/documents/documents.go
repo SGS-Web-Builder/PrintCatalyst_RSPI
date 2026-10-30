@@ -138,7 +138,7 @@ func (s *Service) Save(ctx context.Context, orderID string, hdr *multipart.FileH
 		return Document{}, fmt.Errorf("create document directory: %w", err)
 	}
 	fullPath := filepath.Join(s.files.DataRoot(), blobPath)
-	if err := os.WriteFile(fullPath, body, 0644); err != nil {
+	if err := s.files.WriteAtomic(blobPath, bytes.NewReader(body)); err != nil {
 		_ = os.Remove(fullPath)
 		return Document{}, fmt.Errorf("write document blob: %w", err)
 	}

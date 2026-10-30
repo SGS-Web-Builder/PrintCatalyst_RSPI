@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"fmt"
 	"math/big"
+	"time"
 )
 
 // ReissueExpired is owner-authorized recovery, never payment verification or
@@ -17,14 +18,18 @@ func (s *Service) ReissueExpired(ctx context.Context, order string) error {
 	}
 	defer tx.Rollback()
 	var state, status, reference string
-	var expires int64
+	var expires, created int64
 	var oldHash []byte
-	err = tx.QueryRowContext(ctx, `SELECT p.state,p.expires_at,p.code_hash,p.payment_reference,o.status
- FROM kiosk_pickups p JOIN orders o ON o.id=p.order_id WHERE p.order_id=?`, order).Scan(&state, &expires, &oldHash, &reference, &status)
+	err = tx.QueryRowContext(ctx, `SELECT p.state,p.expires_at,p.code_hash,p.payment_reference,o.status,p.created_at
+ FROM kiosk_pickups p JOIN orders o ON o.id=p.order_id WHERE p.order_id=?`, order).Scan(&state, &expires, &oldHash, &reference, &status, &created)
 	if err != nil {
 		return ErrUnavailable
 	}
-	if status != "paid" || reference == "" || (state != "active" && state != "expired") {
+	var eligible bool
+	if err = tx.QueryRowContext(ctx, "SELECT EXISTS(SELECT 1 FROM kiosk_eligible_orders WHERE id=?)", order).Scan(&eligible); err != nil {
+		return err
+	}
+	if !eligible || reference == "" || (state != "active" && state != "expired") {
 		return ErrUnavailable
 	}
 	var dispatched bool
@@ -37,7 +42,15 @@ func (s *Service) ReissueExpired(ctx context.Context, order string) error {
 		return ErrUnavailable
 	}
 	now := s.now().Unix()
-	if state == "active" && expires > now {
+	expiry, e := dayEnd(ctx, tx, s.now())
+	if e != nil {
+		return e
+	}
+	previousEnd, e := dayEnd(ctx, tx, time.Unix(created, 0))
+	if e != nil {
+		return e
+	}
+	if state == "active" && expires > now && previousEnd > now {
 		return nil
 	}
 	if _, err = tx.ExecContext(ctx, `UPDATE kiosk_pickups SET state='expired' WHERE state='active' AND expires_at<=?`, now); err != nil {
@@ -54,7 +67,7 @@ func (s *Service) ReissueExpired(ctx context.Context, order string) error {
 			continue
 		}
 		var used bool
-		if err = tx.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM kiosk_pickups WHERE state='active' AND code_hash=?)`, hash).Scan(&used); err != nil {
+		if err = tx.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM kiosk_pickups WHERE expires_at>? AND code_hash=?)`, now, hash).Scan(&used); err != nil {
 			return err
 		}
 		if used {
@@ -65,7 +78,7 @@ func (s *Service) ReissueExpired(ctx context.Context, order string) error {
 			return err
 		}
 		sealed := s.aead.Seal(nonce, nonce, []byte(code), []byte(order))
-		if _, err = tx.ExecContext(ctx, `UPDATE kiosk_pickups SET state='active',code_hash=?,code_cipher=?,expires_at=? WHERE order_id=?`, hash, sealed, now+86400, order); err != nil {
+		if _, err = tx.ExecContext(ctx, `UPDATE kiosk_pickups SET state='active',code_hash=?,code_cipher=?,expires_at=?,created_at=? WHERE order_id=?`, hash, sealed, expiry, now, order); err != nil {
 			return err
 		}
 		return tx.Commit()

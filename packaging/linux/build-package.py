@@ -12,6 +12,10 @@ import tempfile
 
 ROOT = Path(__file__).resolve().parents[2]
 FILES = {
+    "KIOSK-SETUP-2026-10-31.md": "docs/KIOSK-SETUP-2026-10-31.md",
+    "configure-epson.py": "packaging/linux/configure-epson.py",
+    "EPSON-EM-C800.md": "docs/EPSON-EM-C800.md",
+    "diagnose-print.py": "packaging/linux/diagnose-print.py",
     "screen-launcher.py": "packaging/linux/screen-launcher.py",
     "enable-kiosk-boot.sh": "packaging/linux/enable-kiosk-boot.sh",
     "install.sh": "packaging/linux/install.sh",
@@ -24,8 +28,10 @@ FILES = {
 }
 
 
-def build_args(development, public_key):
+def build_args(development, public_key, license_free=False):
     args = ["go", "build", "-trimpath"]
+    if license_free:
+        return args + ["-tags", "licensefree"]
     if not development:
         try:
             key = base64.b64decode(public_key, validate=True)
@@ -40,23 +46,26 @@ def build_args(development, public_key):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    mode = parser.add_mutually_exclusive_group(required=True)
+    mode = parser.add_mutually_exclusive_group(required=False)
     mode.add_argument("--development", action="store_true")
     mode.add_argument("--public-key", help="Publisher PUBLIC verification key (base64)")
+    mode.add_argument("--license-free", action="store_true", help="No licence activation (default)")
+    parser.add_argument("--arch", choices=["arm64", "amd64"], default="arm64")
     opts = parser.parse_args()
-    args = build_args(opts.development, opts.public_key)
-    kind = "development" if opts.development else "production"
-    output = ROOT / "build" / f"printcatalyst-pi-arm64-{kind}.tar.gz"
+    license_free = opts.license_free or not (opts.development or opts.public_key)
+    args = build_args(opts.development, opts.public_key, license_free)
+    kind = "license-free" if license_free else ("development" if opts.development else "production")
+    output = ROOT / "build" / f"printcatalyst-pi-{opts.arch}-{kind}.tar.gz"
     output.parent.mkdir(exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="pi-package-") as temp:
         binary = Path(temp) / "printcatalyst-kiosk"
-        env = dict(os.environ, GOOS="linux", GOARCH="arm64", CGO_ENABLED="0")
+        env = dict(os.environ, GOOS="linux", GOARCH=opts.arch, CGO_ENABLED="0")
         subprocess.run(args + ["-o", str(binary), "./cmd/print-catalyst-on-premise"],
                        cwd=ROOT / "runtime", env=env, check=True)
         payload = {name: (ROOT / source).read_bytes().replace(b"\r\n", b"\n")
                    for name, source in FILES.items()}
         payload["printcatalyst-kiosk"] = binary.read_bytes()
-        manifest = {"mode": kind, "platform": "linux/arm64", "hardware_qualified": False,
+        manifest = {"mode": kind, "platform": "linux/"+opts.arch, "hardware_qualified": False,
                     "sha256": {name: hashlib.sha256(data).hexdigest() for name, data in payload.items()}}
         payload["manifest.json"] = json.dumps(manifest, indent=2).encode() + b"\n"
         payload["SHA256SUMS"] = "".join(f"{hashlib.sha256(data).hexdigest()}  {name}\n"
@@ -70,6 +79,9 @@ def main():
                 archive.addfile(info, io.BytesIO(data))
         output.write_bytes(temporary.read_bytes())
     print(output)
+    if license_free:
+        print("No licence activation required. Hardware qualification remains outstanding.")
+        return
     print("Not hardware qualified. Development builds are not merchant releases." if opts.development
           else "Production enforcement enabled; Pi activation and hardware acceptance still required.")
 

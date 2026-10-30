@@ -332,15 +332,15 @@ func buildGetPrinterAttributesRequest(uri string) ([]byte, error) {
 	// operation-attributes-tag.
 	b.WriteByte(ippTagDelimiter)
 	// attributes-charset = utf-8
-	writeAttr(&b, "attributes-charset", ippTagKeyword, []string{"utf-8"})
+	writeAttr(&b, "attributes-charset", 0x47, []string{"utf-8"})
 	// attributes-natural-language = en
-	writeAttr(&b, "attributes-natural-language", ippTagKeyword, []string{"en"})
+	writeAttr(&b, "attributes-natural-language", 0x48, []string{"en"})
 	// printer-uri = URI from caller
 	writeAttr(&b, "printer-uri", ippTagURI, []string{ippURI})
 	// requesting all common attribute groups.
 	writeAttr(&b, "requested-attributes", ippTagKeyword,
 		[]string{"all", "media-supported", "media-col-database", "media-source-supported",
-			"print-color-mode-supported", "sides-supported", "finishings-supported",
+			"print-color-mode-supported", "color-supported", "sides-supported", "finishings-supported",
 			"output-bin-supported", "printer-name", "printer-info", "printer-location",
 			"printer-make-and-model"})
 	// end-of-attributes-tag.
@@ -352,9 +352,13 @@ func buildGetPrinterAttributesRequest(uri string) ([]byte, error) {
 // values are also restricted to US-ASCII per RFC 8010 §3.5.4 (with the
 // documented exceptions for text-without-language which we don't use).
 func writeAttr(b *bytes.Buffer, name string, valueTag byte, values []string) {
-	b.WriteByte(valueTag)
-	writeName(b, name)
-	for _, v := range values {
+	for i, v := range values {
+		b.WriteByte(valueTag)
+		if i == 0 {
+			writeName(b, name)
+		} else {
+			writeName(b, "")
+		}
 		writeString(b, v)
 	}
 }
@@ -388,212 +392,94 @@ func writeString(b *bytes.Buffer, v string) {
 // field packed as a big-endian uint16. Any version mismatch is a fatal
 // error — IPP/2.0 is the only protocol we implement.
 func parseGetPrinterAttributesResponse(body []byte) (map[string][]string, error) {
-	if len(body) < 8 {
-		return nil, errors.New("ipp response too short")
+	bad := func() (map[string][]string, error) { return nil, errors.New("malformed IPP attributes") }
+	if len(body) < 9 || (body[0] != 1 && body[0] != 2) {
+		return bad()
 	}
-	if body[0] != 0x02 || body[1] != 0x00 {
-		return nil, fmt.Errorf("unsupported ipp version %d.%d", body[0], body[1])
-	}
-	statusCode := binary.BigEndian.Uint16(body[2:4])
-	if statusCode != ippStatusOK {
-		return nil, fmt.Errorf("ipp error status=%d", statusCode)
+	if binary.BigEndian.Uint16(body[2:4]) != ippStatusOK {
+		return nil, errors.New("unsuccessful IPP response")
 	}
 	out := map[string][]string{}
-	r := bytes.NewReader(body[8:])
-	for r.Len() > 0 {
-		tag, err := r.ReadByte()
-		if err != nil {
-			break
-		}
-		// end-of-attributes-tag: every attribute group is over.
-		if tag == ippTagEnd {
-			break
-		}
-		// Delimiter tags (0x01..0x05) mark the start of an
-		// attribute group; they are NOT followed by an attribute
-		// name. The next byte is the value-tag of the first
-		// attribute in the group.
-		if tag >= 0x01 && tag <= 0x05 {
-			continue
-		}
-		// Read attribute name (length-prefixed).
-		var nameLen uint16
-		if err := binary.Read(r, binary.BigEndian, &nameLen); err != nil {
-			return nil, fmt.Errorf("read attr name length: %w", err)
-		}
-		nameBytes := make([]byte, nameLen)
-		if _, err := io.ReadFull(r, nameBytes); err != nil {
-			return nil, fmt.Errorf("read attr name: %w", err)
-		}
-		name := string(nameBytes)
-		// Read value(s) until next delimiter or end-of-attributes tag.
-		values, err := readAttrValues(r, tag)
-		if err != nil {
-			// Skip unknown tags rather than failing the entire probe.
-			continue
-		}
-		out[name] = append(out[name], values...)
-	}
-	return out, nil
-}
-
-// readAttrValues consumes one or more values for an attribute whose
-// value-tag has already been read. Per RFC 8010 §3.5.5, multi-valued
-// attributes encode each value with its own length prefix (for string
-// types) or 4-byte integer (for numeric types); there is no repeated
-// value-tag byte between values.
-//
-// The reader keeps consuming values until it sees a delimiter byte
-// (0x01..0x05) or the end-of-attributes tag (0x03). When the byte
-// following a value does not look like a delimiter and the next two
-// bytes form a plausible length (<=1024, which is well over any
-// realistic attribute value), we treat them as another value of the
-// same attribute. Otherwise we push back and let the outer loop read
-// the next attribute.
-func readAttrValues(r *bytes.Reader, tag byte) ([]string, error) {
-	var values []string
-	for r.Len() > 0 {
-		next, err := r.ReadByte()
-		if err != nil {
-			return values, err
-		}
-		if next == ippTagEnd {
-			break
-		}
-		if next >= 0x01 && next <= 0x05 {
-			if err := r.UnreadByte(); err != nil {
-				return values, err
+	offset := 8
+	name := ""
+	depth := 0
+	for offset < len(body) {
+		tag := body[offset]
+		offset++
+		if tag == 3 {
+			if depth != 0 {
+				return bad()
 			}
-			break
+			return out, nil
 		}
-		// Try to interpret the byte after `next` as the high byte
-		// of a value-length. If the implied length is unreasonable
-		// for a single value, treat `next` as the tag of the next
-		// attribute and push both bytes back.
+		if tag < 0x10 {
+			if depth != 0 {
+				return bad()
+			}
+			name = ""
+			continue
+		}
+		if offset+2 > len(body) {
+			return bad()
+		}
+		n := int(binary.BigEndian.Uint16(body[offset:]))
+		offset += 2
+		if offset+n+2 > len(body) {
+			return bad()
+		}
+		nextName := string(body[offset : offset+n])
+		offset += n
+		size := int(binary.BigEndian.Uint16(body[offset:]))
+		offset += 2
+		if offset+size > len(body) {
+			return bad()
+		}
+		value := body[offset : offset+size]
+		offset += size
+		// Skip collection members structurally without losing following attributes.
+		if depth > 0 {
+			if tag == 0x34 {
+				depth++
+			}
+			if tag == 0x37 {
+				depth--
+			}
+			continue
+		}
+		if n > 0 {
+			name = nextName
+		} else if name == "" {
+			return bad()
+		}
+		if tag == 0x34 {
+			depth = 1
+			continue
+		}
+		var text string
 		switch tag {
-		case ippTagKeyword, ippTagURI, ippTagName, ippTagText, ippTagMemberAttr:
-			if r.Len() < 1 {
-				if err := r.UnreadByte(); err != nil {
-					return values, err
-				}
-				return values, nil
+		case 0x21, 0x23:
+			if size != 4 {
+				return bad()
 			}
-			second, err := r.ReadByte()
-			if err != nil {
-				if err := r.UnreadByte(); err != nil {
-					return values, err
-				}
-				return values, nil
+			text = fmt.Sprint(int32(binary.BigEndian.Uint32(value)))
+		case 0x22:
+			if size != 1 || value[0] > 1 {
+				return bad()
 			}
-			length := int(next)<<8 | int(second)
-			if length < 0 || length > 8192 || length > r.Len() {
-				// Push back both bytes — the outer loop will
-				// read `next` as a new attribute's tag.
-				if err := r.UnreadByte(); err != nil {
-					return values, err
-				}
-				if err := r.UnreadByte(); err != nil {
-					return values, err
-				}
-				return values, nil
+			text = fmt.Sprint(value[0] == 1)
+		case 0x33:
+			if size != 8 {
+				return bad()
 			}
-			// Reconstruct the length bytes so readValue can
-			// re-read them.
-			if err := r.UnreadByte(); err != nil {
-				return values, err
-			}
-			if err := r.UnreadByte(); err != nil {
-				return values, err
-			}
+			text = fmt.Sprintf("%d-%d", int32(binary.BigEndian.Uint32(value)), int32(binary.BigEndian.Uint32(value[4:])))
+		case 0x41, 0x42, 0x44, 0x45, 0x47, 0x48, 0x49:
+			text = string(value)
+		default:
+			continue
 		}
-		v, err := readValue(r, tag)
-		if err != nil {
-			return values, err
-		}
-		values = append(values, v)
+		out[name] = append(out[name], text)
 	}
-	return values, nil
-}
-
-// readValue reads exactly one value of the supplied value-tag. Strings use
-// the 2-byte length-prefix; integers read 4 bytes big-endian; booleans
-// read a single byte; ranges are emitted as "lower-upper".
-func readValue(r *bytes.Reader, tag byte) (string, error) {
-	switch tag {
-	case ippTagKeyword, ippTagURI, ippTagName, ippTagText, ippTagMemberAttr:
-		var n uint16
-		if err := binary.Read(r, binary.BigEndian, &n); err != nil {
-			return "", err
-		}
-		buf := make([]byte, n)
-		if _, err := io.ReadFull(r, buf); err != nil {
-			return "", err
-		}
-		return string(buf), nil
-	case ippTagInteger, ippTagEnum:
-		var n int32
-		if err := binary.Read(r, binary.BigEndian, &n); err != nil {
-			return "", err
-		}
-		return fmt.Sprintf("%d", n), nil
-	case ippTagBoolean:
-		var b byte
-		if err := binary.Read(r, binary.BigEndian, &b); err != nil {
-			return "", err
-		}
-		if b == 1 {
-			return "true", nil
-		}
-		return "false", nil
-	case ippTagRangeOfInt:
-		var lo, hi int32
-		if err := binary.Read(r, binary.BigEndian, &lo); err != nil {
-			return "", err
-		}
-		if err := binary.Read(r, binary.BigEndian, &hi); err != nil {
-			return "", err
-		}
-		return fmt.Sprintf("%d-%d", lo, hi), nil
-	case ippTagCollection, ippTagBeginCollect:
-		skipCollection(r)
-		return "", nil
-	default:
-		return "", fmt.Errorf("unsupported tag 0x%02X", tag)
-	}
-}
-
-// skipCollection walks past a collection value by reading attribute-value
-// pairs until the end-of-collection marker (0x37) is encountered.
-func skipCollection(r *bytes.Reader) {
-	depth := 1
-	for depth > 0 {
-		b, err := r.ReadByte()
-		if err != nil {
-			return
-		}
-		switch b {
-		case ippTagEnd:
-			return
-		case ippTagBeginCollect:
-			depth++
-		case ippTagEndCollect:
-			depth--
-			if depth == 0 {
-				return
-			}
-		}
-		// We are skipping; a real decoder would track the
-		// name/value structure, but for our use case the only
-		// collection we ever see is "media-col-database" which
-		// is large but linearly terminated.
-		var n uint16
-		if err := binary.Read(r, binary.BigEndian, &n); err != nil {
-			return
-		}
-		if _, err := r.Seek(int64(n), io.SeekCurrent); err != nil {
-			return
-		}
-	}
+	return bad()
 }
 
 // DNS-SD browse for "_ipp._tcp.local." — minimal implementation that sends

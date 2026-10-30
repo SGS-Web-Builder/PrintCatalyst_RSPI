@@ -144,10 +144,10 @@ func (d *Dispatcher) TestPrintOn(ctx context.Context, queue, paper string, width
 		}
 	}
 	if !found {
-		return TestPrintResult{}, fmt.Errorf("printer queue is unavailable in Windows: %s", queue)
+		return TestPrintResult{}, fmt.Errorf("printer queue is unavailable: %s", queue)
 	}
 	if widthMM <= 0 || heightMM <= 0 {
-		return TestPrintResult{}, fmt.Errorf("paper dimensions are missing; refresh the Windows printer driver")
+		return TestPrintResult{}, fmt.Errorf("paper dimensions are missing; refresh the printer capabilities")
 	}
 	content := sizedTestPDF(paper, widthMM, heightMM)
 	id, err := d.submitTest(ctx, queue, content, DocumentRef{OrderID: "paper-test", DocumentID: "paper-test", MIMEType: "application/pdf", PageCount: 1, PageStart: 1, PageEnd: 1, PagesPerSheet: 1, ColourMode: "monochrome", Sides: "one-sided", PaperSize: paper, Copies: 1, Orientation: "portrait"})

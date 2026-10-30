@@ -1,0 +1,20 @@
+CREATE TABLE kiosk_control(singleton INTEGER PRIMARY KEY CHECK(singleton=1), paused INTEGER NOT NULL DEFAULT 0 CHECK(paused IN(0,1)), reason TEXT NOT NULL DEFAULT '', updated_at INTEGER NOT NULL DEFAULT 0);
+INSERT INTO kiosk_control(singleton) VALUES(1);
+CREATE TABLE price_revision(singleton INTEGER PRIMARY KEY CHECK(singleton=1), revision INTEGER NOT NULL DEFAULT 0);
+INSERT INTO price_revision(singleton) VALUES(1);
+CREATE TRIGGER price_book_insert AFTER INSERT ON pricing_book BEGIN UPDATE price_revision SET revision=revision+1; END;
+CREATE TRIGGER price_book_update AFTER UPDATE ON pricing_book BEGIN UPDATE price_revision SET revision=revision+1; END;
+CREATE TRIGGER price_override_insert AFTER INSERT ON printer_price_books BEGIN UPDATE price_revision SET revision=revision+1; END;
+CREATE TRIGGER price_override_update AFTER UPDATE ON printer_price_books BEGIN UPDATE price_revision SET revision=revision+1; END;
+CREATE TRIGGER price_override_delete AFTER DELETE ON printer_price_books BEGIN UPDATE price_revision SET revision=revision+1; END;
+CREATE TABLE price_schedules(id TEXT PRIMARY KEY, scope TEXT NOT NULL, input_json TEXT NOT NULL, due_at INTEGER NOT NULL, state TEXT NOT NULL DEFAULT 'pending', detail TEXT NOT NULL DEFAULT '', created_at INTEGER NOT NULL);
+CREATE TABLE remote_audit(id INTEGER PRIMARY KEY AUTOINCREMENT, action TEXT NOT NULL, detail TEXT NOT NULL, occurred_at INTEGER NOT NULL);
+CREATE TABLE printer_telemetry(printer_id TEXT PRIMARY KEY, payload TEXT NOT NULL, checked_at INTEGER NOT NULL);
+CREATE TABLE remote_commands(id TEXT PRIMARY KEY, kind TEXT NOT NULL, state TEXT NOT NULL, detail TEXT NOT NULL DEFAULT '', created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL);
+CREATE TABLE remote_refunds(order_id TEXT PRIMARY KEY, intent_id TEXT NOT NULL, provider_id TEXT NOT NULL, payment_id TEXT NOT NULL, amount INTEGER NOT NULL, currency TEXT NOT NULL, request_id TEXT NOT NULL UNIQUE, gateway_id TEXT NOT NULL DEFAULT '', state TEXT NOT NULL, reason TEXT NOT NULL, updated_at INTEGER NOT NULL);
+CREATE TRIGGER price_currency_update AFTER UPDATE ON business_profile BEGIN UPDATE price_revision SET revision=revision+1; END;
+
+CREATE TRIGGER remote_price_audit AFTER UPDATE ON price_revision WHEN NEW.revision<>OLD.revision BEGIN INSERT INTO remote_audit(action,detail,occurred_at) VALUES('pricing.revision','Revision '||NEW.revision,unixepoch()); END;
+CREATE TRIGGER remote_schedule_audit AFTER UPDATE OF state ON price_schedules BEGIN INSERT INTO remote_audit(action,detail,occurred_at) VALUES('pricing.schedule',NEW.id||': '||NEW.state,unixepoch()); END;
+CREATE TRIGGER remote_command_audit AFTER UPDATE OF state ON remote_commands BEGIN INSERT INTO remote_audit(action,detail,occurred_at) VALUES('service.command',NEW.id||': '||NEW.state,unixepoch()); END;
+CREATE TRIGGER remote_refund_audit AFTER UPDATE OF state ON remote_refunds BEGIN INSERT INTO remote_audit(action,detail,occurred_at) VALUES('refund.status',NEW.order_id||': '||NEW.state,unixepoch()); END;

@@ -23,9 +23,27 @@ class PackageTests(unittest.TestCase):
         self.assertIn(".ReleasePublicKey=" + key, args[-1])
         self.assertNotIn("production", builder.build_args(True, None))
 
+    def test_license_free_build_needs_no_key(self):
+        self.assertIn("licensefree", builder.build_args(False, None, True))
+
+    def test_license_free_archives(self):
+        for arch, machine in [("amd64", 62), ("arm64", 183)]:
+            with self.subTest(arch=arch):
+                path = builder.ROOT / f"build/printcatalyst-pi-{arch}-license-free.tar.gz"
+                with tarfile.open(path) as archive:
+                    data={m.name.split("/",1)[1]:archive.extractfile(m).read() for m in archive.getmembers()}
+                manifest=json.loads(data["manifest.json"])
+                self.assertEqual(manifest["mode"], "license-free")
+                self.assertEqual(manifest["platform"], "linux/"+arch)
+                self.assertEqual(int.from_bytes(data["printcatalyst-kiosk"][18:20],"little"),machine)
+                for line in data["SHA256SUMS"].decode().splitlines():
+                    digest,name=line.split("  ",1)
+                    self.assertEqual(hashlib.sha256(data[name]).hexdigest(),digest)
+                self.assertIn(b"systemctl enable --now printcatalyst-kiosk.service",data["install.sh"])
+
     def test_archive_is_allowlisted_and_matches_checksums(self):
-        path = builder.ROOT / "build/printcatalyst-pi-arm64-development.tar.gz"
-        self.assertTrue(path.exists(), "Build development package first")
+        path = builder.ROOT / "build/printcatalyst-pi-arm64-license-free.tar.gz"
+        self.assertTrue(path.exists(), "Build ARM64 license-free package first")
         with tarfile.open(path) as archive:
             members = archive.getmembers()
             expected = set(builder.FILES) | {"printcatalyst-kiosk", "manifest.json", "SHA256SUMS"}
@@ -35,7 +53,7 @@ class PackageTests(unittest.TestCase):
         for line in data["SHA256SUMS"].decode().splitlines():
             digest, name = line.split("  ", 1)
             self.assertEqual(hashlib.sha256(data[name]).hexdigest(), digest)
-        self.assertEqual(json.loads(data["manifest.json"])["mode"], "development")
+        self.assertEqual(json.loads(data["manifest.json"])["mode"], "license-free")
         binary = data["printcatalyst-kiosk"]
         self.assertEqual(binary[:4], b"\x7fELF")
         self.assertEqual(binary[4], 2)  # ELF64

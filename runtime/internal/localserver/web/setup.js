@@ -1028,16 +1028,16 @@ function showDesktopNotification(event) {
     Notification.requestPermission().then(permission => {
       if (permission === 'granted') {
         try {
-          new Notification('New print order', {
-            body: `${event.customerName} placed an order for ${event.totalMinor} minor units`,
+          new Notification('Order received — not yet printed', {
+            body: `${event.customerName || 'Customer'} · ${fromMinorUnits(event.totalMinor,event.currencyMinorUnits)} ${event.currency || ''}. Check Orders for print status.`,
           });
         } catch (_) { /* sandbox or permission denied */ }
       }
     });
   } else if (Notification.permission === 'granted') {
     try {
-      new Notification('New print order', {
-        body: `${event.customerName} placed an order for ${event.totalMinor} minor units`,
+      new Notification('Order received — not yet printed', {
+        body: `${event.customerName || 'Customer'} · ${fromMinorUnits(event.totalMinor,event.currencyMinorUnits)} ${event.currency || ''}. Check Orders for print status.`,
       });
     } catch (_) { /* sandbox or permission denied */ }
   }
@@ -1914,6 +1914,17 @@ function describeLicenceState(status) {
 }
 
 function renderLicence(status) {
+  if(status.licenseFree){
+    document.getElementById('permanent-license-key').closest('label').hidden=true;
+    for(const id of ['licence-activate','licence-transfer','licence-revoke'])document.getElementById(id).hidden=true;
+    const help=document.getElementById('permanent-license-key').closest('label').nextElementSibling;
+    if(help)help.textContent='No licence key or activation is required for this Linux edition.';
+    licenceInstallationId().textContent=status.installationId;
+    licenceFingerprint().textContent='Not required';licencePublicKey().textContent='Not required';
+    licenceEdition().textContent='Licence-free Linux';licenceSupportUntil().textContent='No licence expiry';
+    licenceVerifiedAt().textContent='Not required';licenceState().textContent=status.message;
+    licenceEntitlementsList().textContent='All software features';return;
+  }
   if(status.permanentLicense){
     licenceInstallationId().textContent=status.installationId;licenceFingerprint().textContent=status.licenseId||'Not activated';licencePublicKey().textContent='Publisher signature verified by the service';licenceEdition().textContent='Permanent · all features';licenceSupportUntil().textContent='Lifetime (no subscription expiry)';licenceVerifiedAt().textContent=status.active?'Activated once · no recurring checks':'Not yet activated';licenceState().textContent=status.message;document.getElementById('licence-transfer').hidden=true;document.getElementById('licence-revoke').hidden=true;licenceEntitlementsList().textContent='All software features on one shop computer';return;
   }

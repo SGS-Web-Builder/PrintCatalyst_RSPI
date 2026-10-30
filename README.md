@@ -1,3 +1,5 @@
+> **31 October kiosk setup:** Start with [the Pi + Epson + touchscreen deployment guide](docs/KIOSK-SETUP-2026-10-31.md). It covers updating the existing Pi, Epson LAN configuration, screen pairing, Cloudflare and payment acceptance.
+
 # Print Catalyst Raspberry Pi Kiosk
 
 Independent Raspberry Pi touchscreen kiosk edition of Print Catalyst.

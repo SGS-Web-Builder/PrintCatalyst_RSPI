@@ -27,20 +27,22 @@ type Claimer interface {
 	Claim(context.Context, string) (string, error)
 }
 type Server struct {
-	db           *sql.DB
-	pickup       Claimer
-	check        func(context.Context) error
-	credential   [32]byte
-	now          func() time.Time
-	mu           sync.Mutex
-	server       *http.Server
-	listener     net.Listener
-	serveErr     error
-	sessionMu    sync.Mutex
-	ticketHash   [32]byte
-	ticketUntil  time.Time
-	sessionHash  [32]byte
-	sessionUntil time.Time
+	releaseNotifier func()
+	adsDir          string
+	db              *sql.DB
+	pickup          Claimer
+	check           func(context.Context) error
+	credential      [32]byte
+	now             func() time.Time
+	mu              sync.Mutex
+	server          *http.Server
+	listener        net.Listener
+	serveErr        error
+	sessionMu       sync.Mutex
+	ticketHash      [32]byte
+	ticketUntil     time.Time
+	sessionHash     [32]byte
+	sessionUntil    time.Time
 }
 
 func New(db *sql.DB, p Claimer, key []byte, check func(context.Context) error) (*Server, error) {
@@ -49,6 +51,12 @@ func New(db *sql.DB, p Claimer, key []byte, check func(context.Context) error) (
 	}
 	return &Server{db: db, pickup: p, check: check, credential: sha256.Sum256([]byte("Bearer " + base64.RawURLEncoding.EncodeToString(key))), now: time.Now}, nil
 }
+
+// SetReleaseNotifier must be called before starting the server. It must not block.
+func (s *Server) SetReleaseNotifier(fn func()) { s.releaseNotifier = fn }
+
+func (s *Server) SetAdsDirectory(dir string) { s.adsDir = dir }
+
 func (s *Server) Handler() http.Handler { return http.HandlerFunc(s.handle) }
 func (s *Server) handle(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Cache-Control", "no-store")
@@ -69,7 +77,7 @@ func (s *Server) handle(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	if s.serveAsset(w, r) {
+	if s.serveAsset(w, r) || s.serveAds(w, r) {
 		return
 	}
 	if r.Header.Get("Origin") != "http://"+Address {
@@ -95,6 +103,18 @@ func (s *Server) handle(w http.ResponseWriter, r *http.Request) {
 	}
 	if !bearer {
 		http.SetCookie(w, &http.Cookie{Name: "pc_kiosk", Value: r.CookiesNamed("pc_kiosk")[0].Value, Path: "/api/v1/kiosk/", HttpOnly: true, SameSite: http.SameSiteStrictMode, MaxAge: 365 * 24 * 60 * 60})
+	}
+	if r.URL.Path == "/api/v1/kiosk/events" {
+		s.events(w, r)
+		return
+	}
+	if r.URL.Path == "/api/v1/kiosk/screen" {
+		s.screen(w, r)
+		return
+	}
+	if r.URL.Path == "/api/v1/kiosk/dismiss" {
+		s.dismiss(w, r)
+		return
 	}
 	if r.URL.Path == "/api/v1/kiosk/progress" {
 		s.progress(w, r)
@@ -137,9 +157,16 @@ func (s *Server) handle(w http.ResponseWriter, r *http.Request) {
 	order, err := s.pickup.Claim(r.Context(), input.Code)
 	switch {
 	case err == nil:
+		if s.releaseNotifier != nil {
+			s.releaseNotifier()
+		}
 		s.accepted(w, r, order)
 	case errors.Is(err, pickup.ErrPreparing):
-		respond(w, 409, "preparing")
+		if order == "" {
+			respond(w, 503, "assistance")
+			return
+		}
+		s.accepted(w, r, order, "preparing")
 	case errors.Is(err, pickup.ErrUnavailable):
 		respond(w, 400, "invalid_code")
 	default:

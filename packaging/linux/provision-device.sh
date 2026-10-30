@@ -3,7 +3,7 @@
 set -eu
 umask 077
 [ "$(id -u)" = 0 ] || { echo 'Run as root on the target development Pi.' >&2; exit 1; }
-[ -r /sys/firmware/devicetree/base/serial-number ] || { echo 'Pi board identity is unavailable.' >&2; exit 1; }
+[ -r /sys/firmware/devicetree/base/serial-number ] || [ -s /etc/machine-id ] || { echo 'Linux machine identity is unavailable.' >&2; exit 1; }
 config=/etc/printcatalyst-kiosk
 state=/var/lib/printcatalyst-kiosk
 for path in "$config" "$state"; do

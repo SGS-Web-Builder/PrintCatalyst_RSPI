@@ -34,8 +34,8 @@ func (d *Dispatcher) cleanupPrepared(ctx context.Context) error {
 	// Payment, submission, cancelled jobs and expired codes are not completion.
 	rows, err := d.db.QueryContext(ctx, `SELECT k.order_id,k.prepared_digest FROM kiosk_preparations k WHERE k.state='ready' AND k.purged_at=0
  AND EXISTS(SELECT 1 FROM order_lines WHERE order_id=k.order_id)
- AND NOT EXISTS(SELECT 1 FROM order_lines l LEFT JOIN print_submissions j ON j.line_id=l.id WHERE l.order_id=k.order_id AND (COALESCE(j.state,'')<>'submitted' OR COALESCE(j.progress,'')<>'completed'))
- AND NOT EXISTS(SELECT 1 FROM separator_invoices i WHERE i.order_id=k.order_id AND i.state<>'skipped' AND (i.state<>'submitted' OR i.progress<>'completed')) LIMIT 50`)
+ AND NOT EXISTS(SELECT 1 FROM order_lines l LEFT JOIN print_submissions j ON j.line_id=l.id WHERE l.order_id=k.order_id AND (COALESCE(j.state,'')<>'submitted' OR COALESCE(j.progress,'')<>'completed' OR (j.job_id LIKE 'cups:%' AND j.progress_detail<>'Printed output confirmed by merchant')))
+ AND NOT EXISTS(SELECT 1 FROM separator_invoices i WHERE i.order_id=k.order_id AND i.state<>'skipped' AND (i.state<>'submitted' OR i.progress<>'completed' OR (i.job_id LIKE 'cups:%' AND i.progress_detail<>'Printed output confirmed by merchant'))) LIMIT 50`)
 	if err != nil {
 		return err
 	}

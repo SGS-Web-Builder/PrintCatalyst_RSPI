@@ -28,6 +28,14 @@ func (d *Dispatcher) monitorJobs(ctx context.Context) {
 }
 
 func (d *Dispatcher) refreshJobs(ctx context.Context) {
+	// Older builds treated CUPS scheduler completion as physical completion.
+	// Restore review for those rows, but never undo a merchant confirmation.
+	for _, table := range []string{"print_submissions", "separator_invoices"} {
+		if _, err := d.db.ExecContext(ctx, "UPDATE "+table+" SET progress='review',progress_detail='CUPS finished sending the job; confirm all physical output before marking done' WHERE job_id LIKE 'cups:%' AND progress='completed' AND progress_detail<>'Printed output confirmed by merchant'"); err != nil {
+			d.setLastError(err)
+			return
+		}
+	}
 	d.refreshSeparatorJobs(ctx)
 	monitor, ok := d.backend.(JobMonitor)
 	if !ok {

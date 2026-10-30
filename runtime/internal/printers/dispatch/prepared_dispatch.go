@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/SGS-Web-Builder/PrintCatalyst_RSPI/runtime/internal/licensegate"
 	"github.com/SGS-Web-Builder/PrintCatalyst_RSPI/runtime/internal/prepared"
+	"log/slog"
 	"time"
 )
 
@@ -22,10 +23,12 @@ func (d *Dispatcher) dispatchPrepared(ctx context.Context, id, printer, service 
 	if err := d.db.QueryRowContext(ctx, `SELECT r.prepared_digest FROM kiosk_releases r JOIN kiosk_preparations p ON p.order_id=r.order_id WHERE r.order_id=? AND p.state='ready' AND p.prepared_digest=r.prepared_digest`, id).Scan(&digest); err != nil {
 		return err
 	}
-	manifest, err := d.config.Prepared.Verify(id, digest)
+	started := time.Now()
+	manifest, cached, err := d.config.Prepared.VerifyCached(id, digest)
 	if err != nil {
 		return err
 	}
+	slog.Info("print_preflight", "order", shortHash(id), "elapsed_ms", time.Since(started).Milliseconds())
 	type work struct {
 		index int
 		state string
@@ -121,7 +124,11 @@ func (d *Dispatcher) dispatchPrepared(ctx context.Context, id, printer, service 
 		if err = licensegate.CheckRequired(ctx, d.config.LicenseCheck); err != nil {
 			return err
 		}
-		data, readErr := d.config.Prepared.ReadJob(digest, j)
+		data := cached[job.index]
+		var readErr error
+		if data == nil {
+			data, readErr = d.config.Prepared.ReadJob(digest, j)
+		}
 		if readErr != nil {
 			return readErr
 		}
@@ -141,7 +148,10 @@ func (d *Dispatcher) dispatchPrepared(ctx context.Context, id, printer, service 
 		if n != 1 {
 			return errors.New("submission already claimed; review required")
 		}
+		submitStarted := time.Now()
 		jobID, submitErr := d.backend.Submit(ctx, j.Queue, data, preparedRef(id, j))
+		slog.Info("print_submission", "order", shortHash(id), "line", shortHash(j.LineID), "elapsed_ms", time.Since(submitStarted).Milliseconds(), "since_preflight_ms", time.Since(started).Milliseconds(), "bytes", len(data), "accepted", submitErr == nil && jobID != "")
+		cached[job.index] = nil
 		state, detail := "submitted", ""
 		if submitErr != nil || jobID == "" {
 			state = "failed"
@@ -170,5 +180,13 @@ func (d *Dispatcher) dispatchPrepared(ctx context.Context, id, printer, service 
 	if _, err = tx.ExecContext(ctx, `UPDATE documents SET dispatched_at=? WHERE order_id=? AND dispatched_at=0`, time.Now().Unix(), id); err != nil {
 		return err
 	}
-	return tx.Commit()
+	if err = tx.Commit(); err != nil {
+		return err
+	}
+	// Unpaid cash deliberately remains pending_payment. Do not re-read and hash
+	// its entire prepared bundle on every 20ms dispatch tick after submission.
+	d.mu.Lock()
+	d.seen[id] = true
+	d.mu.Unlock()
+	return nil
 }

@@ -37,8 +37,8 @@ func (s *Server) registerPrinterSetup(mux *http.ServeMux) {
 			http.Error(w, "Printer service unavailable", 503)
 			return
 		}
-		if p.Backend != "windows" {
-			http.Error(w, "Install this printer in Windows to test it from this application", 409)
+		if p.Backend != "windows" && p.Backend != "ipp" && p.Backend != "ipps" {
+			http.Error(w, "This printer backend does not support test printing", 409)
 			return
 		}
 		if p.Capabilities != nil {

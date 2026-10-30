@@ -31,8 +31,8 @@ test('pickup display rejects malformed codes and never renders markup',()=>{
 function portal(fetchFn=async()=>new Response('{}'), extras={}) {
  const elements=new Map();
  const element=selector=>{if(!elements.has(selector))elements.set(selector,{classList:{toggle(){}},disabled:false,hidden:false,value:'',textContent:'',parentElement:{hidden:false,querySelectorAll:()=>[]},before(){},focus(){this.focused=true}});return elements.get(selector);};
- const ctx=vm.createContext({createImageComposer,window:{addEventListener(){}},document:{createElement:()=>({textContent:''}),querySelector:element,getElementById:id=>element('#'+id),querySelectorAll:()=>[]},fetch:fetchFn,Response,JSON,console,URL,setTimeout,clearTimeout,...extras});
- vm.runInContext(source.replace(/^import .*image-composer.mjs[^']*';\r?\n/, '')+'\n globalThis.api={renderPickup,handleStatusUpdate,restoreCustomerPhone,rememberCustomerPhone,initializePortal,persistOrderReceipt,prepareRecovery(callback){loadPricing=async()=>{};showConfirmation=callback},uploadWithProgress,state,beginCheckout,configureCustomerDetails,mockSubmit(fn){placeOrder=fn},pagesForMode,readResponse,requestQuote,updateCheckoutButtons,setReady(value){quoteReady=value},setPlacing(value){placingOrder=value}};',ctx);
+ const ctx=vm.createContext({prepareNotifications:()=>Promise.resolve(),subscribeOrder:()=>Promise.resolve(),notificationReceipt:()=>null,createImageComposer,window:{addEventListener(){}},document:{createElement:()=>({textContent:''}),querySelector:element,getElementById:id=>element('#'+id),querySelectorAll:()=>[]},fetch:fetchFn,Response,JSON,console,URL,setTimeout,clearTimeout,...extras});
+ vm.runInContext(source.replace(/^import .*payment-notifications.mjs';\r?\n/, '').replace(/^import .*image-composer.mjs[^']*';\r?\n/, '')+'\n globalThis.api={uploadFiles,prepareUpload(send){uploadWithProgress=send;renderUploadedFiles=()=>{};loadPricing=async()=>{};renderConfig=()=>{}},retryPayment,renderPickup,handleStatusUpdate,restoreCustomerPhone,rememberCustomerPhone,initializePortal,persistOrderReceipt,prepareRecovery(callback){loadPricing=async()=>{};showConfirmation=callback},uploadWithProgress,state,beginCheckout,configureCustomerDetails,mockSubmit(fn){placeOrder=fn},pagesForMode,readResponse,requestQuote,updateCheckoutButtons,setReady(value){quoteReady=value},setPlacing(value){placingOrder=value}};',ctx);
  return {api:ctx.api,element};
 }
 test('real portal displays readiness and non-JSON server errors',async()=>{
@@ -81,7 +81,8 @@ test('payment choice opens customer details without creating an order',()=>{
  api.state.razorpayReady=true;api.beginCheckout('razorpay');
  assert.equal(api.state.paymentMethod,'razorpay');
  assert.equal(element('#confirm-order-btn').textContent,'Continue to payment');
- assert.equal(element('#details-summary').textContent,'12.00 INR · Pay Online');
+ assert.match(element('#details-summary').textContent,/12\.00 INR.*Pay Online/);
+ assert.match(element('#details-summary').textContent,/return to this page for your 4-digit pickup code/);
  assert.equal(requests,0);
 });
 
@@ -169,4 +170,48 @@ test('phone cache requires consent, expires, and does not bypass disabled custom
  element('#order-form [name="customerPhone"]').disabled=false;
  values.set('pc-customer-phone',JSON.stringify({phone:'old',expires:1}));
  api.restoreCustomerPhone();assert.equal(values.size,0);
+});
+
+test('receipt recovery falls back to compact receipt without losing OTP authorization',()=>{
+ let saved;const {api}=portal(undefined,{sessionStorage:{setItem(k,v){if(JSON.parse(v).files.length)throw new Error('quota');saved=JSON.parse(v)},removeItem(){}}});
+ assert.equal(api.persistOrderReceipt({orderId:'order',shareToken:'private-token',paymentMethod:'razorpay',files:[{large:'preview'}]}),true);
+ assert.equal(saved.shareToken,'private-token');assert.equal(saved.orderId,'order');assert.equal(saved.paymentMethod,'razorpay');
+});
+test('receipt persistence reports unavailable storage before payment navigation',()=>{
+ const {api}=portal(undefined,{sessionStorage:{setItem(){throw new Error('disabled')},removeItem(){throw new Error('must not delete draft')}}});
+ assert.equal(api.persistOrderReceipt({orderId:'order',shareToken:'private-token'}),false);
+});
+
+test('payment retry does not navigate or call gateway when receipt cannot survive return',async()=>{
+ let calls=0;
+ const {api,element}=portal(async()=>{calls++;throw new Error('unexpected payment request')},{sessionStorage:{setItem(){throw new Error('disabled')},removeItem(){}}});
+ api.state.orderId='order';api.state.shareToken='private';api.state.paymentMethod='razorpay';
+ await api.retryPayment();
+ assert.equal(calls,0);
+ assert.match(element('#payment-error').textContent,/Allow site storage/);
+ assert.equal(element('#payment-error').hidden,false);
+});
+
+
+test('multiple large files use separate requests and preserve earlier uploads on failure',async()=>{
+ const stored=new Map();const sent=[];
+ class UploadForm {constructor(){this.items=[]}append(...args){this.items.push(args)}}
+ const {api}=portal(undefined,{FormData:UploadForm,sessionStorage:{setItem:(k,v)=>stored.set(k,v)}});
+ api.state.orderId='draft';api.state.uploadToken='token';
+ api.prepareUpload(async(url,form,token)=>{sent.push(form.items);assert.equal(token,'token');assert.equal(form.items.length,1);if(sent.length===2)throw Error('connection lost');return new Response(JSON.stringify({files:[{documentId:'first',originalFilename:'one.pdf'}],uploadToken:'token'}),{status:201})});
+ await api.uploadFiles([{name:'one.pdf',type:'application/pdf',size:50*1024*1024},{name:'two.pdf',type:'application/pdf',size:50*1024*1024}]);
+ assert.equal(sent.length,2);assert.equal(api.state.uploadedFiles[0].documentId,'first');assert.equal(JSON.parse(stored.get('pc-draft')).files[0].documentId,'first');
+});
+
+test('cash checkout stays visible without Razorpay and unavailable methods explain the blocker',()=>{
+ const {api,element}=portal();api.state.cashOnCounterReady=true;api.state.razorpayReady=false;api.setReady(true);api.updateCheckoutButtons();
+ assert.equal(element('#place-order-btn').hidden,false);assert.equal(element('#place-order-btn').disabled,false);
+ assert.equal(element('#pay-online-btn').hidden,true);assert.equal(element('#payment-notification-options').hidden,true);
+ api.state.cashOnCounterReady=false;api.updateCheckoutButtons();assert.equal(element('#payment-unavailable').hidden,false);
+});
+
+test('unpaid cash pickup is visible without claiming payment was confirmed',()=>{
+ const {api,element}=portal();api.renderPickup({state:'active',code:'0012',preparation:'pending',paymentPending:true});
+ assert.equal(element('#pickup-code').textContent,'0012');assert.match(element('#pickup-message').textContent,/Payment is still pending/);assert.doesNotMatch(element('#pickup-message').textContent,/Payment confirmed/);
+ api.renderPickup({state:'automatic',paymentPending:true});assert.equal(element('#pickup-code').textContent,'');assert.match(element('#pickup-message').textContent,/Payment is still pending/);
 });

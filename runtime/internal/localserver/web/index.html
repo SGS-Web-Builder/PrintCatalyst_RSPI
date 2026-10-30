@@ -476,13 +476,13 @@
             <details class="section-details" open>
               <summary>Step 1 — Connect your domain or subdomain</summary>
               <ol class="connection-steps">
-                <li>Add your domain to Cloudflare. Create a Cloudflare Tunnel and install its Windows connector on this shop PC using the Administrator PowerShell command Cloudflare provides.</li>
+                <li>Add your domain to Cloudflare. Create a Cloudflare Tunnel and install its Linux ARM64 connector on this Pi using the terminal command Cloudflare provides.</li>
                 <li>Add a published application route: hostname <code>print.yourshop.com</code>, service type <strong>HTTP</strong>, service URL <code>localhost:8080</code> (use your app's port). Leave the path empty so the portal and payment webhooks reach this app.</li>
                 <li>Select Cloudflare below, enter <code>https://print.yourshop.com</code>, save, then click <strong>Verify origin</strong>. Test the QR on a phone using mobile data.</li>
                 <li>Once verified online, open Payments for Step 2. Local IP access remains available for local testing; Razorpay requires a public HTTPS domain.</li>
               </ol>
-              <p class="help">Saving here does not install or start Cloudflare. Its connector runs as a separate Windows service. Mark offline only changes this app's status; stop the Cloudflare service to disconnect the public route. Do not add a login challenge to customer or webhook routes.</p>
-              <p><a href="https://developers.cloudflare.com/cloudflare-one/networks/connectors/cloudflare-tunnel/get-started/create-remote-tunnel/" target="_blank" rel="noopener">Cloudflare Windows setup instructions</a></p>
+              <p class="help">Saving here does not install or start Cloudflare. Its connector runs as a separate Linux service. Mark offline only changes this app's status; stop the Cloudflare service to disconnect the public route. Do not add a login challenge to customer or webhook routes.</p>
+              <p><a href="https://developers.cloudflare.com/cloudflare-one/networks/connectors/cloudflare-tunnel/get-started/create-remote-tunnel/" target="_blank" rel="noopener">Cloudflare Tunnel setup instructions</a></p>
               <form id="tunnel-form">
                 <div class="form-grid">
                   <label class="form-field">Provider<select name="provider"><option value="direct">Direct shop IP (no hosting)</option><option value="cloudflared">Cloudflare Tunnel (installed on this PC)</option></select></label>
@@ -493,7 +493,7 @@
                 <button type="submit" class="btn btn--primary">Save</button>
               </form>
             </details>
-            <p><a href="#payments" data-section="payments" class="btn btn--primary">Continue to Step 2: Razorpay</a></p><p>To monitor orders on your phone, open your connected HTTPS domain followed by <code>/monitor/</code>. Sign in with your local owner username and password. Monitoring is read-only.</p>
+            <p><a href="#payments" data-section="payments" class="btn btn--primary">Continue to Step 2: Razorpay</a></p><p>To monitor orders on your phone, open your connected HTTPS domain followed by <code>/monitor/</code>. Sign in with your local owner username and password. Monitoring is read-only.</p><p><a href="/ads-admin/">Manage touchscreen advertisements</a> · Upload images/videos, schedule campaigns and choose a default ad. Available remotely at your HTTPS domain followed by /ads-admin/.</p>
             <details class="section-details">
               <summary>Recent transitions</summary>
               <p id="tunnel-events-message" class="help" role="status"></p>
@@ -596,7 +596,7 @@
                 <li>In Razorpay, select the same Test or Live Mode as your keys. Open Account &amp; Settings → Webhooks → Add New Webhook.</li>
                 <li>Paste the URL and secret, select the events below, then create the webhook.</li>
                 <li>Complete a customer payment in Test Mode. Check successful webhook delivery in Razorpay and confirm the corresponding order becomes paid in this dashboard.</li>
-                <li>When ready, repeat with Live Mode keys and a Live Mode webhook. Keep this PC and both Windows services running.</li>
+                <li>When ready, repeat with Live Mode keys and a Live Mode webhook. Keep this Pi and both Linux services running.</li>
               </ol>
               <p><a href="https://razorpay.com/docs/webhooks/setup-edit-payments/" target="_blank" rel="noopener">Razorpay webhook instructions</a></p>
               <p class="help">After saving a Razorpay provider, copy the webhook URL below and register it in your Razorpay dashboard so the on-premise server receives real-time payment confirmations.</p>

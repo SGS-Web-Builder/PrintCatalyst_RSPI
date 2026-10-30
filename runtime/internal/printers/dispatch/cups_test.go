@@ -76,11 +76,23 @@ func TestCUPSStatusIdentityAndStates(t *testing.T) {
 	for _, tc := range []struct {
 		state int
 		want  string
-	}{{3, "pending"}, {4, "blocked"}, {5, "processing"}, {6, "blocked"}, {7, "review"}, {8, "review"}, {9, "completed"}, {99, "review"}} {
+	}{{3, "pending"}, {4, "blocked"}, {5, "processing"}, {6, "blocked"}, {7, "review"}, {8, "review"}, {9, "review"}, {99, "review"}} {
 		t.Run(tc.want+string(rune(tc.state+'0')), func(t *testing.T) {
 			b := NewCUPSBackend()
 			title := jobTitle("order", "line")
 			b.client.Transport = cupsTransport(func(r *http.Request) (*http.Response, error) {
+				request, _ := io.ReadAll(r.Body)
+				r.Body = io.NopCloser(bytes.NewReader(request))
+				// Requests use an operation code rather than a success status.
+				binary.BigEndian.PutUint16(request[2:4], 0)
+				attrs, err := parseCUPS(request, binary.BigEndian.Uint32(request[4:8]))
+				if err != nil {
+					t.Fatal(err)
+				}
+				user, ok := oneText(attrs, "requesting-user-name", 0x42)
+				if !ok || user != "printcatalyst-kiosk" {
+					t.Fatal("status request lost job owner")
+				}
 				state := ippNumber("job-state", tc.state)
 				state.tag = 0x23
 				return cupsReply(r, state, ippText("job-name", 0x42, title), ippText("job-printer-uri", 0x45, "ipp://localhost:631/printers/shop")), nil

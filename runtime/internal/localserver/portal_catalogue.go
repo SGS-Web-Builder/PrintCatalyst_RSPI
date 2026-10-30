@@ -139,9 +139,6 @@ func (s *Server) portalOptions(ctx context.Context, service string, selection ..
 		}
 	}
 	buttons, err := s.readPortalPaymentButtons(ctx)
-	if s.pickup != nil {
-		buttons.CashEnabled = false
-	}
 	if err != nil {
 		return nil, err
 	}

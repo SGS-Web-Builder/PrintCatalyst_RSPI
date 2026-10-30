@@ -1,5 +1,3 @@
-//go:build !windows
-
 package discover
 
 import (
@@ -113,8 +111,8 @@ func TestIPPResponseParserWithDelimiter(t *testing.T) {
 // TestIPPResponseRejectsBadStatus ensures a non-zero status returns an error.
 func TestIPPResponseRejectsBadStatus(t *testing.T) {
 	pkt := []byte{
-		0x02, 0x00,             // version
-		0x00, 0x06,             // status = 0x0006 (server-error-busy)
+		0x02, 0x00, // version
+		0x00, 0x06, // status = 0x0006 (server-error-busy)
 		0x00, 0x00, 0x12, 0x34, // request-id
 	}
 	_, err := parseGetPrinterAttributesResponse(pkt)

@@ -1,0 +1,1 @@
+{"adminToken":"REPLACE_WITH_RANDOM_ADMIN_KEY","devices":[{"id":"kiosk-001","name":"Office kiosk","token":"REPLACE_WITH_DISTINCT_RANDOM_DEVICE_KEY","dashboard":"https://kiosk.example.com/remote/"}]}

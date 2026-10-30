@@ -45,7 +45,7 @@ func (d *Dispatcher) RunPreparation(ctx context.Context) error {
 	}
 }
 func (d *Dispatcher) prepareWaiting(ctx context.Context) error {
-	rows, err := d.db.QueryContext(ctx, `SELECT p.order_id FROM kiosk_pickups p JOIN orders o ON o.id=p.order_id LEFT JOIN kiosk_preparations k ON k.order_id=p.order_id WHERE p.state='active' AND p.preparation<>'ready' AND o.status='paid' AND o.submitted_at>0 AND (k.order_id IS NULL OR (k.state='pending' AND k.updated_at<=?)) ORDER BY p.created_at LIMIT 10`, time.Now().Unix()-30)
+	rows, err := d.db.QueryContext(ctx, `SELECT p.order_id FROM kiosk_pickups p JOIN orders o ON o.id=p.order_id LEFT JOIN kiosk_preparations k ON k.order_id=p.order_id WHERE p.state='active' AND p.preparation<>'ready' AND o.id IN (SELECT id FROM kiosk_eligible_orders) AND o.submitted_at>0 AND (k.order_id IS NULL OR (k.state='pending' AND k.updated_at<=?)) ORDER BY p.created_at LIMIT 10`, time.Now().Unix()-30)
 	if err != nil {
 		return err
 	}
@@ -83,7 +83,7 @@ func (d *Dispatcher) prepareOrder(ctx context.Context, id string) error {
 		return errors.New("preparation unavailable")
 	}
 	// Creating this row enables database freeze triggers before any source reads.
-	_, err := d.db.ExecContext(ctx, `INSERT OR IGNORE INTO kiosk_preparations(order_id,plan_json,updated_at) SELECT o.id,'',? FROM orders o JOIN kiosk_pickups p ON p.order_id=o.id WHERE o.id=? AND o.status='paid' AND o.submitted_at>0 AND p.state='active' AND p.preparation<>'ready'`, time.Now().Unix(), id)
+	_, err := d.db.ExecContext(ctx, `INSERT OR IGNORE INTO kiosk_preparations(order_id,plan_json,updated_at) SELECT o.id,'',? FROM orders o JOIN kiosk_pickups p ON p.order_id=o.id WHERE o.id=? AND o.id IN (SELECT id FROM kiosk_eligible_orders) AND o.submitted_at>0 AND p.state='active' AND p.preparation<>'ready'`, time.Now().Unix(), id)
 	if err != nil {
 		return err
 	}
@@ -172,7 +172,7 @@ func (d *Dispatcher) prepareOrder(ctx context.Context, id string) error {
 		return err
 	}
 	defer tx.Rollback()
-	result, err := tx.ExecContext(ctx, `UPDATE kiosk_pickups SET preparation='ready',prepared_digest=? WHERE order_id=? AND state='active' AND preparation<>'ready' AND EXISTS(SELECT 1 FROM orders WHERE id=? AND status='paid')`, digest, id, id)
+	result, err := tx.ExecContext(ctx, `UPDATE kiosk_pickups SET preparation='ready',prepared_digest=? WHERE order_id=? AND state='active' AND preparation<>'ready' AND EXISTS(SELECT 1 FROM orders WHERE id=? AND id IN (SELECT id FROM kiosk_eligible_orders))`, digest, id, id)
 	if err != nil {
 		return err
 	}
@@ -186,11 +186,17 @@ func (d *Dispatcher) prepareOrder(ctx context.Context, id string) error {
 	if _, err = tx.ExecContext(ctx, `UPDATE kiosk_preparations SET prepared_digest=?,state='ready',error='',updated_at=? WHERE order_id=?`, digest, time.Now().Unix(), id); err != nil {
 		return err
 	}
-	return tx.Commit()
+	if err = tx.Commit(); err != nil {
+		return err
+	}
+	if d.config.OnPrepared != nil {
+		d.config.OnPrepared()
+	}
+	return nil
 }
 func (d *Dispatcher) capturePreparation(ctx context.Context, id string) ([]preparationLine, error) {
 	var printer, service string
-	if err := d.db.QueryRowContext(ctx, `SELECT primary_printer_id,service_id FROM orders WHERE id=? AND status='paid'`, id).Scan(&printer, &service); err != nil {
+	if err := d.db.QueryRowContext(ctx, `SELECT primary_printer_id,service_id FROM orders WHERE id=? AND id IN (SELECT id FROM kiosk_eligible_orders)`, id).Scan(&printer, &service); err != nil {
 		return nil, err
 	}
 	rows, err := d.db.QueryContext(ctx, `SELECT l.id,l.document_id,doc.storage_path,doc.page_count,doc.mime_type,doc.sha256,l.colour_mode,l.sides,l.paper_size,l.copies,l.page_range_start,l.page_range_end,l.orientation,l.pages_per_sheet,l.selected_pages_json FROM order_lines l JOIN documents doc ON doc.id=l.document_id WHERE l.order_id=? ORDER BY l.id`, id)

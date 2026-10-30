@@ -236,7 +236,7 @@ func (b *CUPSBackend) JobProgress(ctx context.Context, queue, id, order string) 
 	if err != nil {
 		return "review", "Job identity requires review", nil
 	}
-	op := []ippAttribute{ippText("printer-uri", 0x45, "ipp://localhost:631/printers/"+queue), ippNumber("job-id", int(number)), ippText("requested-attributes", 0x44, "job-state"), ippText("", 0x44, "job-name"), ippText("", 0x44, "job-printer-uri"), ippText("", 0x44, "job-state-reasons")}
+	op := []ippAttribute{ippText("printer-uri", 0x45, "ipp://localhost:631/printers/"+queue), ippNumber("job-id", int(number)), ippText("requesting-user-name", 0x42, "printcatalyst-kiosk"), ippText("requested-attributes", 0x44, "job-state"), ippText("", 0x44, "job-name"), ippText("", 0x44, "job-printer-uri"), ippText("", 0x44, "job-state-reasons")}
 	values, err := b.request(ctx, 9, "/jobs/", op, nil, nil)
 	if err != nil {
 		return "blocked", "Cannot confirm CUPS job state; do not resubmit", err
@@ -270,7 +270,10 @@ func (b *CUPSBackend) JobProgress(ctx context.Context, queue, id, order string) 
 	case 7, 8:
 		return "review", "CUPS job cancelled or aborted; check output", nil
 	case 9:
-		return "completed", "CUPS reports job completed", nil
+		// A CUPS backend can finish after handing bytes to a device, including
+		// drivers that cannot report physical pages. Never authorize deletion
+		// or advertise complete output from scheduler state alone.
+		return "review", "CUPS finished sending the job; confirm all pages and copies physically printed before marking done", nil
 	}
 	return "review", "Unknown CUPS job state", nil
 }

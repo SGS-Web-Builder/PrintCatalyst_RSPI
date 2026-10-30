@@ -22,9 +22,14 @@ type Vault struct {
 
 func New(seed []byte, serial string) (*Vault, error) {
 	serial = strings.TrimRight(strings.TrimSpace(serial), "\x00")
-	decoded, err := hex.DecodeString(serial)
-	if len(seed) != 32 || err != nil || len(decoded) != 8 {
-		return nil, errors.New("32-byte credential and 16-digit Pi serial required")
+	identity := strings.TrimPrefix(serial, "linux-machine:")
+	decoded, err := hex.DecodeString(identity)
+	size := 8
+	if strings.HasPrefix(serial, "linux-machine:") {
+		size = 16
+	}
+	if len(seed) != 32 || err != nil || len(decoded) != size {
+		return nil, errors.New("32-byte credential and valid Pi serial or Linux machine ID required")
 	}
 	nonzero := false
 	for _, b := range decoded {

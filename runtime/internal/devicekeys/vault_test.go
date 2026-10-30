@@ -65,3 +65,23 @@ func TestRejectInvalidIdentity(t *testing.T) {
 		t.Fatal("short key accepted")
 	}
 }
+
+func TestLinuxMachineIdentity(t *testing.T) {
+	seed := bytes.Repeat([]byte{7}, 32)
+	v, err := New(seed, "linux-machine:0123456789abcdef0123456789abcdef")
+	if err != nil {
+		t.Fatal(err)
+	}
+	data, err := v.Seal("pickup", []byte("private"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	restarted, _ := New(seed, "linux-machine:0123456789abcdef0123456789abcdef")
+	if _, err = restarted.Open("pickup", data); err != nil {
+		t.Fatal(err)
+	}
+	other, _ := New(seed, "linux-machine:0123456789abcdef0123456789abcdee")
+	if _, err = other.Open("pickup", data); err == nil {
+		t.Fatal("wrong machine accepted")
+	}
+}
