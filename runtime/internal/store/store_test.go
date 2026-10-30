@@ -62,8 +62,8 @@ func TestOpenIsIdempotentAndRetainsExistingRows(t *testing.T) {
 	if err := second.DB().QueryRow(`SELECT COUNT(*) FROM schema_migrations`).Scan(&migrationCount); err != nil {
 		t.Fatal(err)
 	}
-	if migrationCount != 37 {
-		t.Fatalf("migration count = %d, want 37", migrationCount)
+	if migrationCount != 48 {
+		t.Fatalf("migration count = %d, want 48", migrationCount)
 	}
 }
 

@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"github.com/SGS-Web-Builder/PrintCatalyst_RSPI/runtime/internal/licensegate"
 	"github.com/SGS-Web-Builder/PrintCatalyst_RSPI/runtime/internal/pageselection"
+	"github.com/SGS-Web-Builder/PrintCatalyst_RSPI/runtime/internal/prepared"
 	"sync"
 	"time"
 
@@ -28,6 +29,7 @@ const (
 // dispatcher looks up the document blob via documents.Service.FetchAt
 // and pipes it to the configured PrinterBackend.
 type DocumentRef struct {
+	Prepared      bool   // Final PDF with source selection and layout already applied.
 	InvoiceLogo   []byte // Optional merchant PNG/JPEG, printed above the invoice.
 	Invoice       bool
 	InvoiceSheets *int   // Filled by the renderer after successful invoice pagination.
@@ -93,6 +95,9 @@ type QueueResolver interface {
 
 // DispatcherConfig bundles the tunables for the dispatcher loop.
 type DispatcherConfig struct {
+	OnPrepared    func()
+	Prepared      *prepared.Store
+	Renderer      PreparationRenderer
 	RequirePickup bool // Production Pi releases require a durable physical kiosk claim.
 	LicenseCheck  func(context.Context) error
 	// PollInterval is how often the dispatcher queries the orders
@@ -126,6 +131,7 @@ type Dispatcher struct {
 	mu        sync.Mutex
 	seen      map[string]bool // order ids already submitted (idempotency)
 	lastError error
+	wake      chan struct{}
 	tickMu    sync.Mutex
 }
 
@@ -143,6 +149,7 @@ func New(db *sql.DB, docs *documents.Service, backend PrinterBackend, resolver Q
 		resolver: resolver,
 		config:   config,
 		seen:     map[string]bool{},
+		wake:     make(chan struct{}, 1),
 	}
 }
 
@@ -165,8 +172,9 @@ func (d *Dispatcher) Run(ctx context.Context) error {
 		return errors.New("dispatcher has no document service configured")
 	}
 	monitorCtx, stopMonitor := context.WithCancel(ctx)
-	defer stopMonitor()
-	go d.monitorJobs(monitorCtx)
+	monitorDone := make(chan struct{})
+	go func() { defer close(monitorDone); d.monitorJobs(monitorCtx) }()
+	defer func() { stopMonitor(); <-monitorDone }()
 	ticker := time.NewTicker(d.config.PollInterval)
 	defer ticker.Stop()
 	d.tick(ctx)
@@ -174,6 +182,8 @@ func (d *Dispatcher) Run(ctx context.Context) error {
 		select {
 		case <-ctx.Done():
 			return ctx.Err()
+		case <-d.wake:
+			d.tick(ctx)
 		case <-ticker.C:
 			d.tick(ctx)
 		}
@@ -255,6 +265,9 @@ func (d *Dispatcher) dispatchOrder(ctx context.Context, id, printer, service, st
 	}
 	if err := licensegate.CheckRequired(ctx, d.config.LicenseCheck); err != nil {
 		return err
+	}
+	if d.config.Prepared != nil {
+		return d.dispatchPrepared(ctx, id, printer, service)
 	}
 	rows, err := d.db.QueryContext(ctx, `
 SELECT l.id,l.document_id,COALESCE(doc.storage_path,''),COALESCE(doc.page_count,0),
@@ -519,4 +532,13 @@ func (d *Dispatcher) recordManualFailure(ctx context.Context, id, line, queue st
 	_, err := d.db.ExecContext(ctx, `INSERT OR IGNORE INTO print_submissions(line_id,state,queue_name,error,updated_at)
  SELECT ?,'failed',?,?,? FROM orders WHERE id=? AND print_requested=1`, line, queue, cause.Error(), time.Now().Unix(), id)
 	return errors.Join(fmt.Errorf("order %s: %w", id, cause), err)
+}
+
+// Wake requests an immediate scan after a committed pickup release. Requests
+// coalesce; the normal durable polling loop remains the restart fallback.
+func (d *Dispatcher) Wake() {
+	select {
+	case d.wake <- struct{}{}:
+	default:
+	}
 }

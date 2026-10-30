@@ -181,6 +181,8 @@ func TestKioskGlobalLimitAndConcurrentReservations(t *testing.T) {
 
 func TestKioskPreparingAndClaimAreSeparate(t *testing.T) {
 	s, _ := fixture(t)
+	wakes := 0
+	s.SetReleaseNotifier(func() { wakes++ })
 	ctx := context.Background()
 	_, err := s.db.Exec(`INSERT INTO orders(id,share_token,status,currency,currency_minor_units,total_minor,customer_name,customer_phone,created_at,updated_at) VALUES('order','private','paid','INR',2,500,'Customer','',1,1)`)
 	if err != nil {
@@ -203,7 +205,7 @@ func TestKioskPreparingAndClaimAreSeparate(t *testing.T) {
 			t.Fatalf("status %d want %d", w.Code, want)
 		}
 	}
-	send(409)
+	send(202)
 	if err = p.MarkPrepared(ctx, "order", strings.Repeat("a", 64)); err != nil {
 		t.Fatal(err)
 	}
@@ -212,6 +214,9 @@ func TestKioskPreparingAndClaimAreSeparate(t *testing.T) {
 	s.check = func(context.Context) error { return nil }
 	send(202)
 	send(400)
+	if wakes != 1 {
+		t.Fatalf("expected one committed-release wake, got %d", wakes)
+	}
 	var count int
 	if err = s.db.QueryRow("SELECT COUNT(*) FROM kiosk_releases").Scan(&count); err != nil || count != 1 {
 		t.Fatal("release count", count, err)

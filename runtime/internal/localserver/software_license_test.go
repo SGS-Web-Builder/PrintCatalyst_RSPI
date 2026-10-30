@@ -40,6 +40,9 @@ func TestSoftwareLicenseBlocksNewWorkButAllowsHistoryAndReconciliation(t *testin
 		{"POST", "/api/v1/owner/licence/activate", "", 204},
 		{"POST", "/api/v1/payments/webhook", "", 204},
 	} {
+		if licensegate.Disabled {
+			tc.status = 204
+		}
 		w := httptest.NewRecorder()
 		h.ServeHTTP(w, httptest.NewRequest(tc.method, tc.path, strings.NewReader(tc.body)))
 		if w.Code != tc.status {

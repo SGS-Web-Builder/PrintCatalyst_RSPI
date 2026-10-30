@@ -14,7 +14,7 @@ Invoices can follow documents in the same ordered bundle with their own paper an
 
 The store uses `os.Root` to confine filesystem operations. On Linux its existing root directory must be service-owned with no group/other permissions; new directories/files use 0700/0600. Symlink bundle roots/files are rejected. Root or a compromised service account can still modify files or code: checksums provide integrity checks against the expected database digest, not protection from a privileged attacker. Prepared PDFs are private plaintext files under the service state directory; encrypted-disk deployment is separate.
 
-Current limits: 100 jobs, 50 MiB per PDF, 512 MiB per order, 1 MiB manifest; copies 1–999. Load returns all verified bytes in memory, so memory budgeting/streaming must be reviewed on the target Pi before deployment. Header checking is not PDF validation; only the trusted renderer should publish validated output.
+Current limits: 100 jobs, 50 MiB per PDF, 512 MiB per order, 1 MiB manifest; copies 1–999. The production path publishes one rendered job at a time, verifies the whole manifest without retaining all PDFs, then reads and verifies each job before submission. The legacy Load helper still returns all bytes; do not use it in runtime dispatch. Real Pi memory qualification remains required. Header checking is not PDF validation; only the trusted renderer should publish validated output.
 
 ## Required integration, still pending
 
@@ -25,3 +25,5 @@ Current limits: 100 jobs, 50 MiB per PDF, 512 MiB per order, 1 MiB manifest; cop
 5. Integrate prepared-file retention after confirmed completion, orphan staging cleanup and restart recovery. Never delete paid uncollected output because its pickup code expired.
 
 Windows-host tests cover idempotency, reopen/recovery, concurrent publishing, settings/queue binding, cross-order rejection, tampering, missing/truncated files, no partial-order return, invoice tray preservation and invalid inputs. Linux permission/symlink tests are cross-compiled, not executed on this host. ARM64 compilation is not physical printer qualification.
+
+2026-10-05: the preparation worker and verified dispatcher path now consume this store when configured; see PREPARATION-CUPS.md. The renderer remains an injected interface, and main.go does not yet enable this path. Earlier pending integration items describe the production work still required.

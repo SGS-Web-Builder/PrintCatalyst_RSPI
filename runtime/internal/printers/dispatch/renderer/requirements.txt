@@ -1,0 +1,5 @@
+pypdfium2==5.14.0
+reportlab==4.5.1
+Pillow==12.3.0
+uharfbuzz==0.56.2
+charset-normalizer==3.5.2

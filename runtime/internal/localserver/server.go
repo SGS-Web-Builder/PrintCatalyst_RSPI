@@ -6,6 +6,7 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	"github.com/SGS-Web-Builder/PrintCatalyst_RSPI/runtime/internal/webnotify"
 	"io/fs"
 	"net"
 	"net/http"
@@ -41,6 +42,7 @@ var dashboardAssets embed.FS
 
 // Server exposes the loopback-only local API and dashboard shell.
 type Server struct {
+	customerPush   *webnotify.Service
 	pickup         *pickup.Service
 	address        string
 	installationID string
@@ -197,6 +199,13 @@ func (s *Server) Handler() http.Handler {
 	mux := http.NewServeMux()
 	s.registerOwner(mux)
 	s.registerMonitor(mux)
+	s.registerRemote(mux)
+	s.registerRemoteOperations(mux)
+	s.registerRemoteAds(mux)
+	s.registerRemoteCommands(mux)
+	s.registerRemoteSupport(mux)
+	s.registerRemoteUpdates(mux)
+	s.registerAds(mux)
 	s.registerPricing(mux)
 	s.registerOperators(mux)
 	s.registerOwnerOrders(mux)
@@ -215,6 +224,7 @@ func (s *Server) Handler() http.Handler {
 	s.registerShopSettings(mux)
 	s.registerPortal(mux)
 	s.registerPortalPickup(mux)
+	s.registerCustomerPush(mux)
 	s.registerPublicPairing(mux)
 	s.registerTrayLocal(mux)
 	mux.HandleFunc("GET /healthz", func(response http.ResponseWriter, _ *http.Request) {

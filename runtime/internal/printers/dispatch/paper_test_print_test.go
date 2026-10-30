@@ -3,6 +3,7 @@ package dispatch
 import (
 	"context"
 	"errors"
+	"github.com/SGS-Web-Builder/PrintCatalyst_RSPI/runtime/internal/prepared"
 	"strings"
 	"testing"
 )
@@ -42,5 +43,24 @@ func TestPaperTestTargetsSelectedQueueAndSize(t *testing.T) {
 	b.fail = errors.New("spool failure")
 	if _, err = d.TestPrintOn(context.Background(), "Selected", "A4", 210, 297); err == nil {
 		t.Fatal("submission failure hidden")
+	}
+}
+
+func TestGeneratedPaperTestSkipsCustomerRasterizer(t *testing.T) {
+	b := &paperTestBackend{mockBackend: mockBackend{queues: []string{"Canon"}}}
+	d := NewWithDefaultQueue(nil, nil, b, DispatcherConfig{Prepared: &prepared.Store{}})
+	// No renderer is installed: an internal, final-size vector test PDF needs none.
+	if _, err := d.TestPrintOn(context.Background(), "Canon", "A4", 210, 297); err != nil {
+		t.Fatal(err)
+	}
+	if !b.ref.Prepared || b.ref.LineID == "" || b.ref.PageStart != 0 || b.ref.PageEnd != 0 || b.ref.PagesPerSheet != 1 || !strings.Contains(b.body, "595.28 841.89") {
+		t.Fatalf("invalid prepared test: %+v", b.ref)
+	}
+	previous := b.ref.LineID
+	if _, err := d.TestPrintOn(context.Background(), "Canon", "A4", 210, 297); err != nil {
+		t.Fatal(err)
+	}
+	if b.ref.LineID == previous {
+		t.Fatal("test jobs reused identity")
 	}
 }

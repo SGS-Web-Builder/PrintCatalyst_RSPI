@@ -211,6 +211,10 @@ func (d *Dispatcher) submitSeparators(ctx context.Context, id string) error {
 }
 
 func (d *Dispatcher) separatorText(ctx context.Context, id, queue string) (string, error) {
+	return d.separatorTextForRoutes(ctx, id, queue, nil)
+}
+
+func (d *Dispatcher) separatorTextForRoutes(ctx context.Context, id, queue string, routes map[string]string) (string, error) {
 	var name, phone, email, notes, currency, status, merchant string
 	var total, discount int64
 	var units int
@@ -247,21 +251,24 @@ func (d *Dispatcher) separatorText(ctx context.Context, id, queue string) (strin
 		status = "Recorded"
 	}
 	fmt.Fprintf(&out, "Printer: %s\nPayment: %s\n\nORDER DOCUMENTS & SETTINGS\n", queue, status)
-	rows, err := d.db.QueryContext(ctx, `SELECT COALESCE(d.original_filename,'Document'),l.paper_size,l.colour_mode,l.sides,l.copies,l.page_range_start,l.page_range_end,l.orientation,l.pages_per_sheet,l.selected_pages_json,l.line_total_minor,COALESCE(j.queue_name,r.queue_name,'Unassigned') FROM order_lines l LEFT JOIN documents d ON d.id=l.document_id LEFT JOIN print_submissions j ON j.line_id=l.id LEFT JOIN print_routes r ON r.line_id=l.id WHERE l.order_id=? ORDER BY l.id`, id)
+	rows, err := d.db.QueryContext(ctx, `SELECT l.id,COALESCE(d.original_filename,'Document'),l.paper_size,l.colour_mode,l.sides,l.copies,l.page_range_start,l.page_range_end,l.orientation,l.pages_per_sheet,l.selected_pages_json,l.line_total_minor,COALESCE(j.queue_name,r.queue_name,'Unassigned') FROM order_lines l LEFT JOIN documents d ON d.id=l.document_id LEFT JOIN print_submissions j ON j.line_id=l.id LEFT JOIN print_routes r ON r.line_id=l.id WHERE l.order_id=? ORDER BY l.id`, id)
 	if err != nil {
 		return "", err
 	}
 	defer rows.Close()
 	for rows.Next() {
-		var file, paper, colour, sides, orientation, selected, documentQueue string
+		var lineID, file, paper, colour, sides, orientation, selected, documentQueue string
 		var copies, start, end, nup int
 		var value int64
-		if err = rows.Scan(&file, &paper, &colour, &sides, &copies, &start, &end, &orientation, &nup, &selected, &value, &documentQueue); err != nil {
+		if err = rows.Scan(&lineID, &file, &paper, &colour, &sides, &copies, &start, &end, &orientation, &nup, &selected, &value, &documentQueue); err != nil {
 			return "", err
 		}
 		pages := fmt.Sprintf("%d-%d", start, end)
 		if selected != "" && selected != "null" {
 			pages = selected
+		}
+		if frozen, ok := routes[lineID]; ok {
+			documentQueue = frozen
 		}
 		if documentQueue == queue {
 			documentQueue = "This printer"

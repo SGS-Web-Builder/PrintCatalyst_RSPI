@@ -3,6 +3,7 @@ package localserver_test
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"image"
 	"image/png"
 	"io"
@@ -16,7 +17,11 @@ func TestPortalComposeOwnershipRetryAndReplacement(t *testing.T) {
 	id, token := draft["orderId"].(string), draft["uploadToken"].(string)
 	var pngBody bytes.Buffer
 	png.Encode(&pngBody, image.NewRGBA(image.Rect(0, 0, 30, 40)))
-	body, kind := uploadMultipart(t, []uploadFile{{Name: "one.png", MIME: "image/png", Body: pngBody.Bytes()}, {Name: "two.png", MIME: "image/png", Body: pngBody.Bytes()}})
+	var files []uploadFile
+	for i := 0; i < 7; i++ {
+		files = append(files, uploadFile{Name: fmt.Sprintf("photo-%d.png", i), MIME: "image/png", Body: pngBody.Bytes()})
+	}
+	body, kind := uploadMultipart(t, files)
 	req, _ := http.NewRequest("POST", ts.URL+"/api/v1/portal/uploads?orderId="+id, body)
 	req.Header.Set("Content-Type", kind)
 	req.Header.Set("X-Upload-Token", token)
@@ -31,10 +36,10 @@ func TestPortalComposeOwnershipRetryAndReplacement(t *testing.T) {
 	}
 	json.NewDecoder(resp.Body).Decode(&uploaded)
 	resp.Body.Close()
-	if len(uploaded.Files) != 2 {
+	if len(uploaded.Files) != 7 {
 		t.Fatal("upload failed")
 	}
-	input := map[string]any{"orderId": id, "documentIds": []string{uploaded.Files[0].ID, uploaded.Files[1].ID}, "perPage": 2, "paperSize": "A4", "orientation": "portrait", "split": 50}
+	input := map[string]any{"orderId": id, "documentIds": []string{uploaded.Files[0].ID, uploaded.Files[1].ID, uploaded.Files[2].ID, uploaded.Files[3].ID}, "perPage": 2, "paperSize": "A4", "orientation": "portrait", "split": 50}
 	call := func(auth string, want int) map[string]any {
 		t.Helper()
 		raw, _ := json.Marshal(input)
@@ -59,17 +64,17 @@ func TestPortalComposeOwnershipRetryAndReplacement(t *testing.T) {
 	call(token, 400)
 	var count int
 	db.DB().QueryRow("SELECT COUNT(*) FROM documents WHERE order_id=?", id).Scan(&count)
-	if count != 2 {
+	if count != 7 {
 		t.Fatal("failed compose changed sources")
 	}
-	input["perPage"] = 2
+	input["perPage"] = 4
 	output := call(token, 200)
 	retry := call(token, 200)
 	if output["documentId"] != retry["documentId"] || output["pageCount"] != float64(1) {
 		t.Fatal("retry changed output or incorrect page count")
 	}
 	db.DB().QueryRow("SELECT COUNT(*) FROM documents WHERE order_id=?", id).Scan(&count)
-	if count != 1 {
+	if count != 4 {
 		t.Fatal("sources were not replaced exactly once")
 	}
 	db.DB().Exec("UPDATE orders SET submitted_at=1 WHERE id=?", id)

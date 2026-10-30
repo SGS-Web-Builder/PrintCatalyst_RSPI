@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"github.com/SGS-Web-Builder/PrintCatalyst_RSPI/runtime/internal/currency"
 	"github.com/SGS-Web-Builder/PrintCatalyst_RSPI/runtime/internal/printers"
+	"strings"
 )
 
 // Effective applies a printer-specific book over shop-wide defaults.
@@ -58,6 +59,9 @@ func (s *Service) GridBook(ctx context.Context, id string) (Book, error) {
 	book, err := s.Load(ctx)
 	if errors.Is(err, ErrNotFound) {
 		code, e := s.profileCurrency(ctx)
+		if errors.Is(e, sql.ErrNoRows) {
+			return book, ErrSetup
+		}
 		if e != nil {
 			return book, e
 		}
@@ -105,7 +109,15 @@ func (s *Service) SaveGrid(ctx context.Context, id string, input Input) (Book, e
 	for _, e := range entries {
 		supported := false
 		for _, p := range fleet {
-			if p.Supports(e.PaperSize, e.ColourMode, e.Sides) {
+			paperOffered := false
+			for _, paper := range p.Papers {
+				if strings.EqualFold(paper, e.PaperSize) {
+					paperOffered = true
+					break
+				}
+			}
+			// Shared rates are a shop price book, not a declaration of printer capability.
+			if (id == "" && paperOffered) || p.Supports(e.PaperSize, e.ColourMode, e.Sides) {
 				supported = true
 				break
 			}
@@ -127,6 +139,9 @@ func (s *Service) SaveGrid(ctx context.Context, id string, input Input) (Book, e
 		return Book{}, fmt.Errorf("%w: selected printer has no enabled paper sizes", ErrInvalid)
 	}
 	book, err := s.Load(ctx)
+	if errors.Is(err, ErrNotFound) {
+		return book, fmt.Errorf("%w: choose All enabled printers — shared rates and save your base prices first; then add optional printer overrides", ErrSetup)
+	}
 	if err != nil {
 		return book, err
 	}
@@ -144,13 +159,24 @@ func (s *Service) SaveGrid(ctx context.Context, id string, input Input) (Book, e
 	if err != nil {
 		return book, err
 	}
+	tx, e := s.db.BeginTx(ctx, nil)
+	if e != nil {
+		return Book{}, e
+	}
+	defer tx.Rollback()
+	if e = checkRevision(ctx, tx, input.ExpectedRevision); e != nil {
+		return Book{}, e
+	}
 	if len(entries) == 0 {
-		_, err = s.db.ExecContext(ctx, "DELETE FROM printer_price_books WHERE printer_id=?", id)
+		_, err = tx.ExecContext(ctx, "DELETE FROM printer_price_books WHERE printer_id=?", id)
 	} else {
-		_, err = s.db.ExecContext(ctx, `INSERT INTO printer_price_books(printer_id,currency,minor_units,entries_json,updated_at) VALUES(?,?,?,?,?) ON CONFLICT(printer_id) DO UPDATE SET currency=excluded.currency,minor_units=excluded.minor_units,entries_json=excluded.entries_json,updated_at=excluded.updated_at`, id, book.Currency, book.CurrencyMinorUnits, string(raw), s.now().Unix())
+		_, err = tx.ExecContext(ctx, `INSERT INTO printer_price_books(printer_id,currency,minor_units,entries_json,updated_at) VALUES(?,?,?,?,?) ON CONFLICT(printer_id) DO UPDATE SET currency=excluded.currency,minor_units=excluded.minor_units,entries_json=excluded.entries_json,updated_at=excluded.updated_at`, id, book.Currency, book.CurrencyMinorUnits, string(raw), s.now().Unix())
 	}
 	if err != nil {
 		return book, err
+	}
+	if err = tx.Commit(); err != nil {
+		return Book{}, err
 	}
 	return s.GridBook(ctx, id)
 }

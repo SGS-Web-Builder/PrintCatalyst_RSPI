@@ -22,13 +22,13 @@ Make startup, data paths, one-time activation storage, document conversion and p
 
 ## 3 — Payment and pickup state: IN PROGRESS
 
-Migrations 035–037, encrypted/HMAC pickup service, transactional claims, dispatch guard, startup key derivation, verified capture/reconciliation queue and portal code display/recovery are implemented and tested. Retention protects paid/uncollected files. Cash checkout is disabled in kiosk mode without changing saved settings. A separate authenticated loopback release API now has durable global/per-kiosk throttling. Manual touchscreen pairing/session setup is implemented. Automatic desktop startup, merchant reissue and complete hardware integration remain pending. See KIOSK-ENDPOINT.md.
+Migrations 035–038, encrypted/HMAC pickup service, transactional claims, dispatch guard, startup key derivation, verified capture/reconciliation queue and portal code display/recovery are implemented and tested. Retention protects paid/uncollected files. Cash checkout is disabled in kiosk mode without changing saved settings. A separate authenticated loopback release API now has durable global/per-kiosk throttling. Manual touchscreen pairing/session setup is implemented. Automatic desktop startup, merchant reissue and complete hardware integration remain pending. See KIOSK-ENDPOINT.md.
 
 Add migrations for pickup/preparation/release records, idempotent code allocation after verified payment, portal display/recovery, expiry/reissue and brute-force limits. Retain existing payment verification and merchant monitoring. Explicitly disable paid-order auto-dispatch in kiosk mode. Cover duplicate callbacks and concurrent claims.
 
 ## 4 — Printer preparation and release: IN PROGRESS
 
-Prepared bundle storage/integrity checks are implemented and tested; see PREPARED-OUTPUT.md. Runtime preparation and dispatch integration remain pending. Implement CUPS/IPP capabilities, routing/options, rendering, status mapping and invoice output. Stage prepared jobs without submitting them; release only after valid code claim. Test restart and unknown-outcome reconciliation. Test physical selected-page, duplex, colour and copy correctness.
+Prepared bundle storage/integrity checks are implemented and tested; see PREPARED-OUTPUT.md. A durable preparation worker, verified dispatch path and CUPS protocol adapter now exist with injected-renderer/transport tests. Real PDF/image rendering, Unicode invoice pagination, Linux startup wiring and completed-bundle cleanup are implemented; target-Pi execution and physical qualification remain pending. See PREPARATION-CUPS.md. Implement CUPS/IPP capabilities, routing/options, rendering, status mapping and invoice output. Stage prepared jobs without submitting them; release only after valid code claim. Test restart and unknown-outcome reconciliation. Test physical selected-page, duplex, colour and copy correctness.
 
 ## 5 — Touchscreen UI: IN PROGRESS
 

@@ -54,6 +54,23 @@ func TestScreenSessionLifecycle(t *testing.T) {
 		t.Fatal("unsafe cookie")
 	}
 	old := cookies[0]
+	restarted, err := New(s.db, c, testKey, s.check)
+	if err != nil {
+		t.Fatal(err)
+	}
+	restarted.now = s.now
+	request := kioskRequest("")
+	request.AddCookie(old)
+	if !restarted.validSession(request) {
+		t.Fatal("pairing lost on restart")
+	}
+	rotated, err := New(s.db, c, make([]byte, 32), s.check)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if rotated.validSession(request) {
+		t.Fatal("rotated credential retained pairing")
+	}
 	if w := pair(second); w.Code != 403 {
 		t.Fatal("ticket replay accepted")
 	}
@@ -72,7 +89,7 @@ func TestScreenSessionLifecycle(t *testing.T) {
 	if w := send("/api/v1/kiosk/claim", `{"code":"0007"}`, false, current); w.Code != 202 {
 		t.Fatal(w.Code)
 	}
-	now = now.Add(13 * time.Hour)
+	now = now.Add(11 * 365 * 24 * time.Hour)
 	if w := send("/api/v1/kiosk/claim", `{"code":"0007"}`, false, current); w.Code != 403 {
 		t.Fatal("expired session accepted")
 	}

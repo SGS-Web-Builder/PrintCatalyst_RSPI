@@ -32,7 +32,7 @@ def main():
             ticket = json.load(response)['ticket']
     except Exception:
         raise SystemExit('Cannot pair: check that the Pi service is running locally.') from None
-    print('Enter this pairing code on the local touchscreen within 2 minutes: ' + ticket)
+    print('Open http://127.0.0.1:8081/admin/pair/ in the kiosk browser profile. Enter within 2 minutes: ' + ticket)
     print('Do not share or save it. Pairing replaces any previous screen session.')
 
 

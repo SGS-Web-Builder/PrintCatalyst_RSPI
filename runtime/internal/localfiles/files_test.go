@@ -129,3 +129,52 @@ func (reader *countingReader) Read([]byte) (int, error) {
 	reader.reads++
 	return 0, io.EOF
 }
+
+func TestWriteReserveRejectsOversizedAndChangingCapacity(t *testing.T) {
+	for _, changing := range []bool{false, true} {
+		root := t.TempDir()
+		calls := 0
+		files, err := New(root, WithMinimumFreeBytes(1024), withCapacityProbe(func(string) (uint64, error) {
+			calls++
+			if changing && calls > 1 {
+				return 1024, nil
+			}
+			return 1040, nil
+		}))
+		if err != nil {
+			t.Fatal(err)
+		}
+		err = files.WriteAtomic("ad.png", strings.NewReader(strings.Repeat("x", 32)))
+		var capacity *CapacityError
+		if !errors.As(err, &capacity) {
+			t.Fatalf("expected reserve failure: %v", err)
+		}
+		if _, err = os.Stat(filepath.Join(root, "ad.png")); !os.IsNotExist(err) {
+			t.Fatal("partial ad committed")
+		}
+		entries, _ := filepath.Glob(filepath.Join(root, ".pc-write-*"))
+		if len(entries) != 0 {
+			t.Fatal("temporary upload leaked")
+		}
+	}
+}
+
+func TestReserveWriterAccountsForEarlierChunks(t *testing.T) {
+	root := t.TempDir()
+	files, err := New(root, WithMinimumFreeBytes(1024), withCapacityProbe(func(string) (uint64, error) { return 1040, nil }))
+	if err != nil {
+		t.Fatal(err)
+	}
+	file, err := os.CreateTemp(root, "reserve-*")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer file.Close()
+	writer := reserveWriter{file: file, files: files, budget: 16}
+	if _, err = writer.Write([]byte("1234567890")); err != nil {
+		t.Fatal(err)
+	}
+	if _, err = writer.Write([]byte("1234567890")); err == nil {
+		t.Fatal("earlier writes did not reduce budget")
+	}
+}

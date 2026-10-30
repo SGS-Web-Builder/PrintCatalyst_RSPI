@@ -85,24 +85,37 @@ func (s *Sweeper) MarkDispatched(ctx context.Context, documentID string) error {
 	return err
 }
 
-// PurgeExpired removes confirmed-complete files or unpaid uploads at least 24 hours old.
+// PurgeExpired removes fully confirmed orders or abandoned drafts after 24 hours.
+// Submitted checkout files survive delayed payment verification. Keep the entire
+// order for recovery until every document and invoice has confirmed output.
 // Paid/uncollected kiosk orders survive code expiry and await completion or cancellation.
 // Spool submission alone is not completion. Legacy retention settings do not override this policy.
 func (s *Sweeper) PurgeExpired(ctx context.Context) (int, error) {
-	rows, err := s.db.QueryContext(ctx, `
+	// Acquire the SQLite write reservation before selecting candidates. Checkout
+	// cannot submit an expired draft between the eligibility check and unlink.
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return 0, err
+	}
+	defer tx.Rollback()
+	if _, err = tx.ExecContext(ctx, "UPDATE documents SET purged_at=purged_at WHERE 0"); err != nil {
+		return 0, err
+	}
+	rows, err := tx.QueryContext(ctx, `
 SELECT d.id,d.storage_path FROM documents d
 JOIN orders o ON o.id=d.order_id
 WHERE d.purged_at=0 AND (
- (d.created_at<=? AND o.status NOT IN ('paid','dispatched')
+ (d.created_at<=? AND (o.submitted_at=0 OR o.status='cancelled') AND o.status NOT IN ('paid','dispatched')
   AND NOT EXISTS(SELECT 1 FROM kiosk_pickups p WHERE p.order_id=o.id AND o.status NOT IN ('completed','cancelled')))
  OR o.status='completed' OR
- (EXISTS(SELECT 1 FROM order_lines l WHERE l.document_id=d.id)
-  AND NOT EXISTS(SELECT 1 FROM order_lines l LEFT JOIN print_submissions j ON j.line_id=l.id
-   WHERE l.document_id=d.id AND COALESCE(j.progress,'')<>'completed')) OR
  (EXISTS(SELECT 1 FROM order_lines l WHERE l.order_id=o.id)
   AND NOT EXISTS(SELECT 1 FROM order_lines l LEFT JOIN print_submissions j ON j.line_id=l.id
-   WHERE l.order_id=o.id AND COALESCE(j.progress,'')<>'completed')))
-`, time.Now().Add(-24*time.Hour).Unix())
+   WHERE l.order_id=o.id AND (COALESCE(j.state,'')<>'submitted' OR COALESCE(j.progress,'')<>'completed'
+    OR (j.job_id LIKE 'cups:%' AND j.progress_detail<>'Printed output confirmed by merchant')))
+  AND NOT EXISTS(SELECT 1 FROM separator_invoices i WHERE i.order_id=o.id AND i.state<>'skipped'
+   AND (i.state<>'submitted' OR i.progress<>'completed'
+    OR (i.job_id LIKE 'cups:%' AND i.progress_detail<>'Printed output confirmed by merchant')))))
+ LIMIT 100`, time.Now().Add(-24*time.Hour).Unix())
 	if err != nil {
 		return 0, fmt.Errorf("query purge candidates: %w", err)
 	}
@@ -128,11 +141,14 @@ WHERE d.purged_at=0 AND (
 			failures = append(failures, fmt.Errorf("purge blob %s: %w", path, err))
 			continue
 		}
-		if _, err := s.db.ExecContext(ctx, `UPDATE documents SET purged_at=? WHERE id=?`, time.Now().Unix(), ids[i]); err != nil {
+		if _, err := tx.ExecContext(ctx, `UPDATE documents SET purged_at=? WHERE id=?`, time.Now().Unix(), ids[i]); err != nil {
 			failures = append(failures, fmt.Errorf("mark purged document %s: %w", ids[i], err))
 			continue
 		}
 		purged++
+	}
+	if err := tx.Commit(); err != nil {
+		failures = append(failures, err)
 	}
 	err = errors.Join(failures...)
 	s.setLastError(err)

@@ -11,15 +11,18 @@ Read docs/HANDOFF.md first. It records implementation status, not claims that pl
 ## Product invariants
 
 - Retain portal/dashboard design and functional parity, public Cloudflare portal, Razorpay verification and read-only mobile merchant monitoring.
-- A verified paid order waits for a four-digit code entered on a trusted physical kiosk before dispatch.
+- By default, a verified paid order waits for a four-digit code entered on the trusted physical kiosk. The owner may explicitly disable OTP remotely (user decision 2026-10-30); then only server-verified, paid, prepared orders may auto-release. Preserve transactional policy/refund checks and duplicate prevention.
+- User decision 2026-10-30: cash checkout is available when enabled, including without Razorpay. Only authenticated owner confirmation of full cash receipt authorizes preparation and the normal OTP/AutoPrint flow. Cash evidence must remain distinct from gateway verification.
 - Browser redirects and client-supplied payment status cannot authorize payment or release.
 - No duplicate automatic print after retry, double tap, timeout, browser reload or process restart.
 - Ambiguous printer submission requires reconciliation/operator review, never blind resubmission.
 - Preserve selected pages, copies, paper, colour, orientation-dependent duplex, image composition and invoice settings.
-- One-time licence activation: no periodic online verification and no licence disk/crypto/network work during release. Validate signed device binding at startup; define Linux key protection before implementation.
+- Current user decision: default Linux/Pi packages are licence-free (licensefree build tag). No activation prompt or release-time licence requirement. Retain optional licensed-build code for future use. Keep pickup encryption and kiosk credentials protected.
 - Kiosk local access is not merchant authorization. Do not expose merchant routes just because a touchscreen browser is loopback.
 - No secrets, production customer data, publisher private keys or real payment credentials in source/tests/logs/screenshots.
 
 ## Completion and handoff
 
 Run checks meaningful to the change. Never label an untested Linux printer driver or physical print path as working. Record exact commands, outcomes, files changed, outstanding risks and next steps in docs/HANDOFF.md. Keep implemented versus planned status explicit. Do not claim a commit/push/deployment happened without verifying it.
+
+- User decision 2026-10-30: when owner selects all_documents, submitted unpaid cash orders may receive OTP immediately and print via OTP or explicitly disabled-OTP AutoPrint. Never label unpaid cash as paid or gateway-verified. Online orders still require verified capture. Turning policy off stops uncommitted unpaid claims; committed releases remain valid.

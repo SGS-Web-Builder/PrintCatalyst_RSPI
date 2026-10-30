@@ -38,3 +38,5 @@ test('Windows progress updates independently of payment, including recovery and 
  o.documents.push({...doc,printState:'printing'});assert.equal(queueState(o),'printing');
  o.documents[1].printState='failed';assert.equal(queueState(o),'failed');
 });
+
+test('printing remains visible after a physical release request',()=>{assert.equal(queueState({status:'paid',printRequested:true,documents:[{printState:'printing'}]}),'printing');});

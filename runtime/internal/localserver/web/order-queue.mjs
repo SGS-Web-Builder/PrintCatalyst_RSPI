@@ -5,8 +5,8 @@ export function queueState(order) {
   const docs=[...(order.documents || []),...(order.separators || [])];
   if(docs.length && docs.every(d=>d.printState==='completed'))return 'done';
   if(order.status==='failed' || docs.some(d=>['failed','blocked'].includes(d.printState)))return 'failed';
-  if(docs.some(d=>['waiting','submitting','processing','review'].includes(d.printState)) || order.printRequested)return 'processing';
   if(docs.some(d=>['printing','submitted'].includes(d.printState)))return 'printing';
+  if(docs.some(d=>['waiting','submitting','processing','review'].includes(d.printState)) || order.printRequested)return 'processing';
   if(!docs.length && order.status==='dispatched')return 'printing';
   return 'pending';
 }
@@ -50,7 +50,12 @@ export function createOrderQueue(client,getRole) {
   function metric(label,value){const box=el('div','oq-metric');box.append(el('strong','',value),el('small','',label));return box;}
   function actionButtons(o) {
     const group=el('div','oq-actions'),state=queueState(o),jobs=[...o.documents,...(o.separators||[])];
-    if(getRole()==='owner' && state==='pending' && !o.documents.some(d=>d.printState)){
+    if(getRole()==='owner' && o.kioskMode && o.status==='pending_payment' && o.paymentMethod==='cash_on_counter'){const b=button('Confirm cash received',()=>confirmCash(o),'oq-button oq-release');b.disabled=busy.has(o.id);group.append(b);}
+    if(getRole()==='owner' && o.kioskMode && o.preparationFailed && ['paid','pending_payment'].includes(o.status)){const b=button('Retry document preparation',()=>retryPreparation(o),'oq-button oq-preview');b.disabled=busy.has(o.id);group.append(b);}
+    if(getRole()==='owner' && o.kioskMode && o.pickupExpired && ['paid','pending_payment'].includes(o.status)){
+      const b=button('Replace expired pickup code',()=>reissue(o),'oq-button oq-preview');b.disabled=busy.has(o.id);group.append(b);
+    }
+    if(getRole()==='owner' && !o.kioskMode && state==='pending' && !o.documents.some(d=>d.printState)){
       const b=button(busy.has(o.id)?'Releasing…':'One-Click Print',()=>release(o), 'oq-button oq-release');b.disabled=busy.has(o.id);group.append(b);
     }
     if(getRole()==='owner' && ((state==='failed' && jobs.some(d=>d.printState==='failed')) || (state==='processing' && jobs.some(d=>d.printState==='submitting')))){
@@ -61,9 +66,27 @@ export function createOrderQueue(client,getRole) {
     }
     return group;
   }
+  async function confirmCash(o){
+    if(busy.has(o.id)||!window.confirm('Confirm you received the full cash amount for this order? Printing follows the kiosk OTP / AutoPrint setting.'))return;
+    busy.add(o.id);render();
+    try{await client.request('POST',`/api/v1/owner/orders/${o.id}/cash-confirm`,{confirm:true});await refresh();announce('Cash receipt recorded. Ask the customer to keep their receipt open for print release.');}
+    catch(error){announce(error.message);}finally{busy.delete(o.id);render();}
+  }
+  async function retryPreparation(o){
+    if(busy.has(o.id)||!window.confirm('Check printer configuration, renderer dependencies and the document first. Retry preparation? This does not release printing.'))return;
+    busy.add(o.id);render();
+    try{await client.request('POST',`/api/v1/owner/orders/${o.id}/preparation/retry`,{});await refresh();announce('Preparation queued. The customer still needs to enter their pickup code.');}
+    catch(error){announce(error.message);}finally{busy.delete(o.id);render();}
+  }
+  async function reissue(o) {
+    if(busy.has(o.id) || !window.confirm('Replace the expired pickup code? The customer must still enter the new code at this kiosk to print.'))return;
+    busy.add(o.id);render();
+    try{await client.request('POST',`/api/v1/owner/orders/${o.id}/pickup/reissue`,{});await refresh();announce('Pickup code replaced. Ask the customer to refresh their order receipt. Printing still requires entry at the kiosk.');}
+    catch(error){announce(error.message);}finally{busy.delete(o.id);render();}
+  }
   async function release(o,retry=false) {
     if(busy.has(o.id))return;
-    if(retry && !window.confirm('Check the Windows printer queue and output tray first. An interrupted submission may have printed. Retry only failed or interrupted documents and separator invoices?'))return;
+    if(retry && !window.confirm('Check the printer queue and output tray first. An interrupted submission may have printed. Retry only failed or interrupted documents and separator invoices?'))return;
     busy.add(o.id);render();
     try{await client.request('POST',`/api/v1/owner/orders/${o.id}/print`,{retry});announce('Print release accepted. Customer settings preserved. Payment status is unchanged.');await refresh();}
     catch(error){announce(error.message);}
@@ -72,7 +95,7 @@ export function createOrderQueue(client,getRole) {
   async function transition(o,target) {
     if(busy.has(o.id))return;
     if(target==='print_completed' && !window.confirm('Confirm that all documents and any separator invoices physically printed. This does not record payment.'))return;
-    if(target==='cancelled' && !window.confirm('Reject this order? Jobs already sent to Windows must be cancelled in the printer queue.'))return;
+    if(target==='cancelled' && !window.confirm('Reject this order? Jobs already sent to the printer must be cancelled in the printer queue.'))return;
     busy.add(o.id);render();
     try{await client.request('PUT',`/api/v1/owner/orders/${o.id}/status`,{status:target});await refresh();announce(target==='print_completed'?'Print marked done. Payment status is unchanged.':'Order rejected.');}
     catch(error){announce(error.message);}finally{busy.delete(o.id);render();}
@@ -123,7 +146,7 @@ export function createOrderQueue(client,getRole) {
     if(getRole()==='owner'){
       if(['pending_payment','paid','dispatched'].includes(o.status)){const reject=button('✕ Reject',()=>transition(o,'cancelled'),'oq-button oq-danger');reject.disabled=busy.has(o.id);actions.append(reject);}
     }
-    footer.append(actions);main.append(footer,el('p','oq-footnote','One-click release uses the customer’s saved settings. Status follows Windows every second. If Windows removes a job without reporting completion, confirm the output and mark done. Payment is tracked separately.'));
+    footer.append(actions);main.append(footer,el('p','oq-footnote','CUPS finishing a job does not confirm physical output. Check every page, copy and invoice before choosing Confirm printed. Files are retained while output needs review. Check the printer queue before retrying; some pages may already have printed.'));
   }
   async function refresh(){
     if(loading)return;loading=true;

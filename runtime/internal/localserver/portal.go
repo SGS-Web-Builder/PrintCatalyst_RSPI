@@ -144,7 +144,10 @@ func (s *Server) registerPortal(mux *http.ServeMux) {
 	// already enforces, and stops a half-configured installation from
 	// silently accepting customer uploads.
 	portalReady := func(w http.ResponseWriter, r *http.Request) bool {
-		reason := s.notReadyReason(r.Context())
+		reason := s.admissionReason(r.Context())
+		if reason == "" {
+			reason = s.notReadyReason(r.Context())
+		}
 		if reason == "" {
 			return true
 		}
@@ -478,10 +481,6 @@ func (s *Server) registerPortal(mux *http.ServeMux) {
 		// customer never sees a "Pay online" button that would
 		// then 503.
 		paymentMethod := strings.TrimSpace(req.PaymentMethod)
-		if s.pickup != nil && paymentMethod != orders.PaymentMethodRazorpay {
-			portalJSONError(w, "Kiosk orders require verified online payment. Select online payment to continue.", 409)
-			return
-		}
 		if paymentMethod == "" {
 			paymentMethod = orders.PaymentMethodCashOnCounter
 		}
@@ -557,6 +556,15 @@ func (s *Server) registerPortal(mux *http.ServeMux) {
 				return
 			}
 		}
+		if _, err = tx.ExecContext(r.Context(), "UPDATE kiosk_control SET paused=paused WHERE singleton=1"); err != nil {
+			portalJSONError(w, "Kiosk status unavailable", 503)
+			return
+		}
+		var paused bool
+		if err = tx.QueryRowContext(r.Context(), "SELECT paused FROM kiosk_control WHERE singleton=1").Scan(&paused); err != nil || paused {
+			portalJSONError(w, "Kiosk is temporarily closed for new orders", 503)
+			return
+		}
 		// Update the stub order with real data and set submitted_at to the same now timestamp so a follow-up POST is
 		// rejected by the guard above. The UPDATE is guarded by
 		// submitted_at = 0 in addition to status = pending_payment so the
@@ -595,6 +603,17 @@ WHERE id=? AND status=? AND submitted_at=0`,
 
 		// Insert order lines. The stub was created with zero lines, so no DELETE needed.
 		for _, ql := range quote.Lines {
+			// The quote was computed before acquiring the checkout write lock.
+			// A draft may have expired or been edited in that interval.
+			var available bool
+			if err := tx.QueryRowContext(r.Context(), "SELECT EXISTS(SELECT 1 FROM documents WHERE id=? AND order_id=? AND purged_at=0)", ql.DocumentID, req.OrderID).Scan(&available); err != nil {
+				portalJSONError(w, "could not verify checkout documents", 500)
+				return
+			}
+			if !available {
+				portalJSONError(w, "a document expired or was removed; upload it again before payment", 409)
+				return
+			}
 			lineID, err := portalRandomID()
 			if err != nil {
 				portalJSONError(w, "internal error", 500)
@@ -679,10 +698,22 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 			}
 		}
 
+		var receiptPickup any
+		if s.pickup != nil && paymentMethod == orders.PaymentMethodCashOnCounter {
+			var allowed bool
+			if e := s.db.QueryRowContext(r.Context(), "SELECT EXISTS(SELECT 1 FROM business_settings WHERE singleton=1 AND auto_print_mode='all_documents')").Scan(&allowed); e == nil && allowed {
+				if _, e = s.pickup.IssueVerified(r.Context(), req.OrderID, "unpaid-cash:"+req.OrderID); e == nil {
+					if view, e := s.pickup.ViewForOrder(r.Context(), req.OrderID); e == nil {
+						receiptPickup = view
+					}
+				}
+			}
+		}
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(201)
 		_ = json.NewEncoder(w).Encode(map[string]any{
 			"orderId":       req.OrderID,
+			"pickup":        receiptPickup,
 			"shareToken":    shareToken,
 			"status":        orders.StatusPendingPayment,
 			"paymentMethod": paymentMethod,

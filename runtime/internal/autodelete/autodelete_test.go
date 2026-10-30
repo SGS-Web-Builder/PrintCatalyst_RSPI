@@ -202,9 +202,9 @@ func TestRetentionPolicyKeepsRecordsAndNeverConfusesSpoolingWithCompletion(t *te
 		{"unpaid completed", "pending_payment", "completed", time.Minute, true},
 		{"spooled only", "dispatched", "printing", time.Hour, false},
 		{"recent failed", "failed", "blocked", 23 * time.Hour, false},
-		{"expired failed", "failed", "blocked", 25 * time.Hour, true},
+		{"expired failed retains recovery", "failed", "blocked", 25 * time.Hour, false},
 		{"expired paid awaits pickup", "paid", "pending", 25 * time.Hour, false},
-		{"expired pending", "pending_payment", "", 24 * time.Hour, true},
+		{"expired checkout retains recovery", "pending_payment", "", 24 * time.Hour, false},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			f, sw := newTestRig(t)

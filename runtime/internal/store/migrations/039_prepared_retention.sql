@@ -1,0 +1,1 @@
+ALTER TABLE kiosk_preparations ADD COLUMN purged_at INTEGER NOT NULL DEFAULT 0;

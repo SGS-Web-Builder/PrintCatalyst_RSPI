@@ -69,6 +69,9 @@ type Client struct {
 }
 
 func New(db *sql.DB, installation, server, key string) (*Client, error) {
+	if Disabled {
+		return &Client{}, nil
+	}
 	c := &Client{db: db, installation: installation, url: strings.TrimRight(server, "/"), now: time.Now, http: &http.Client{Timeout: 20 * time.Second, CheckRedirect: func(*http.Request, []*http.Request) error { return errors.New("licence redirects are not allowed") }}}
 	if key != "" {
 		raw, e := base64.StdEncoding.DecodeString(key)
@@ -159,6 +162,9 @@ func (c *Client) loadActivation(ctx context.Context) {
 // Check is an in-memory activation flag read: no network, disk, signature or
 // clock work occurs on the order/dispatch path.
 func (c *Client) Check(ctx context.Context) error {
+	if Disabled {
+		return nil
+	}
 	state := c.activation.Load()
 	if state == nil {
 		return ErrRequired
@@ -166,6 +172,9 @@ func (c *Client) Check(ctx context.Context) error {
 	return state.err
 }
 func (c *Client) Status(ctx context.Context) Status {
+	if Disabled {
+		return Status{Active: true, Configured: true, Message: "Licence-free Linux edition — no activation required"}
+	}
 	s := Status{Configured: c.configured()}
 	state := c.activation.Load()
 	if state == nil {
@@ -178,11 +187,14 @@ func (c *Client) Status(ctx context.Context) Status {
 		s.Message = state.err.Error()
 	} else {
 		s.Active = true
-		s.Message = "Permanently activated on this PC — no recurring licence checks"
+		s.Message = "Permanently activated on this PC â€” no recurring licence checks"
 	}
 	return s
 }
 func (c *Client) Activate(ctx context.Context, key string) error {
+	if Disabled {
+		return nil
+	}
 	if len(key) < 16 || len(key) > 128 {
 		return errors.New("enter the licence key supplied by the software provider")
 	}

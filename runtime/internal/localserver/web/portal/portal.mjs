@@ -1,3 +1,4 @@
+import {prepareNotifications,subscribeOrder,notificationReceipt} from './payment-notifications.mjs';
 import {createImageComposer} from './image-composer.mjs?v=0.1.19';
 
 // Customer portal client. Manages file upload, per-file print options,
@@ -12,7 +13,7 @@ import {createImageComposer} from './image-composer.mjs?v=0.1.19';
 
 // The portal is deliberately small: no framework, no bundler, no service
 
-// worker. Every byte we ship here is parsed by the customer's browser on
+// document cache. Every byte we ship here is parsed by the customer's browser on
 
 // the merchant's PC; the smaller the file the faster the page first
 
@@ -264,6 +265,8 @@ function updateCheckoutButtons() {
   $('#pay-online-btn').disabled = disabled;
 
   $('#pay-online-btn').hidden = !state.razorpayReady;
+  const unavailable=$('#payment-unavailable');if(unavailable)unavailable.hidden=state.cashOnCounterReady!==false||!!state.razorpayReady;
+  const notifications=$('#payment-notification-options');if(notifications)notifications.hidden=!state.razorpayReady;
 
   $('#confirm-order-btn').disabled=disabled;
 
@@ -310,13 +313,16 @@ async function uploadFiles(files) {
 
     }
 
-    const formData=new FormData();for(const file of files)formData.append('files',file,file.name);
-
-    const response=await uploadWithProgress('/api/v1/portal/uploads?orderId='+encodeURIComponent(state.orderId),formData,state.uploadToken);
-
-    const data=await readResponse(response);
-
-    state.uploadedFiles=data.files;state.uploadToken=data.uploadToken;saveDraft();
+    // Keep each request below proxy limits and preserve completed files if a
+    // later upload fails. The server deduplicates retries within this draft.
+    for (const [index,file] of files.entries()) {
+      $('#upload-filename').textContent=`${index+1} of ${files.length}: ${file.name}`;
+      $('#upload-meter').value=0;
+      const formData=new FormData();formData.append('files',file,file.name);
+      const response=await uploadWithProgress('/api/v1/portal/uploads?orderId='+encodeURIComponent(state.orderId),formData,state.uploadToken);
+      const data=await readResponse(response);
+      state.uploadedFiles=data.files;state.uploadToken=data.uploadToken;saveDraft();
+    }
 
     renderUploadedFiles();
 
@@ -905,6 +911,7 @@ function configureCustomerDetails(){
 }
 
 function beginCheckout(method) {
+ if(method==='razorpay')void prepareNotifications();
 
   if (!quoteReady || placingOrder || uploadBusy) return;
 
@@ -917,7 +924,7 @@ function beginCheckout(method) {
     void placeOrder($('#order-form'),method);return;
   }
 
-  $('#details-summary').textContent = `${$('#quote-total').textContent} · ${method === 'razorpay' ? 'Pay Online' : 'Cash On Counter'}`;
+  $('#details-summary').textContent = `${$('#quote-total').textContent} · ${method === 'razorpay' ? 'Pay Online. After payment, return to this page for your 4-digit pickup code. Enter it on the shop touchscreen when your files are ready.' : 'Cash On Counter'}`;
 
   $('#confirm-order-btn').textContent = method === 'razorpay' ? 'Continue to payment' : 'Confirm cash order';
 
@@ -972,7 +979,7 @@ async function placeOrder(form,method) {
     result.receiptLines=payload.lines.map(line=>({...line,filename:state.uploadedFiles.find(f=>f.documentId===line.documentId)?.originalFilename || 'Document'}));
 
     // Keep draft recovery until the receipt has actually been persisted.
-    persistOrderReceipt({...result, files:state.uploadedFiles});
+    const receiptSaved = persistOrderReceipt({...result, files:state.uploadedFiles});
 
     state.shareToken = result.shareToken;
 
@@ -982,7 +989,14 @@ async function placeOrder(form,method) {
 
     if (result.paymentMethod === 'razorpay' && result.redirectUrl) {
 
-      // Open the hosted checkout directly, without an intermediate screen.
+      if (!receiptSaved) {
+        showConfirmation(result);
+        $('#payment-error').textContent='Payment has not opened: browser storage is unavailable. Allow site storage, then use Retry payment so your pickup code can be recovered after returning.';
+        $('#payment-error').hidden=false;
+        return;
+      }
+      await subscribeOrder(result.orderId,result.shareToken);
+      // Open checkout only after preserving the order receipt.
       window.location.href = result.redirectUrl;
 
       return;
@@ -1021,7 +1035,7 @@ function renderReceipt(lines=[]){
 }
 
 function showConfirmation(result) {
-  renderPickup(null);
+  renderPickup(result.pickup || null);
   renderReceipt(result.receiptLines || []);
 
   $('#receipt-title').textContent = 'Order received';
@@ -1033,7 +1047,7 @@ function showConfirmation(result) {
 
   setStatusBadge('pending_payment');
 
-  $('#order-summary').textContent = `Order ${result.orderId} received. ${result.paymentMethod === 'razorpay' ? 'Awaiting payment confirmation.' : 'Please pay at the counter to start printing.'}`;
+  $('#order-summary').textContent = `Order ${result.orderId} received. ${result.paymentMethod === 'razorpay' ? 'Awaiting payment confirmation.' : (result.pickup?.paymentPending?'Printing is allowed by the shop’s unpaid cash policy. Payment is still pending.':'Please pay at the counter to start printing.')}`;
 
   $('#payment-error').textContent=result.paymentError || '';
 
@@ -1176,6 +1190,7 @@ function renderPickup(view) {
   const panel=$('#pickup-panel'), code=$('#pickup-code'), message=$('#pickup-message');
   if (!panel || !code || !message) return;
   code.textContent='';
+  const heading=$('#pickup-title');if(heading)heading.textContent=view?.state?.startsWith('automatic')?'Automatic printing':'Your pickup code';
   panel.hidden=!view || view.state==='waiting_payment' || view.state==='completed';
   if (panel.hidden) { message.textContent=''; return; }
   if (view.state==='active' && /^\d{4}$/.test(view.code || '')) {
@@ -1185,9 +1200,12 @@ function renderPickup(view) {
       : view.preparation==='failed'
         ? 'Your payment is confirmed, but preparation needs attention. Please ask the merchant.'
         : 'Payment confirmed. Your files are being prepared. Keep this code for the shop touchscreen.';
+    if(view.paymentPending)message.textContent=view.preparation==='failed'?'Preparation needs attention. Please ask the counter. Payment is still pending.': 'Enter this code on the shop touchscreen. Your files can print under the shop’s unpaid cash policy. Payment is still pending.';
+    message.textContent += ' Valid until midnight in the shop’s timezone.';
   } else {
-    const messages={assistance:'Payment verified, but pickup setup needs attention. Please ask the merchant.',preparing_code:'Payment verified. Preparing your pickup code…',claimed:'Code accepted. Your order is queued for printing.',expired:'This pickup code has expired. Your paid order is saved; ask the merchant for assistance.',unavailable:'Pickup information is unavailable. Refresh or ask the merchant for assistance.'};
+    const messages={automatic_printing:'Your paid order has been released automatically. Please collect your documents at the kiosk.',automatic:'Payment verified. Your order will print automatically when ready. No OTP is needed; collect it at the kiosk.',refunded:'Your refund has been processed by the payment gateway. Bank credit timing depends on your payment method.',refund_pending:'Your refund is pending with the payment gateway. Printing is on hold.',refund_review:'Your refund needs merchant review. Printing is on hold; please contact the merchant.',assistance:'Payment verified, but pickup setup needs attention. Please ask the merchant.',preparing_code:'Payment verified. Preparing your pickup code…',claimed:'Code accepted. Your order is queued for printing.',expired:'This pickup code has expired. Your paid order is saved; ask the merchant for assistance.',unavailable:'Pickup information is unavailable. Refresh or ask the merchant for assistance.'};
     message.textContent=messages[view.state] || messages.unavailable;
+    if(view.paymentPending){const unpaid={assistance:'Your cash order needs assistance. Please ask the counter. Payment is still pending.',preparing_code:'Preparing your pickup code. Payment is still pending.',automatic:'Your cash order will print automatically when ready. No OTP is needed. Payment is still pending.',automatic_printing:'Your cash order has been released. Payment is still pending.',expired:'This pickup code has expired. Your unpaid order is saved; ask the counter for assistance.'};message.textContent=unpaid[view.state]||message.textContent+' Payment is still pending.';}
   }
 }
 
@@ -1333,7 +1351,9 @@ window.addEventListener('DOMContentLoaded', () => {
 
   try {
 
-    const previous = JSON.parse(sessionStorage.getItem('pc-last-order') || 'null');
+    const linked=notificationReceipt(window.location.hash);
+    if(linked){history.replaceState(null,'',window.location.pathname+window.location.search);persistOrderReceipt(linked);}
+    const previous = linked || JSON.parse(sessionStorage.getItem('pc-last-order') || 'null');
 
     if (previous?.orderId) { state.orderId = previous.orderId; state.shareToken = previous.shareToken; state.uploadedFiles = previous.files || []; state.paymentMethod=previous.paymentMethod; showConfirmation(previous); }
 
@@ -1433,7 +1453,7 @@ async function retryPayment(){
 
  const button=$('#retry-payment-btn');button.disabled=true;$('#payment-error').hidden=true;
 
- try{const data=await postJSON(`/api/v1/portal/orders/${encodeURIComponent(state.orderId)}/pay`,{});if(!data.redirectUrl)throw new Error('Payment link is unavailable. Please retry.');window.location.href=data.redirectUrl;}
+ try{void prepareNotifications();if(!persistOrderReceipt({orderId:state.orderId,shareToken:state.shareToken,paymentMethod:state.paymentMethod,files:state.uploadedFiles}))throw new Error('Allow site storage before payment so your pickup code can be recovered when you return.');await subscribeOrder(state.orderId,state.shareToken);const data=await postJSON(`/api/v1/portal/orders/${encodeURIComponent(state.orderId)}/pay`,{});if(!data.redirectUrl)throw new Error('Payment link is unavailable. Please retry.');window.location.href=data.redirectUrl;}
 
  catch(err){$('#payment-error').textContent=err.message;$('#payment-error').hidden=false;}
 
@@ -1527,7 +1547,14 @@ function printOptionIcon(value) {
 // Receipt display and payment recovery must not depend on storage writes.
 function persistOrderReceipt(receipt){
   try{sessionStorage.setItem('pc-last-order',JSON.stringify(receipt));sessionStorage.removeItem('pc-draft');return true;}
-  catch{return false;}
+  catch {
+    try {
+      const compact={...receipt,files:[],receiptLines:[]};
+      sessionStorage.setItem('pc-last-order',JSON.stringify(compact));
+      sessionStorage.removeItem('pc-draft');
+      return true;
+    } catch { return false; }
+  }
 }
 
 // Store only the phone, with explicit consent, scoped to this browser origin.

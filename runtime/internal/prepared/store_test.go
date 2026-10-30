@@ -6,7 +6,44 @@ import (
 	"path/filepath"
 	"sync"
 	"testing"
+	"time"
 )
+
+func TestAbandonedCleanupPreservesPublishedAndRecent(t *testing.T) {
+	s, dir := fixture(t)
+	id, err := s.Publish("order-one", input())
+	if err != nil {
+		t.Fatal(err)
+	}
+	old := ".preparing-0123456789abcdef0123456789abcdef"
+	recent := ".preparing-abcdef0123456789abcdef0123456789"
+	for _, name := range []string{old, recent, ".preparing-unknown"} {
+		if err := os.Mkdir(filepath.Join(dir, name), 0700); err != nil {
+			t.Fatal(err)
+		}
+	}
+	now := time.Now()
+	for _, name := range []string{old, id, ".preparing-unknown"} {
+		past := now.Add(-48 * time.Hour)
+		if err := os.Chtimes(filepath.Join(dir, name), past, past); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := s.CleanupAbandoned(now); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Stat(filepath.Join(dir, old)); !os.IsNotExist(err) {
+		t.Fatal("old staging survives", err)
+	}
+	for _, name := range []string{recent, id, ".preparing-unknown"} {
+		if _, err := os.Stat(filepath.Join(dir, name)); err != nil {
+			t.Fatal("retained entry removed", name, err)
+		}
+	}
+	if _, _, err := s.Load("order-one", id); err != nil {
+		t.Fatal(err)
+	}
+}
 
 func fixture(t *testing.T) (*Store, string) {
 	t.Helper()
@@ -177,5 +214,90 @@ func TestConcurrentPublishAndMultiJobIntegrity(t *testing.T) {
 	}
 	if len(entries) != 1 {
 		t.Fatal("staging files leaked", len(entries))
+	}
+}
+
+func TestCompletedDeletionBoundToOrder(t *testing.T) {
+	s, _ := fixture(t)
+	id, err := s.Publish("order", input())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = s.DeleteCompleted("other", id); err == nil {
+		t.Fatal("cross-order deletion allowed")
+	}
+	if _, _, err = s.Load("order", id); err != nil {
+		t.Fatal(err)
+	}
+	if err = s.DeleteCompleted("order", "../outside"); err == nil {
+		t.Fatal("path escape accepted")
+	}
+	if err = s.DeleteCompleted("order", id); err != nil {
+		t.Fatal(err)
+	}
+	if err = s.DeleteCompleted("order", id); err != nil {
+		t.Fatal("idempotent cleanup failed", err)
+	}
+}
+
+func TestStreamedPublicationAndTamperAfterPreflight(t *testing.T) {
+	s, dir := fixture(t)
+	calls := 0
+	id, err := s.PublishJobs("stream-order", 2, func(i int) (Input, error) {
+		calls++
+		in := input()[0]
+		if i == 1 {
+			in.LineID = "second"
+		}
+		return in, nil
+	})
+	if err != nil || calls != 2 {
+		t.Fatal(err, calls)
+	}
+	m, err := s.Verify("stream-order", id)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err = s.ReadJob(id, m.Jobs[1]); err != nil {
+		t.Fatal(err)
+	}
+	if err = os.WriteFile(filepath.Join(dir, id, m.Jobs[1].File), []byte("%PDF-corrupt"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	if _, err = s.ReadJob(id, m.Jobs[1]); err == nil {
+		t.Fatal("tamper accepted after preflight")
+	}
+}
+
+func TestBoundedVerifiedCache(t *testing.T) {
+	s, dir := fixture(t)
+	inputs := input()
+	first := inputs[0]
+	first.PDF = append([]byte("%PDF-"), bytes.Repeat([]byte("x"), 9<<20)...)
+	second := first
+	second.LineID = "second"
+	id, err := s.Publish("cache-order", []Input{first, second})
+	if err != nil {
+		t.Fatal(err)
+	}
+	m, data, err := s.VerifyCached("cache-order", id)
+	if err != nil || len(data) != 2 || !bytes.Equal(data[0], first.PDF) || data[1] != nil {
+		t.Fatal("cache bound/contents", err)
+	}
+	original := append([]byte(nil), data[0]...)
+	if err = os.WriteFile(filepath.Join(dir, id, m.Jobs[0].File), []byte("%PDF-changed"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(original, data[0]) {
+		t.Fatal("verified snapshot changed")
+	}
+	if err = os.WriteFile(filepath.Join(dir, id, m.Jobs[1].File), []byte("%PDF-changed"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	if _, err = s.ReadJob(id, m.Jobs[1]); err == nil {
+		t.Fatal("uncached tamper accepted")
+	}
+	if _, data, err = s.VerifyCached("cache-order", id); err == nil || data != nil {
+		t.Fatal("corrupt preflight returned bytes")
 	}
 }

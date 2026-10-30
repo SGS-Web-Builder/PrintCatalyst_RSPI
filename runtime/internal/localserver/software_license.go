@@ -42,7 +42,7 @@ func (s *Server) registerSoftwareLicense(mux *http.ServeMux) {
 }
 func (s *Server) softwareLicenseView(r *http.Request) map[string]any {
 	v := s.licenseGate.Status(r.Context())
-	return map[string]any{"permanentLicense": true, "active": v.Active, "configured": v.Configured, "unconfigured": !v.Active, "installationId": s.installationID, "licenseId": v.LicenseID, "checkUntil": v.CheckUntil, "message": v.Message, "entitlements": []string{"All software features"}}
+	return map[string]any{"licenseFree": licensegate.Disabled, "permanentLicense": true, "active": v.Active, "configured": v.Configured, "unconfigured": !v.Active, "installationId": s.installationID, "licenseId": v.LicenseID, "checkUntil": v.CheckUntil, "message": v.Message, "entitlements": []string{"All software features"}}
 }
 func (s *Server) enforceSoftwareLicense(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

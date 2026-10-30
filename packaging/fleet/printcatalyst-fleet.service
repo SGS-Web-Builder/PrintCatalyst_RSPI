@@ -1,0 +1,21 @@
+[Unit]
+Description=PrintCatalyst fleet heartbeat dashboard
+After=network.target
+
+[Service]
+DynamicUser=yes
+StateDirectory=printcatalyst-fleet
+StateDirectoryMode=0700
+LoadCredential=config:/etc/printcatalyst-fleet/config.json
+ExecStart=/usr/local/lib/printcatalyst-fleet/fleet-server -config %d/config -state /var/lib/printcatalyst-fleet/state.json
+Restart=on-failure
+RestartSec=5
+UMask=0077
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+
+[Install]
+WantedBy=multi-user.target

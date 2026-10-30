@@ -28,6 +28,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"github.com/SGS-Web-Builder/PrintCatalyst_RSPI/runtime/internal/webnotify"
 	"log"
 	"net"
 	"os"
@@ -293,35 +294,28 @@ func main() {
 		}
 	}()
 
-	// Print dispatcher: polls the orders table every 20 ms for orders that
-	// have transitioned to "paid" and submits them to the configured printer
-	// backend. The resolver wraps the printers service to map printer IDs
-	// (set by the customer via primaryPrinterId) to OS-level queue names.
-	// Started here so the dispatcher runs for the lifetime of the service.
-	// On non-Windows (dev machines) the winspool backend is unavailable;
-	// a nil backend causes Run to return early so the server starts normally
-	// for UI development. The dispatcher IS compiled on Windows.
+	// Pi preparation and dispatch share the existing dashboard/order services.
 	docs := documents.New(files, database.DB())
-	// On non-Windows dev machines, winspool is unavailable so we pass nil.
-	// Run() returns ErrNoBackend immediately in this case — this lets
-	// the HTTP server start normally for UI development without requiring
-	// a Windows VM.
-	var backend dispatch.PrinterBackend
-	if dispatch.WinspoolAvailable() {
-		backend = dispatch.NewWinspoolBackend()
-	}
 	dispatchConfig := dispatch.DefaultDispatcherConfig()
 	dispatchConfig.LicenseCheck = softwareLicense.Check
-	dispatcher := dispatch.New(database.DB(), docs, backend,
-		dispatch.NewDBQueueResolver(database.DB()),
-		dispatchConfig,
-	)
-	go func() {
-		log.Printf("step: dispatcher.Run starting (winspool=%t)", backend != nil)
-		if err := dispatcher.Run(runCtx); err != nil && !errors.Is(err, context.Canceled) && !errors.Is(err, dispatch.ErrNoBackend) {
-			log.Printf("dispatcher.Run error: %v", err)
-		}
-	}()
+	dispatchConfig.OnPrepared = pickupSvc.NotifyPrepared
+	backend, dispatchConfig, closePrinting, err := platformPrinting(settings.DataDirectory, dispatchConfig)
+	if err != nil {
+		fatalf(diagnostic, "print runtime startup failed: %v", err)
+	}
+	defer closePrinting()
+	dispatcher := dispatch.New(database.DB(), docs, backend, dispatch.NewDBQueueResolver(database.DB()), dispatchConfig)
+	go pickupSvc.RunWaiting(runCtx, softwareLicense.Check, dispatcher.Wake)
+	var printWorkers *dispatch.Workers
+	if dispatchConfig.Prepared != nil {
+		printWorkers = dispatch.NewWorkers(dispatcher)
+	} else {
+		go func() {
+			if err := dispatcher.Run(runCtx); err != nil && !errors.Is(err, context.Canceled) {
+				log.Printf("dispatcher stopped: %v", err)
+			}
+		}()
+	}
 	sweeper := autodelete.New(database.DB(), docs, autodelete.DefaultSweeperConfig())
 	go func() {
 		if err := sweeper.Run(runCtx); err != nil && !errors.Is(err, context.Canceled) {
@@ -375,11 +369,25 @@ func main() {
 			return state.reload(ctx, server)
 		}),
 	)
+	customerPush, pushErr := webnotify.New(database.DB())
+	if pushErr != nil {
+		fatalf(diagnostic, "customer notification initialization failed: %v", pushErr)
+	}
+	localserver.WithCustomerPush(customerPush)(server)
+	go server.RunRemote(runCtx)
 	kioskServer, err := kiosk.NewPlatform(database.DB(), pickupSvc, softwareLicense.Check)
+	if kioskServer != nil {
+		kioskServer.SetReleaseNotifier(dispatcher.Wake)
+		kioskServer.SetAdsDirectory(filepath.Join(dataDir, "ads"))
+	}
 	if err != nil {
 		fatalf(diagnostic, "physical kiosk startup failed: %v", err)
 	}
-	service := supervisor.New(database, server, kioskServer)
+	components := []supervisor.Component{database, server, kioskServer, customerPush}
+	if printWorkers != nil {
+		components = append(components, printWorkers)
+	}
+	service := supervisor.New(components...)
 	log.Printf("step: service created; bind=%s:%d console=%t", settings.BindHost, settings.Port, *consoleMode)
 	if err := runPlatform(service, net.JoinHostPort(settings.BindHost, strconv.Itoa(settings.Port)), *consoleMode); err != nil {
 		log.Printf("step: runPlatform FAILED: %v", err)
@@ -459,6 +467,9 @@ func bridgeToRecordChannel(out chan<- printers.DiscoveredRecord) chan<- discover
 // loop never blocks waiting on a slow backend, so a degraded printer
 // does not stop the rest of the UI.
 func registerPrinterDiscoverers(svc *printers.Service) {
+	if registerNativePrinting(svc) {
+		return
+	}
 	// Win32 EnumPrinters + DeviceCapabilities. Local spooler and
 	// any USB, network-shared, or Bluetooth-over-spooler printers.
 	svc.RegisterDiscoverer(platformDiscovererAdapter(printers.BackendWindows, func(ctx context.Context, out chan<- printers.DiscoveredRecord) {
